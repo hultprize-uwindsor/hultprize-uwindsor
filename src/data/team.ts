@@ -43,4 +43,10 @@ export const TEAM: TeamMember[] = [
     bio: 'Julia is a fourth-year Business Administration student with a minor in Applied IT. She owns sponsorship for the program this year — the prospect pipeline, the tier structure, and a $15,000 target that funds the venue, print, and every event on the calendar.',
     photo: '/images/team/julia-adu-bobie.jpg',
   },
+  {
+    name: 'Salma Syeda',
+    role: 'Web Developer & Photographer/Videographer',
+    bio: "Salma is a Computer Science student specializing in Information Technology, with an associate's degree in Web Development and Internet Applications. She's the founder of Salma Studio Co. — a brand architect and creative visionary bringing 5+ years of experience in web design, project management, social media, and content creation to the team.",
+    photo: '/images/team/salma-syeda.jpg',
+  },
 ]
