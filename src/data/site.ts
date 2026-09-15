@@ -5,6 +5,7 @@ export const SITE = {
   contactEmail: 'hultprize@uwindsor.ca',
   instagramHandle: '', // e.g. '@hultprizeuwindsor' — leave blank to hide
   instagramUrl: '',
+  linkedinUrl: 'https://www.linkedin.com/company/hult-prize-at-the-university-of-windsor/',
   registrationCloses: 'November 20',
   campusFinals: 'February 12',
   // The Google Apps Script Web App URL that receives sign-up form submissions

@@ -29,6 +29,13 @@ export default function Footer() {
               </a>
             </p>
           )}
+          {SITE.linkedinUrl && (
+            <p>
+              <a href={SITE.linkedinUrl} target="_blank" rel="noreferrer">
+                LinkedIn
+              </a>
+            </p>
+          )}
           <p className="site-footer__muted">University of Windsor, Windsor, ON</p>
         </div>
 
