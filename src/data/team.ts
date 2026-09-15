@@ -5,8 +5,7 @@ export interface TeamMember {
   photo: string // path under /public/images/team/
 }
 
-// Photo files live in public/images/team/. Rachael "Bobola" Juru doesn't
-// have a headshot yet — she uses the placeholder silhouette until one's sent.
+// Photo files live in public/images/team/.
 export const TEAM: TeamMember[] = [
   {
     name: 'Mahnoz Akhtari',
@@ -36,7 +35,7 @@ export const TEAM: TeamMember[] = [
     name: 'Rachael "Bobola" Juru',
     role: 'Deputy Campus Director',
     bio: 'Rachael is a fourth-year Business Administration student specializing in Human Resources. As Deputy Campus Director, she keeps the program’s teams, workshops, and campus finals running and on schedule.',
-    photo: '/images/team/placeholder.svg',
+    photo: '/images/team/rachael-juru.jpg',
   },
   {
     name: 'Julia Adu-Bobie',
