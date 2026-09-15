@@ -41,6 +41,7 @@ export default function Footer() {
 
         <div className="site-footer__col">
           <h3>Key dates</h3>
+          <p>Launch Day: {SITE.launchDay}</p>
           <p>Registration closes: {SITE.registrationCloses}</p>
           <p>Campus Finals: {SITE.campusFinals}</p>
         </div>

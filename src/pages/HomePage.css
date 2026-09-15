@@ -99,6 +99,15 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+.date-card--accent {
+  background: rgba(236, 32, 136, 0.12);
+  border-color: var(--hp-pink-bright);
+}
+
+.date-card--accent .date-card__label {
+  color: var(--hp-pink-bright);
+}
+
 .signup-intro {
   max-width: 60ch;
   color: var(--color-text-muted);
