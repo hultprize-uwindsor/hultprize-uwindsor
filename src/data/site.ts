@@ -1,8 +1,7 @@
 // Central place for site-wide copy so it's easy to update in one spot.
 export const SITE = {
   siteName: 'Hult Prize at University of Windsor',
-  // TODO: swap for the team's real inbox once confirmed.
-  contactEmail: 'hultprize@uwindsor.ca',
+  contactEmail: 'akhtari1@uwindsor.ca',
   instagramHandle: '', // e.g. '@hultprizeuwindsor' — leave blank to hide
   instagramUrl: '',
   linkedinUrl: 'https://www.linkedin.com/company/hult-prize-at-the-university-of-windsor/',
