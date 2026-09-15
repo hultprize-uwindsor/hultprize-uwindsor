@@ -5,9 +5,8 @@ export interface TeamMember {
   photo: string // path under /public/images/team/
 }
 
-// Photo files live in public/images/team/. Three headshots are still
-// unmatched to a name (see the mapping question asked in chat) — those
-// three use the placeholder silhouette until confirmed.
+// Photo files live in public/images/team/. Rachael "Bobola" Juru doesn't
+// have a headshot yet — she uses the placeholder silhouette until one's sent.
 export const TEAM: TeamMember[] = [
   {
     name: 'Mahnoz Akhtari',
@@ -19,7 +18,7 @@ export const TEAM: TeamMember[] = [
     name: 'Yusriyah Rahman',
     role: 'Judges and Experts Coordinator',
     bio: "Yusriyah is a fourth-year Computer Science student with a minor in Mathematics. Her experience spans data analysis and PMO work at GFX Solutions, full-stack development at Glendor Inc., and research on deep learning for environmental change detection presented at the ISPRS Congress.",
-    photo: '/images/team/placeholder.svg',
+    photo: '/images/team/yusriyah-rahman.jpg',
   },
   {
     name: 'Yumna Sumya',
@@ -31,7 +30,7 @@ export const TEAM: TeamMember[] = [
     name: 'Sura Gaafar',
     role: 'Events Coordinator',
     bio: "Sura is a third-year Honours Computer Science Co-op student with a minor in Mathematics. She's completed a Software Engineering internship at RIIS, is now a Research Assistant modelling environmental change across the Great Lakes Basin, and co-founded Black Students in Computer Science.",
-    photo: '/images/team/placeholder.svg',
+    photo: '/images/team/sura-gaafar.jpg',
   },
   {
     name: 'Rachael "Bobola" Juru',
@@ -43,6 +42,6 @@ export const TEAM: TeamMember[] = [
     name: 'Julia Adu-Bobie',
     role: 'Partnerships and Sponsorships Coordinator',
     bio: 'Julia is a fourth-year Business Administration student with a minor in Applied IT. She owns sponsorship for the program this year — the prospect pipeline, the tier structure, and a $15,000 target that funds the venue, print, and every event on the calendar.',
-    photo: '/images/team/placeholder.svg',
+    photo: '/images/team/julia-adu-bobie.jpg',
   },
 ]
