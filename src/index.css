@@ -1,0 +1,222 @@
+:root {
+  color-scheme: light;
+
+  /* Hult Prize palette (matched from hultprize.org) */
+  --hp-black: #191919;
+  --hp-white: #ffffff;
+  --hp-grey-light: #efefef;
+  --hp-grey-mid: #8a8a8a;
+  --hp-pink: #ec2088;
+  --hp-pink-bright: #ff329b;
+  --hp-green: #279d49;
+
+  /* University of Windsor official brand colours */
+  --uw-blue: #005596;
+  --uw-yellow: #ffce00;
+  --uw-grey: #58585b;
+
+  /* Semantic tokens */
+  --color-bg: var(--hp-white);
+  --color-bg-alt: var(--hp-grey-light);
+  --color-text: var(--hp-black);
+  --color-text-muted: var(--uw-grey);
+  --color-inverse-bg: var(--hp-black);
+  --color-inverse-text: var(--hp-white);
+  --color-accent: var(--hp-pink);
+  --color-accent-strong: var(--hp-pink-bright);
+  --color-uwindsor: var(--uw-blue);
+  --color-uwindsor-accent: var(--uw-yellow);
+  --color-border: #e2e2e2;
+  --color-danger: #c0392b;
+
+  --font-sans: 'Helvetica Neue', Helvetica, 'Open Sans', Arial, sans-serif;
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 20px;
+  --max-width: 1120px;
+
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.55;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 0.5em 0;
+}
+
+h1 {
+  font-size: clamp(1.9rem, 6vw, 3.1rem);
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4.5vw, 2.25rem);
+}
+
+h3 {
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+}
+
+p {
+  margin: 0 0 1em 0;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 0.75em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  display: inline-block;
+}
+
+.section {
+  padding: clamp(48px, 8vw, 96px) 0;
+}
+
+.section--alt {
+  background: var(--color-bg-alt);
+}
+
+.section--dark {
+  background: var(--color-inverse-bg);
+  color: var(--color-inverse-text);
+}
+
+.section--dark .eyebrow {
+  color: var(--color-accent-strong);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 28px;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--hp-white);
+}
+
+.btn--primary:hover {
+  background: var(--color-accent-strong);
+}
+
+.btn--dark {
+  background: var(--hp-black);
+  color: var(--hp-white);
+}
+
+.btn--dark:hover {
+  background: #000;
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--hp-white);
+  border-color: var(--hp-white);
+}
+
+.btn--outline:hover {
+  background: var(--hp-white);
+  color: var(--hp-black);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.uw-strip {
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--uw-blue) 0%, var(--uw-blue) 70%, var(--uw-yellow) 70%, var(--uw-yellow) 100%);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--hp-white);
+  color: var(--hp-black);
+  padding: 10px 16px;
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  left: 12px;
+  top: 12px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--uw-yellow);
+  outline-offset: 2px;
+}

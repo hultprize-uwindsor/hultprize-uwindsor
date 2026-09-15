@@ -1,0 +1,137 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--hp-white);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  position: relative;
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.site-header__logo {
+  height: 32px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.site-header__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.site-header__school {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--uw-blue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.site-header__toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.site-header__toggle span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--hp-black);
+  border-radius: 2px;
+}
+
+.site-header__nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.site-header__link {
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--hp-black);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+}
+
+.site-header__link.is-active {
+  color: var(--color-accent);
+}
+
+.site-header__cta {
+  margin-left: 8px;
+  padding: 10px 20px;
+}
+
+@media (min-width: 721px) {
+  .site-header__toggle {
+    display: none;
+  }
+
+  .site-header__nav {
+    display: flex;
+  }
+}
+
+@media (max-width: 720px) {
+  .site-header__nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--hp-white);
+    border-bottom: 1px solid var(--color-border);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 20px 20px;
+    gap: 4px;
+    box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.2);
+  }
+
+  .site-header__nav.is-open {
+    display: flex;
+  }
+
+  .site-header__link {
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-header__cta {
+    margin-left: 0;
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  .site-header__school {
+    font-size: 0.75rem;
+  }
+}

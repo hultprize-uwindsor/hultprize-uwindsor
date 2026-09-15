@@ -1,0 +1,122 @@
+.hero {
+  padding: clamp(48px, 10vw, 110px) 0 clamp(40px, 7vw, 80px);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(236, 32, 136, 0.10), transparent 55%),
+    radial-gradient(circle at 0% 100%, rgba(0, 85, 150, 0.08), transparent 50%);
+}
+
+.hero__inner {
+  max-width: 780px;
+}
+
+.hero__highlight {
+  color: var(--color-accent);
+}
+
+.hero__lede {
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  color: var(--color-text-muted);
+  max-width: 60ch;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.win-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.win-card {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.win-card--accent {
+  background: var(--hp-black);
+  color: var(--hp-white);
+}
+
+.win-card--accent h3 {
+  color: var(--hp-pink-bright);
+}
+
+.win-card h3 {
+  margin-bottom: 8px;
+}
+
+.win-card p {
+  margin: 0;
+  color: inherit;
+  opacity: 0.85;
+}
+
+.win-card:not(.win-card--accent) p {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.dates-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.date-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  padding: 28px;
+}
+
+.date-card__label {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  color: var(--uw-yellow);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.date-card__value {
+  display: block;
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.date-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.signup-intro {
+  max-width: 60ch;
+  color: var(--color-text-muted);
+  margin-bottom: 32px;
+}
+
+@media (min-width: 640px) {
+  .win-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dates-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 960px) {
+  .win-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

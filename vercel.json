@@ -1,0 +1,8 @@
+{
+  "redirects": [
+    { "source": "/go", "destination": "/#signup", "statusCode": 307 }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
