@@ -72,11 +72,6 @@ export default function HomePage() {
           <p className="eyebrow">Key dates</p>
           <h2>Mark your calendar</h2>
           <div className="dates-grid">
-            <div className="date-card date-card--accent">
-              <span className="date-card__label">Launch Day</span>
-              <span className="date-card__value">{SITE.launchDay}</span>
-              <p>{SITE.launchDayDetail}</p>
-            </div>
             <div className="date-card">
               <span className="date-card__label">Registration closes</span>
               <span className="date-card__value">{SITE.registrationCloses}</span>
