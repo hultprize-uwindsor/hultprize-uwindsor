@@ -32,7 +32,7 @@ export const TEAM: TeamMember[] = [
     photo: '/images/team/sura-gaafar.jpg',
   },
   {
-    name: 'Rachael "Bobola" Juru',
+    name: 'Rachael Juru',
     role: 'Deputy Campus Director',
     bio: 'Rachael is a fourth-year Business Administration student specializing in Human Resources. As Deputy Campus Director, she keeps the program’s teams, workshops, and campus finals running and on schedule.',
     photo: '/images/team/rachael-juru.jpg',
