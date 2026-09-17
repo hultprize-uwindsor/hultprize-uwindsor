@@ -1,7 +1,9 @@
 // Central place for site-wide copy so it's easy to update in one spot.
 export const SITE = {
   siteName: 'Hult Prize at University of Windsor',
-  contactEmail: 'akhtari1@uwindsor.ca',
+  contactEmail: 'hultprizeatuwindsor@gmail.com',
+  // Direct line to the Campus Director, shown as a second contact point.
+  campusDirectorEmail: 'akhtari1@uwindsor.ca',
   instagramHandle: '', // e.g. '@hultprizeuwindsor' — leave blank to hide
   instagramUrl: '',
   linkedinUrl: 'https://www.linkedin.com/company/hult-prize-at-the-university-of-windsor/',

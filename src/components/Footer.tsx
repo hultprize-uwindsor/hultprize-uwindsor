@@ -22,6 +22,12 @@ export default function Footer() {
           <p>
             <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>
           </p>
+          <p className="site-footer__muted">
+            Campus Director:{' '}
+            <a href={`mailto:${SITE.campusDirectorEmail}`}>
+              {SITE.campusDirectorEmail}
+            </a>
+          </p>
           {SITE.instagramHandle && (
             <p>
               <a href={SITE.instagramUrl} target="_blank" rel="noreferrer">
