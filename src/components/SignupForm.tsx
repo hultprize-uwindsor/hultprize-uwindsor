@@ -76,7 +76,7 @@ export default function SignupForm() {
     })
 
     if (!SITE.formEndpoint) {
-      // No endpoint configured yet (local/dev preview) — don't pretend it worked.
+      // No endpoint configured yet (local/dev preview), so report an error.
       console.warn('VITE_FORM_ENDPOINT is not set; form submission skipped.')
       setStatus('error')
       return
@@ -105,7 +105,7 @@ export default function SignupForm() {
       <div className="signup-success" role="status">
         <h3>You're on the list! 🎉</h3>
         <p>
-          Thanks for signing up — we'll be in touch by email with next steps.
+          Thanks for signing up. We'll be in touch by email with next steps.
         </p>
         <p className="signup-disclaimer">
           This form collects interest for our UWindsor team. Official Hult
@@ -219,7 +219,7 @@ export default function SignupForm() {
 
       <button
         type="submit"
-        className="btn btn--primary btn--block"
+        className="btn btn--dark btn--block"
         disabled={status === 'submitting'}
       >
         {status === 'submitting' ? 'Submitting…' : 'Sign up'}

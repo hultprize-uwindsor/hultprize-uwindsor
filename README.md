@@ -1,13 +1,13 @@
-# Hult Prize at University of Windsor — Sign-Up Site
+# Hult Prize at University of Windsor: Sign-Up Site
 
 Two-page, mobile-first sign-up site for the UWindsor Hult Prize chapter.
 Built with React + TypeScript + Vite, deployed on Vercel.
 
 ## Pages
 
-- `/` — What the Hult Prize is, what you win, key dates, sign-up form, contact
-- `/team` — Team headshots, roles, and bios
-- `/go` — Short-link redirect used on printed materials (QR code target)
+- `/`: What the Hult Prize is, what you win, key dates, sign-up form, contact
+- `/team`: Team headshots, roles, and bios
+- `/go`: Short-link redirect used on printed materials (QR code target)
 
 ## Local development
 
@@ -21,14 +21,14 @@ npm run dev
 The sign-up form posts to a Google Apps Script Web App that appends each
 submission as a row in a Google Sheet. See `google-apps-script/Code.gs` for
 the script and setup steps. Once deployed, set the Web App URL as
-`VITE_FORM_ENDPOINT` (see `.env.example`) — in Vercel this is a Project
+`VITE_FORM_ENDPOINT` (see `.env.example`). In Vercel, this is a Project
 Environment Variable.
 
 ## QR code / short link
 
 Printed materials point at `https://hultprizeuwindsor.ca/go`, which redirects
 to the sign-up form (configured in `vercel.json`). This keeps the printed QR
-code stable even if the destination changes later — just update the redirect
+code stable even if the destination changes later. Just update the redirect
 and redeploy.
 
 Regenerate the QR files (SVG + PNG) with:

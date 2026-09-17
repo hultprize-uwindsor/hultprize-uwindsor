@@ -1,0 +1,240 @@
+.photo-carousel {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+}
+
+.photo-carousel__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  overflow: hidden;
+  isolation: isolate;
+  background: #f2f3f4;
+  border-radius: 2px;
+  touch-action: pan-y pinch-zoom;
+}
+
+.photo-carousel__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+
+.photo-carousel__slide.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.photo-carousel__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+}
+
+.photo-carousel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-top: 16px;
+  min-height: 64px;
+}
+
+.photo-carousel__announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.photo-carousel__caption {
+  margin: 0;
+  max-width: 34ch;
+  color: #4e5259;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
+.photo-carousel__controls {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 2px;
+}
+
+.photo-carousel__count {
+  margin-right: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.photo-carousel__total {
+  color: #70747c;
+  font-weight: 400;
+}
+
+.photo-carousel__control {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 44px;
+  padding: 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 2px;
+  color: var(--hp-black);
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.photo-carousel__control svg {
+  width: 20px;
+  height: 20px;
+}
+
+.photo-carousel__control:focus-visible {
+  outline-offset: 1px;
+}
+
+.photo-carousel--panorama .photo-carousel__frame {
+  aspect-ratio: 1440 / 640;
+  max-height: 680px;
+  border-radius: 0;
+}
+
+.photo-carousel--panorama .photo-carousel__frame::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 50% 0 0;
+  background: linear-gradient(transparent, rgb(0 0 0 / 58%));
+  pointer-events: none;
+}
+
+.photo-carousel--panorama .photo-carousel__footer {
+  position: absolute;
+  z-index: 3;
+  bottom: 24px;
+  left: 32px;
+  right: 32px;
+  min-height: 48px;
+  padding: 0;
+  color: #fff;
+}
+
+.photo-carousel--panorama .photo-carousel__caption {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.photo-carousel--panorama .photo-carousel__controls {
+  gap: 8px;
+}
+
+.photo-carousel--panorama .photo-carousel__total {
+  color: #fff;
+}
+
+.photo-carousel--panorama .photo-carousel__control {
+  border-radius: 50%;
+  background: #fff;
+  width: 44px;
+}
+
+.photo-carousel--panorama .photo-carousel__control:focus-visible {
+  outline-color: #fff;
+  outline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .photo-carousel--panorama .photo-carousel__frame {
+    aspect-ratio: 4 / 3;
+  }
+
+  .photo-carousel--panorama .photo-carousel__frame::after {
+    display: none;
+  }
+
+  .photo-carousel--panorama .photo-carousel__footer {
+    position: static;
+    flex-wrap: wrap;
+    padding: 16px 24px 0;
+    color: var(--color-text);
+  }
+
+  .photo-carousel--panorama .photo-carousel__caption {
+    flex-basis: 100%;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .photo-carousel--panorama .photo-carousel__controls {
+    margin-left: 0;
+  }
+
+  .photo-carousel--panorama .photo-carousel__total {
+    color: var(--color-text-muted);
+  }
+
+  .photo-carousel--panorama .photo-carousel__control {
+    background: var(--color-bg-alt);
+  }
+
+  .photo-carousel--panorama .photo-carousel__control:focus-visible {
+    outline-color: var(--hp-black);
+  }
+}
+
+@media (hover: hover) {
+  .photo-carousel__control:hover {
+    background: #f0f1f3;
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 520px) {
+  .photo-carousel__footer {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding-top: 12px;
+  }
+
+  .photo-carousel__caption {
+    max-width: none;
+    flex: 1 1 150px;
+  }
+
+  .photo-carousel__controls {
+    margin-left: auto;
+  }
+
+  .photo-carousel__count {
+    margin-right: 8px;
+  }
+
+  .photo-carousel__control {
+    width: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-carousel__slide,
+  .photo-carousel__control {
+    transition: none;
+  }
+
+  .photo-carousel__control:hover {
+    transform: none;
+  }
+}

@@ -1,39 +1,53 @@
+@font-face {
+  font-family: 'EF Circular';
+  src: url('/fonts/ef-circular-latin.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0020-007D;
+}
+
+@font-face {
+  font-family: 'EF Circular';
+  src: url('/fonts/ef-circular-utilities.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+007E, U+00A0-00BF, U+00D7, U+02BB-02DD, U+0394, U+03A9, U+03BC, U+03C0, U+2013-2788;
+}
+
 :root {
   color-scheme: light;
 
-  /* Hult Prize palette (matched from hultprize.org) */
   --hp-black: #191919;
   --hp-white: #ffffff;
-  --hp-grey-light: #efefef;
-  --hp-grey-mid: #8a8a8a;
+  --hp-grey-light: #f5f5f5;
+  --hp-grey-mid: #85888d;
   --hp-pink: #ec2088;
   --hp-pink-bright: #ff329b;
   --hp-green: #279d49;
-
-  /* University of Windsor official brand colours */
   --uw-blue: #005596;
   --uw-yellow: #ffce00;
-  --uw-grey: #58585b;
+  --uw-grey: #52565d;
 
-  /* Semantic tokens */
   --color-bg: var(--hp-white);
   --color-bg-alt: var(--hp-grey-light);
   --color-text: var(--hp-black);
   --color-text-muted: var(--uw-grey);
   --color-inverse-bg: var(--hp-black);
   --color-inverse-text: var(--hp-white);
-  --color-accent: var(--hp-pink);
-  --color-accent-strong: var(--hp-pink-bright);
+  --color-accent: #c91570;
+  --color-accent-strong: #aa105e;
   --color-uwindsor: var(--uw-blue);
   --color-uwindsor-accent: var(--uw-yellow);
-  --color-border: #e2e2e2;
-  --color-danger: #c0392b;
+  --color-border: #dedfe2;
+  --color-danger: #b52e25;
 
-  --font-sans: 'Helvetica Neue', Helvetica, 'Open Sans', Arial, sans-serif;
-  --radius-sm: 4px;
-  --radius-md: 10px;
-  --radius-lg: 20px;
-  --max-width: 1120px;
+  --font-sans: 'EF Circular', Helvetica, Arial, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --max-width: 1264px;
 
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -43,7 +57,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
@@ -60,6 +75,10 @@ body {
   flex-direction: column;
 }
 
+main {
+  flex: 1;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -69,92 +88,70 @@ a {
   color: inherit;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 .container {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding-inline: 32px;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-weight: 700;
-  line-height: 1.15;
-  margin: 0 0 0.5em 0;
+  line-height: 1.17;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.5em;
 }
 
 h1 {
-  font-size: clamp(1.9rem, 6vw, 3.1rem);
+  font-size: clamp(2.5rem, 4vw, 3.5rem);
 }
 
 h2 {
-  font-size: clamp(1.5rem, 4.5vw, 2.25rem);
+  font-size: clamp(2.125rem, 4vw, 3rem);
 }
 
 h3 {
-  font-size: clamp(1.1rem, 3vw, 1.4rem);
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
 }
 
 p {
-  margin: 0 0 1em 0;
-}
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-accent);
-  margin-bottom: 0.75em;
-}
-
-.eyebrow::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  display: inline-block;
+  margin: 0 0 1em;
 }
 
 .section {
-  padding: clamp(48px, 8vw, 96px) 0;
+  padding-block: clamp(64px, 8.9vw, 128px);
 }
 
-.section--alt {
-  background: var(--color-bg-alt);
-}
-
-.section--dark {
-  background: var(--color-inverse-bg);
-  color: var(--color-inverse-text);
-}
-
-.section--dark .eyebrow {
-  color: var(--color-accent-strong);
+section[id] {
+  scroll-margin-top: 88px;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
+  min-height: 48px;
+  padding: 11px 24px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 0.95rem;
-  padding: 14px 28px;
-  border-radius: var(--radius-sm);
-  border: 2px solid transparent;
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.5;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
-  white-space: nowrap;
-}
-
-.btn:active {
-  transform: translateY(1px);
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .btn--primary {
@@ -172,18 +169,32 @@ p {
 }
 
 .btn--dark:hover {
-  background: #000;
+  background: #34363b;
 }
 
-.btn--outline {
+.btn--secondary {
   background: transparent;
-  color: var(--hp-white);
-  border-color: var(--hp-white);
+  border-color: currentColor;
+  color: var(--hp-black);
 }
 
-.btn--outline:hover {
-  background: var(--hp-white);
+.btn--secondary:hover {
+  background: #f0f0f0;
+}
+
+.btn--light {
+  background: #fff;
   color: var(--hp-black);
+}
+
+.btn--light:hover {
+  background: #eee;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .btn:hover:not(:disabled) {
+    transform: scale(1.035);
+  }
 }
 
 .btn--block {
@@ -193,12 +204,6 @@ p {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.uw-strip {
-  height: 6px;
-  width: 100%;
-  background: linear-gradient(90deg, var(--uw-blue) 0%, var(--uw-blue) 70%, var(--uw-yellow) 70%, var(--uw-yellow) 100%);
 }
 
 .skip-link {
@@ -217,6 +222,18 @@ p {
 }
 
 :focus-visible {
-  outline: 3px solid var(--uw-yellow);
-  outline-offset: 2px;
+  outline: 2px solid var(--hp-black);
+  outline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .container {
+    padding-inline: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
 }

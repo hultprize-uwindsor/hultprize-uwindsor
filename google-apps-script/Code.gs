@@ -1,5 +1,5 @@
 /**
- * Hult Prize @ UWindsor — sign-up form backend.
+ * Hult Prize @ UWindsor sign-up form backend.
  *
  * This is a standalone Apps Script project (not container-bound), so it
  * references the spreadsheet by ID rather than via getActiveSpreadsheet().
@@ -10,7 +10,7 @@
  * 2. Go to script.google.com > New project, paste this file in as Code.gs.
  * 3. Run `setupSheet` once (from the function picker + Run button) to
  *    write the bold header row. The first run will prompt for
- *    authorization — approve it.
+ *    authorization. Approve it.
  * 4. Deploy > New deployment > type "Web app".
  *    - Execute as: Me
  *    - Who has access: Anyone

@@ -1,0 +1,115 @@
+.sponsor-strip {
+  padding-block: 24px 32px;
+  background: var(--color-bg);
+}
+
+.sponsor-strip__controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.sponsor-strip__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-width: 76px;
+  min-height: 44px;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.sponsor-strip__toggle:hover {
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+}
+
+.sponsor-strip__viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+}
+
+.sponsor-strip__track {
+  display: flex;
+  width: max-content;
+  animation: sponsor-scroll 55s linear infinite;
+}
+
+.sponsor-strip__track[data-paused='true'] {
+  animation-play-state: paused;
+}
+
+.sponsor-strip__group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: clamp(48px, 6vw, 80px);
+  margin: 0;
+  padding: 8px clamp(48px, 6vw, 80px) 8px 0;
+  list-style: none;
+}
+
+.sponsor-strip__logo {
+  display: flex;
+  flex: 0 0 clamp(140px, 15vw, 200px);
+  align-items: center;
+  justify-content: center;
+  width: clamp(140px, 15vw, 200px);
+  height: 76px;
+}
+
+.sponsor-strip__logo img {
+  width: auto;
+  height: 60px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+@keyframes sponsor-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (hover: hover) {
+  .sponsor-strip__viewport:hover .sponsor-strip__track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sponsor-strip__controls,
+  .sponsor-strip__group--duplicate,
+  .sponsor-strip__logo--duplicate {
+    display: none;
+  }
+
+  .sponsor-strip__viewport {
+    mask-image: none;
+  }
+
+  .sponsor-strip__track {
+    width: 100%;
+    animation: none;
+  }
+
+  .sponsor-strip__group {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px 40px;
+    width: 100%;
+    padding-inline: 0;
+  }
+
+  .sponsor-strip__logo {
+    flex: 0 1 140px;
+  }
+}
