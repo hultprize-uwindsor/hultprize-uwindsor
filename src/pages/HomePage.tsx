@@ -101,8 +101,8 @@ export default function HomePage() {
               <a href="#signup" className="btn btn--dark">Save your place <span aria-hidden="true">→</span></a>
             </Reveal>
             <Reveal className="date-card" delay={80}>
-              <span className="date-card__label">Campus Finals</span>
-              <h3 className="date-card__value">{SITE.campusFinals}</h3>
+              <span className="date-card__label">Qualifier Finals</span>
+              <h3 className="date-card__value">{SITE.qualifierFinals}</h3>
               <p>Pitch your business on campus. The winning team represents UWindsor in the next stage of Hult Prize.</p>
               <a href="#signup" className="btn btn--secondary">Get involved <span aria-hidden="true">→</span></a>
             </Reveal>

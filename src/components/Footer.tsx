@@ -56,7 +56,7 @@ export default function Footer() {
         <div className="site-footer__col">
           <h3>Your next steps</h3>
           <p className="site-footer__muted">Registration closes<br /><span className="site-footer__date">{SITE.registrationCloses}</span></p>
-          <p className="site-footer__muted">Campus Finals<br /><span className="site-footer__date">{SITE.campusFinals}</span></p>
+          <p className="site-footer__muted">Qualifier Finals<br /><span className="site-footer__date">{SITE.qualifierFinals}</span></p>
         </div>
       </div>
 

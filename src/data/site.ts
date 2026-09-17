@@ -13,7 +13,7 @@ export const SITE = {
   launchDay: 'September 29, 2026',
   launchDayDetail: '1:00–3:00 PM, Joyce Entrepreneurship Centre (2nd floor). Join our Fusion x Hult Prize launch, where UWindsor Hult Prize gets an HQ of its own.',
   registrationCloses: 'November 20',
-  campusFinals: 'February 12',
+  qualifierFinals: 'February 5, 2027',
   // The Google Apps Script Web App URL that receives sign-up form submissions
   // and appends a row to the team's Google Sheet. Set at deploy time.
   formEndpoint: import.meta.env.VITE_FORM_ENDPOINT ?? '',
