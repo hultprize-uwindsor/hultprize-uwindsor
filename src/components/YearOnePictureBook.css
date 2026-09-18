@@ -1,0 +1,22 @@
+.container.picture-book-layout { max-width: none; }
+.picture-book-layout { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(0, 1120px); align-items: center; gap: 32px; }
+.picture-book-copy { max-width: 440px; }
+.picture-book-copy h2 { margin-bottom: 24px; }
+.picture-book-copy > p:not(.eyebrow) { line-height: 1.7; margin-bottom: 18px; }
+.picture-book-copy .picture-book-hint { font-size: 14px; color: #646477; }
+.picture-book-stage { min-width: 0; }
+@media (min-width: 1201px) {
+  .container.picture-book-layout { padding-left: max(32px, calc((100vw - 1200px) / 2)); }
+}
+@media (max-width: 1200px) {
+  .picture-book-layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .picture-book-copy { max-width: 580px; }
+  .picture-book-stage { width: 100%; max-width: 1120px; justify-self: center; }
+}
+@media (max-width: 420px) {
+  .picture-book-stage .gap-3 { gap: 6px; }
+  .picture-book-stage button { padding-inline: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .picture-book-stage * { transition-duration: 0s !important; }
+}

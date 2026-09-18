@@ -1,5 +1,5 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { TEAM, type TeamMember } from '../data/team'
+import { TEAM } from '../data/team'
+import TeamPortrait from '../components/TeamPortrait'
 import Reveal from '../components/Reveal'
 import './TeamPage.css'
 
@@ -9,91 +9,6 @@ const members = TEAM.filter(
   (member) => member !== director && !leads.includes(member),
 )
 
-function TeamPortrait({ member, priority = false }: { member: TeamMember; priority?: boolean }) {
-  const [open, setOpen] = useState(false)
-  const bioId = useId()
-  const trigger = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-
-    const dismissOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !event.defaultPrevented) setOpen(false)
-    }
-
-    document.addEventListener('keydown', dismissOnEscape)
-    return () => document.removeEventListener('keydown', dismissOnEscape)
-  }, [open])
-
-  const closeBio = () => {
-    setOpen(false)
-    trigger.current?.focus({ preventScroll: true })
-  }
-
-  return (
-    <div
-      className={`team-portrait${open ? ' is-open' : ''}`}
-      onPointerEnter={(event) => {
-        if (event.pointerType === 'mouse') setOpen(true)
-      }}
-      onPointerLeave={(event) => {
-        if (!event.currentTarget.contains(document.activeElement)) setOpen(false)
-      }}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false)
-      }}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape' && open) {
-          event.preventDefault()
-          closeBio()
-        }
-      }}
-    >
-      <div className="team-portrait__surface">
-        <button
-          ref={trigger}
-          type="button"
-          className="team-portrait__trigger"
-          aria-label={`${open ? 'Hide' : 'Read'} biography of ${member.name}`}
-          aria-expanded={open}
-          aria-controls={bioId}
-          onClick={() => setOpen((value) => !value)}
-        >
-          <img
-            src={member.photo}
-            alt={member.name}
-            width="1080"
-            height="1440"
-            loading={priority ? 'eager' : 'lazy'}
-            fetchPriority={priority ? 'high' : 'auto'}
-            decoding="async"
-          />
-        </button>
-        <div
-          id={bioId}
-          className="team-portrait__overlay"
-          role="region"
-          aria-label={`Biography of ${member.name}`}
-          aria-hidden={!open}
-          tabIndex={open ? 0 : -1}
-        >
-          <div className="team-portrait__overlay-heading">
-            <button
-              type="button"
-              className="team-portrait__close"
-              aria-label={`Close biography of ${member.name}`}
-              onClick={closeBio}
-              tabIndex={open ? 0 : -1}
-            >
-              <span aria-hidden="true">×</span>
-            </button>
-          </div>
-          <p className="team-portrait__bio">{member.bio}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function TeamPage() {
   return (

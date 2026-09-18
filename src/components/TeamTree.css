@@ -1,0 +1,28 @@
+#team { background: linear-gradient(180deg, #fff 0%, #fff7fb 28%, #fff7fb 90%, #fff 100%); }
+#team > .container > h2, #team > .container > .prose { margin-inline: auto; text-align: center; }
+#team > .container > .prose { max-width: 60ch; }
+.team-tree { margin: 48px auto 0; max-width: 1120px; }
+.team-tree__level + .team-tree__level { margin-top: 48px; }
+.team-tree .team-tree__row { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; align-items: stretch; }
+.team-tree .team-tree__row--director { grid-template-columns: minmax(0, 1fr); }
+.team-tree__label { width: fit-content; margin: 0 auto 20px; padding: 8px 18px; border: 1px solid #ff329b30; border-radius: 99px; background: #fff7fb; color: #99235e; font-size: .7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; white-space: nowrap; }
+.team-tree__card { width: calc(100% - 28px); max-width: 330px; justify-self: center; display: flex; flex-direction: column; padding: 10px 10px 0; background: #fff; border: 1px solid #eadfe5; border-radius: 26px; box-shadow: 0 8px 28px #53203908; transition: border-color 220ms ease, box-shadow 220ms ease; }
+.team-tree__row--director .team-tree__card { border-color: #ff329b60; box-shadow: 0 12px 36px #ad246213; }
+.team-tree__card:hover, .team-tree__card:focus-within { border-color: #ff329b; box-shadow: 0 12px 30px #ad24621a; }
+.team-tree__card .team-portrait__surface { border-radius: 18px; overflow: hidden; }
+.team-tree__card .team-portrait.is-open .team-portrait__surface { transform: none; box-shadow: none; }
+.team-tree__card .team-portrait__overlay { text-align: left; }
+.team-tree__details { display: flex; flex: 1; flex-direction: column; padding: 0 12px; }
+.team-tree .team-tree__details h3 { margin: 20px 0 8px; font-size: 1.25rem; color: #002b51; letter-spacing: -.025em; }
+.team-tree__role { margin: 0 0 20px; color: #62616d; font-size: .875rem; line-height: 1.5; }
+.team-tree .team-tree__email { display: flex; align-items: center; gap: 8px; margin-top: auto; padding: 16px 0 18px; border-top: 1px solid #f0e7ec; text-decoration: none; font-size: .75rem; }
+.team-tree__email svg { flex-shrink: 0; color: #d82c88; }
+.team-tree__email span { min-width: 0; overflow-wrap: anywhere; }
+.team-tree__email svg:last-child { margin-left: auto; }
+@media (max-width: 700px) {
+  .team-tree { max-width: 400px; }
+  .team-tree .team-tree__row { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .team-tree__level + .team-tree__level { margin-top: 36px; }
+  .team-tree__card { position: relative; width: 100%; max-width: none; padding-top: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .team-tree__card { transition: none; } }

@@ -1,6 +1,6 @@
 {
   "redirects": [
-    { "source": "/go", "destination": "/#signup", "statusCode": 307 }
+    { "source": "/go", "destination": "/compete#signup", "statusCode": 307 }
   ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

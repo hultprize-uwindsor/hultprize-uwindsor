@@ -1,0 +1,11 @@
+@import "tailwindcss" source(none);
+@source "./carousel.tsx";
+@source "./card.tsx";
+@source "./button.tsx";
+@source "../components/PhotoCarousel.tsx";
+@plugin "./plugin.cjs";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "./ThreeDImagePageflip.tsx";
+
+@source "./CodeHoverCards.tsx";

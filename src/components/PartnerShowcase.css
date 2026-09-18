@@ -1,0 +1,14 @@
+.partner-showcase { margin-top: 32px; }
+.partner-motion-card { display: block; flex: 0 0 260px; width: 260px; padding: 20px; border: 1px solid #efefef; border-radius: 24px; background: #fff; text-decoration: none; }
+.partner-motion-card p { color: #58595b; margin: 18px 0 0; font-size: 1rem; line-height: 1.5; white-space: normal; }
+.partner-motion-card .partner-placeholder { min-height: 112px; }
+.partner-motion-card .partner-person { min-height: 112px; color: #191919; }
+.partner-motion-logo { display: block; flex: 0 0 200px; width: 200px; text-decoration: none; filter: grayscale(1); }
+.partner-motion-logo:hover { filter: none; }
+.partner-motion-logo .partner-placeholder { min-height: 112px; }
+.partner-motion-card:hover { border-color: #005596; }
+.partner-motion-card:focus-visible, .partner-motion-logo:focus-visible { outline: 2px solid #005596; outline-offset: 4px; }
+@media(max-width: 540px) {
+  .partner-motion-card { flex-basis: 230px; width: 230px; }
+  .partner-motion-logo { flex-basis: 180px; width: 180px; }
+}

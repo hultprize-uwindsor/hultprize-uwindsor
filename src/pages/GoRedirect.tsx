@@ -9,7 +9,7 @@ export default function GoRedirect() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    navigate('/#signup', { replace: true })
+    navigate('/compete#signup', { replace: true })
   }, [navigate])
 
   return (

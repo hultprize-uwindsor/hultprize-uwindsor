@@ -40,7 +40,7 @@ export const TEAM: TeamMember[] = [
   {
     name: 'Julia Adu-Bobie',
     role: 'Partnerships and Sponsorships Lead',
-    bio: 'Julia is a fourth-year Business Administration student with a minor in Applied IT. She owns sponsorship for the program this year, including the prospect pipeline, the tier structure, and a $15,000 target that funds the venue, print, and every event on the calendar.',
+    bio: 'Julia is a fourth-year Business Administration student with a minor in Applied IT. She owns sponsorship for the program this year, including the prospect pipeline, the tier structure, and a $10,000 minimum target that funds the venue, print, and every event on the calendar.',
     photo: '/images/team/julia-adu-bobie.png',
   },
   {

@@ -1,0 +1,23 @@
+:root { --motion-fast: 180ms; --motion-ease: cubic-bezier(.22, 1, .36, 1); }
+[data-motion-pending] { opacity: 0; translate: 0 14px; }
+[data-motion-pending]:focus-within { opacity: 1; translate: none; }
+.btn, .text-link, .site-footer a, .event-filters button { transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease, border-color var(--motion-fast) ease, transform var(--motion-fast) var(--motion-ease); }
+.btn > span[aria-hidden], .entry-card a > span { display: inline-block; transition: transform var(--motion-fast) var(--motion-ease); }
+.entry-card, .post-card, .tier-card { transition: transform 200ms var(--motion-ease), box-shadow 200ms ease; }
+.signup-field input, .signup-field select { transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease; }
+@keyframes gentle-feedback { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.signup-success, .signup-error { animation: gentle-feedback 240ms ease-out; }
+.faq details[open] > p { animation: gentle-feedback 240ms ease-out; }
+.faq summary { transition: color var(--motion-fast) ease; }
+.faq summary:hover { color: #005596; }
+@media (hover: hover) and (pointer: fine) {
+  .entry-card:hover, .post-card:hover, .tier-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px #002b510a; }
+  .btn:hover > span[aria-hidden], .entry-card a:hover > span { transform: translate(2px, -1px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-motion-pending] { opacity: 1; translate: none; }
+  .btn, .text-link, .site-footer a, .event-filters button, .entry-card, .post-card, .tier-card,
+  .signup-field input, .signup-field select, .faq summary, .btn > span[aria-hidden], .entry-card a > span { transition: none; }
+  .entry-card:hover, .post-card:hover, .tier-card:hover, .btn:hover > span[aria-hidden], .entry-card a:hover > span { transform: none; }
+  .signup-success, .signup-error, .faq details[open] > p { animation: none; }
+}

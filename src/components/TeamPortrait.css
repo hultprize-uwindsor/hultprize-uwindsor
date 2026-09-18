@@ -1,0 +1,93 @@
+.team-portrait__surface {
+  position: relative;
+  transition: transform 280ms ease, box-shadow 280ms ease;
+}
+
+.team-portrait.is-open .team-portrait__surface {
+  transform: translateY(-7px);
+  box-shadow: 0 24px 40px -16px rgb(0 0 0 / 32%), 0 8px 16px -8px rgb(0 0 0 / 18%);
+}
+
+.team-portrait__trigger {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.team-portrait img {
+  width: 100%;
+  height: auto;
+}
+
+.team-portrait__overlay {
+  position: absolute;
+  inset: 0;
+  padding: clamp(16px, 2.2vw, 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #aaa transparent;
+  background: rgb(15 15 18 / 91%);
+  color: #fff;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms ease, visibility 220ms;
+}
+
+.team-portrait.is-open .team-portrait__overlay {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.team-portrait__overlay-heading {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.team-portrait__close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.team-portrait__close:hover {
+  background: rgb(255 255 255 / 12%);
+}
+
+.team-portrait__bio {
+  margin: 0;
+  color: #f0f0f0;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.team-portrait__overlay:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -5px;
+}
+
+.team-portrait__close:focus-visible {
+  outline-color: #fff;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .team-portrait__surface, .team-portrait__overlay { transition: none; }
+  .team-portrait.is-open .team-portrait__surface { transform: none; }
+}

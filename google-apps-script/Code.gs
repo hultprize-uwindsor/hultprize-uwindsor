@@ -38,7 +38,11 @@ function setupSheet() {
 
 function doPost(e) {
   const sheet = getSheet_();
-  const params = e.parameter;
+  const params = (e && e.parameter) || {};
+  if (!params.name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(params.email || '')) {
+    return ContentService.createTextOutput(JSON.stringify({ result: 'error' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 
   sheet.appendRow([
     new Date(),
@@ -49,6 +53,26 @@ function doPost(e) {
     params.phone || '',
     params.teamStatus || '',
   ]);
+
+  // A saved sign-up stays saved if the mail service is temporarily unavailable.
+  try {
+    MailApp.sendEmail({
+      to: params.email.trim(),
+      subject: 'You’re on the Hult Prize UWindsor list',
+      name: 'Hult Prize at the University of Windsor',
+      replyTo: 'hultprizeatuwindsor@gmail.com',
+      body: [
+        'Thanks for signing up. We will keep you posted on deadlines, workshops and team matching.',
+        'This is a mailing-list sign-up, not your competition entry. Register officially at https://www.hultprize.org/register. This is the only registration that counts toward the competition.',
+        'Registration closes November 20. The Grand Finale is February 5, 2027.',
+        'Join the registered teams chat: https://signal.group/#CjQKIKs4d_yjcI_b8-HQDZOUCTPgrwHLO9afYy86-aIccZO2EhA2jvXrmEDUZ5fvaccFQciT',
+        'Looking for a team? Join the mixer chat: https://signal.group/#CjQKIDgWmVxurnfxm-CnNUj-p6FY82u5bDTTlh0RSWC1Ag9xEhAqSS4Wby7U4Nd4wnjzEtLP',
+        'Find us at https://hultprizeatuwindsor.ca',
+      ].join('\n\n'),
+    });
+  } catch (error) {
+    console.error('Sign-up saved but confirmation email could not be sent', error);
+  }
 
   return ContentService
     .createTextOutput(JSON.stringify({ result: 'success' }))

@@ -1,49 +1,49 @@
-# Hult Prize at University of Windsor: Sign-Up Site
+# Hult Prize at the University of Windsor
 
-Two-page, mobile-first sign-up site for the UWindsor Hult Prize chapter.
-Built with React + TypeScript + Vite, deployed on Vercel.
+React + TypeScript + Vite chapter website, configured for Vercel.
+Intended domain: **hultprizeatuwindsor.ca**.
 
 ## Pages
 
-- `/`: What the Hult Prize is, what you win, key dates, sign-up form, contact
-- `/team`: Team headshots, roles, and bios
-- `/go`: Short-link redirect used on printed materials (QR code target)
+Home (`/`), About (`/about`), Year One (`/year-one`), This Year (`/this-year`), Events (`/events`), Compete (`/compete`), Partners (`/partners`), Contact (`/contact`). Events also have individual `/events/:slug` pages.
 
-## Local development
+`/team` redirects to the About team section. `/go` and the legacy `/#signup` point to the interest form on Compete. Every primary Register button opens official registration at `https://www.hultprize.org/register`.
 
-```bash
+## Development
+
+```sh
 npm install
 npm run dev
+npm run build
+npm run lint
 ```
 
-## Form submissions
+With Vite running, run `node scripts/check-site.mjs` for browser checks. Use `PLAYWRIGHT_CHANNEL=chrome` if using installed Google Chrome instead of Playwright's browser.
 
-The sign-up form posts to a Google Apps Script Web App that appends each
-submission as a row in a Google Sheet. See `google-apps-script/Code.gs` for
-the script and setup steps. Once deployed, set the Web App URL as
-`VITE_FORM_ENDPOINT` (see `.env.example`). In Vercel, this is a Project
-Environment Variable.
+## Content
 
-## QR code / short link
+- `src/data/copy.json`: finished copy from the build brief.
+- `src/data/site.ts`: domain, email, social and registration links.
+- `src/data/posts.ts`: event/story entries and publication state.
+- `src/data/partners.ts`: returning and confirmed partners.
+- `src/data/assets.ts`: approved Year One photos and PDF download paths, currently pending.
 
-Printed materials point at `https://hultprizeuwindsor.ca/go`, which redirects
-to the sign-up form (configured in `vercel.json`). This keeps the printed QR
-code stable even if the destination changes later. Just update the redirect
-and redeploy.
+See [launch notes](docs/launch-notes.md) for outstanding assets, editorial decisions, and deployment steps.
 
-Regenerate the QR files (SVG + PNG) with:
+## Form and confirmation email
 
-```bash
-node scripts/generate-qr.mjs https://hultprizeuwindsor.ca/go
+The only form is the student interest sign-up on Compete. It posts to the Google Apps Script Web App in `google-apps-script/Code.gs`, which saves a row in Google Sheets and emails next steps. Set the Web App URL as `VITE_FORM_ENDPOINT` locally or in Vercel. Redeploy Apps Script separately when its code changes and authorize its MailApp scope.
+
+## Deployment and domain
+
+The previous setup was documented as Vercel connected to GitHub with automatic deployment on pushes to `main`, with DNS managed through GoDaddy. Connect and verify `hultprizeatuwindsor.ca` in Vercel and the domain account; changing the repository does not change DNS.
+
+## Printed QR code
+
+The stable printed link is `https://hultprizeatuwindsor.ca/go`. Vercel redirects it to `/compete#signup`.
+
+```sh
+node scripts/generate-qr.mjs https://hultprizeatuwindsor.ca/go
 ```
 
-Output lands in `qr-code/`.
-
-## Deployment
-
-- **Hosting:** Vercel, imported from this GitHub repo (auto-deploys on push
-  to `main`).
-- **Domain:** `hultprizeuwindsor.ca`, connected via GoDaddy DNS pointing at
-  Vercel.
-- **Environment variable:** `VITE_FORM_ENDPOINT` must be set in Vercel
-  Project Settings for the sign-up form to work in production.
+SVG and PNG outputs are in `qr-code/`.

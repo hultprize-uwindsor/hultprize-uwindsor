@@ -1,94 +1,45 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import { RegisterButton } from './PageParts'
 import './Header.css'
+import BrandMark from './BrandMark'
 
 export default function Header() {
   const location = useLocation()
   const [openAt, setOpenAt] = useState<string | null>(null)
-  const toggleRef = useRef<HTMLButtonElement>(null)
+  const [footerVisible, setFooterVisible] = useState(false)
+  const toggle = useRef<HTMLButtonElement>(null)
+  const program = useRef<HTMLDetailsElement>(null)
   const open = openAt === location.key
-  const closeMenu = () => setOpenAt(null)
-
+  useEffect(() => { if (program.current) program.current.open = false }, [location.key])
   useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth > 960) setOpenAt(null)
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    const footer = document.querySelector('.site-footer')
+    if (!footer) return
+    const observer = new IntersectionObserver(([entry]) => {
+      setFooterVisible(entry.isIntersecting)
+      if (entry.isIntersecting) {
+        setOpenAt(null)
+        if (program.current) program.current.open = false
+      }
+    }, { threshold: 0 })
+    observer.observe(footer)
+    return () => observer.disconnect()
   }, [])
-
-  return (
-    <>
-      <div className="site-announcement">
-        <Link to="/#signup">
-          Hult Prize at the University of Windsor
-          <span aria-hidden="true">&rarr;</span>
-        </Link>
-      </div>
-
-      <header
-        className="site-header"
-        onKeyDown={(event) => {
-          if (event.key === 'Escape' && open) {
-            closeMenu()
-            toggleRef.current?.focus()
-          }
-        }}
-      >
-        <div className="container site-header__inner">
-          <Link
-            to="/"
-            className="site-header__brand"
-            aria-label="Hult Prize at the University of Windsor home"
-            onClick={closeMenu}
-          >
-            <img
-              src="/images/logos/Hult Prize logos Horizontal White.png"
-              alt="Hult Prize"
-              width="184"
-              height="42"
-              className="site-header__logo"
-            />
-          </Link>
-
-          <button
-            ref={toggleRef}
-            type="button"
-            className="site-header__toggle"
-            aria-expanded={open}
-            aria-controls="site-navigation"
-            onClick={() => setOpenAt(open ? null : location.key)}
-          >
-            {open ? 'Close' : 'Menu'}
-          </button>
-
-          <nav
-            id="site-navigation"
-            aria-label="Main navigation"
-            className={`site-header__nav ${open ? 'is-open' : ''}`}
-          >
-            <Link to="/#what-you-win" className="site-header__link" onClick={closeMenu}>
-              The competition
-            </Link>
-            <Link to="/#key-dates" className="site-header__link" onClick={closeMenu}>
-              Key dates
-            </Link>
-            <NavLink
-              to="/team"
-              className={({ isActive }) => `site-header__link ${isActive ? 'is-active' : ''}`}
-              onClick={closeMenu}
-            >
-              Our team
-            </NavLink>
-            <Link to="#contact" className="site-header__link" onClick={closeMenu}>
-              Contact
-            </Link>
-            <Link to="/#signup" className="btn site-header__cta" onClick={closeMenu}>
-              Register to compete
-            </Link>
-          </nav>
-        </div>
-      </header>
-    </>
-  )
+  return <header className={`site-header${footerVisible ? ' site-header--hidden' : ''}`} inert={footerVisible} aria-hidden={footerVisible || undefined} onKeyDown={e => {
+    if (e.key === 'Escape') {
+      if (program.current?.open) { program.current.open = false; program.current.querySelector('summary')?.focus() }
+      else { setOpenAt(null); toggle.current?.focus() }
+    }
+  }}>
+    <div className="container site-header__inner">
+      <Link to="/" className="site-header__brand" aria-label="Hult Prize at the University of Windsor home"><BrandMark /></Link>
+      <button className="site-header__toggle" ref={toggle} aria-expanded={open} aria-controls="site-navigation" onClick={() => setOpenAt(open ? null : location.key)}>{open ? 'Close' : 'Menu'}</button>
+      <nav id="site-navigation" className={`site-header__nav ${open ? 'is-open' : ''}`} aria-label="Main navigation">
+        <NavLink to="/" end>Home</NavLink><NavLink to="/about">About</NavLink>
+        <details ref={program} className="program-menu"><summary>The Program</summary><div><NavLink to="/year-one">Year One</NavLink><NavLink to="/this-year">This Year</NavLink><NavLink to="/events">Events</NavLink></div></details>
+        <NavLink to="/compete">Compete</NavLink><NavLink to="/partners">Partners</NavLink><NavLink to="/contact">Contact</NavLink>
+      </nav>
+      <div className="site-header__register"><RegisterButton>Register</RegisterButton></div>
+    </div>
+  </header>
 }

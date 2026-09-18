@@ -110,11 +110,12 @@ export default function SignupForm() {
         <p className="signup-disclaimer">
           This form collects interest for our UWindsor team. Official Hult
           Prize competition registration happens separately at{' '}
-          <a href="https://www.hultprize.org/register" target="_blank" rel="noreferrer">
+          <a href={SITE.registrationUrl} target="_blank" rel="noreferrer">
             hultprize.org/register
           </a>
           .
         </p>
+        <p className="signup-disclaimer"><a href={SITE.signalRegisteredUrl} target="_blank" rel="noopener noreferrer">Join the registered teams chat ↗</a></p>
         <button className="btn btn--dark" onClick={() => setStatus('idle')}>
           Submit another response
         </button>
@@ -228,7 +229,7 @@ export default function SignupForm() {
       <p className="signup-disclaimer">
         This form collects interest for our UWindsor team. Official Hult
         Prize competition registration happens separately at{' '}
-        <a href="https://www.hultprize.org/register" target="_blank" rel="noreferrer">
+        <a href={SITE.registrationUrl} target="_blank" rel="noreferrer">
           hultprize.org/register
         </a>
         .

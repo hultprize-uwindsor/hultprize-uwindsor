@@ -1,0 +1,12 @@
+.three-d-scroll { position: relative; width: 100%; overflow: hidden; perspective: 1200px; }
+.three-d-row { width: 100%; overflow: hidden; perspective: 1200px; padding-block: 16px; }
+.three-d-track { display: flex; width: max-content; will-change: transform; transform: translate3d(0, 0, 0); user-select: none; }
+.three-d-block { display: flex; flex-shrink: 0; gap: 24px; padding-right: 24px; }
+.three-d-row:focus-within { overflow-x: auto; }
+.three-d-row:focus-within .three-d-track { transform: none !important; }
+.three-d-row:focus-within [data-clone] { display: none; }
+@media(prefers-reduced-motion: reduce) {
+  .three-d-row { overflow-x: auto; }
+  .three-d-track { transform: none !important; will-change: auto; user-select: auto; }
+  .three-d-block[data-clone] { display: none; }
+}

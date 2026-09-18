@@ -1,0 +1,4 @@
+.count-up { display: inline-grid; position: relative; font-variant-numeric: tabular-nums; }
+.count-up__reserve, .count-up__value { grid-area: 1 / 1; }
+.count-up__reserve { visibility: hidden; }
+.count-up__accessible { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
