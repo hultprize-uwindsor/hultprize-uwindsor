@@ -22,7 +22,17 @@ export function PartnerStrip() {
     <div className="container"><p className="eyebrow">Our partners</p><div className="partner-strip__heading"><h2>Supported by</h2></div></div>
     <ThreeDScrollTriggerContainer>
       <ThreeDScrollTriggerRow baseVelocity={1} direction={1} aria-label="Supporting organisations">
-        {partners.map(partner => <a className="partner-motion-logo" key={partner.name} href={partner.url} target="_blank" rel="noopener noreferrer"><span className="partner-placeholder">{partner.name}</span></a>)}
+        {partners.map(partner => (
+          <a className="partner-motion-logo" key={partner.name} href={partner.url} target="_blank" rel="noopener noreferrer">
+            {partner.logo ? (
+              <span className="partner-logo-box">
+                <img src={partner.logo} alt={partner.name} loading="lazy" />
+              </span>
+            ) : (
+              <span className="partner-placeholder">{partner.name}</span>
+            )}
+          </a>
+        ))}
       </ThreeDScrollTriggerRow>
     </ThreeDScrollTriggerContainer>
   </section>

@@ -6,6 +6,17 @@
 .partner-motion-logo { display: block; flex: 0 0 200px; width: 200px; text-decoration: none; filter: grayscale(1); }
 .partner-motion-logo:hover { filter: none; }
 .partner-motion-logo .partner-placeholder { min-height: 112px; }
+.partner-logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 112px;
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid #efefef;
+  border-radius: 16px;
+}
+.partner-logo-box img { max-width: 100%; max-height: 72px; width: auto; height: auto; object-fit: contain; }
 .partner-motion-card:hover { border-color: #005596; }
 .partner-motion-card:focus-visible, .partner-motion-logo:focus-visible { outline: 2px solid #005596; outline-offset: 4px; }
 @media(max-width: 540px) {
