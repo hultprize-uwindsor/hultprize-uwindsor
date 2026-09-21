@@ -16,12 +16,12 @@ export const PARTNERS: Partner[] = [
   { name: 'Picsume', role: 'Corporate Sponsor and Startup Ecosystem Supporter', url: 'https://www.picsume.com/', logo: '/images/partners/picsume.png' },
   { name: 'City of Windsor', role: 'Municipal Government Partner', url: 'https://www.citywindsor.ca/', logo: '/images/partners/city-of-windsor.png' },
   { name: 'Mayor Drew Dilkens', role: 'Local Government Representative and Advocate', url: 'https://www.citywindsor.ca/mayor-and-council/mayors-office', individual: true },
-  { name: 'Small Business and Entrepreneurship Centre', role: 'Small Business Development and Entrepreneurship Partner', url: 'https://www.webusinesscentre.com/' },
+  { name: 'Small Business and Entrepreneurship Centre', role: 'Small Business Development and Entrepreneurship Partner', url: 'https://www.webusinesscentre.com/', logo: '/images/partners/uwindsor.png' },
 ]
 
 // Only organisations explicitly marked confirmed in the supplied brief.
 export const CURRENT_PARTNERS: Partner[] = [
-  { name: 'Fusion', url: 'https://www.uwindsor.ca/' },
+  { name: 'Fusion', url: 'https://www.uwindsor.ca/', logo: '/images/partners/uwindsor.png' },
   { name: 'Sterling Cybersecurity and Advisory Group', url: 'https://www.sterlinginfo.com/', logo: '/images/partners/sterling-cybersecurity-advisory-group.png' },
   { name: 'Hypercare', url: 'https://www.hypercare.com/', logo: '/images/partners/hypercare.png' },
 ]
