@@ -52,7 +52,7 @@ try {
     await page.getByRole('button', { name: 'Sign up', exact: true }).click()
     assert(await page.getByText('Please enter your name.').isVisible())
     const socialLinks = await page.locator('.site-footer__social a').evaluateAll(as => as.map(a => a.getAttribute('href')))
-    assert(socialLinks.includes('https://hultprizeatuwindsor.ca'))
+    assert(socialLinks.includes('https://hultprizeuwindsor.ca'))
     assert(socialLinks.includes('mailto:hultprizeatuwindsor@gmail.com'))
     assert.equal(socialLinks.filter(href => href.startsWith('https://signal.group/#')).length, 2)
     if (width === 375) {

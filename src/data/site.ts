@@ -5,7 +5,7 @@ export const SITE = {
   contactEmail: 'hultprizeatuwindsor@gmail.com',
   // Direct line to the Campus Director, shown as a second contact point.
   campusDirectorEmail: 'akhtari1@uwindsor.ca',
-  websiteUrl: 'https://hultprizeatuwindsor.ca',
+  websiteUrl: 'https://hultprizeuwindsor.ca',
   instagramHandle: '@hultprizeatuwindsor',
   instagramUrl: 'https://www.instagram.com/hultprizeatuwindsor/',
   signalRegisteredUrl: 'https://signal.group/#CjQKIKs4d_yjcI_b8-HQDZOUCTPgrwHLO9afYy86-aIccZO2EhA2jvXrmEDUZ5fvaccFQciT',

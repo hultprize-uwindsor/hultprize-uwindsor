@@ -1,7 +1,7 @@
 # Hult Prize at the University of Windsor
 
 React + TypeScript + Vite chapter website, configured for Vercel.
-Intended domain: **hultprizeatuwindsor.ca**.
+Intended domain: **hultprizeuwindsor.ca**.
 
 ## Pages
 
@@ -36,14 +36,14 @@ The only form is the student interest sign-up on Compete. It posts to the Google
 
 ## Deployment and domain
 
-The previous setup was documented as Vercel connected to GitHub with automatic deployment on pushes to `main`, with DNS managed through GoDaddy. Connect and verify `hultprizeatuwindsor.ca` in Vercel and the domain account; changing the repository does not change DNS.
+The previous setup was documented as Vercel connected to GitHub with automatic deployment on pushes to `main`, with DNS managed through GoDaddy. Connect and verify `hultprizeuwindsor.ca` in Vercel and the domain account; changing the repository does not change DNS.
 
 ## Printed QR code
 
-The stable printed link is `https://hultprizeatuwindsor.ca/go`. Vercel redirects it to `/compete#signup`.
+The stable printed link is `https://hultprizeuwindsor.ca/go`. Vercel redirects it to `/compete#signup`.
 
 ```sh
-node scripts/generate-qr.mjs https://hultprizeatuwindsor.ca/go
+node scripts/generate-qr.mjs https://hultprizeuwindsor.ca/go
 ```
 
 SVG and PNG outputs are in `qr-code/`.

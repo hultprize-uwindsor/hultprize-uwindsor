@@ -1,6 +1,6 @@
 # Launch handoff
 
-The supplied build brief names eight pages; all eight are implemented. Existing `/team`, `/go`, and `/#signup` links still work. `/go` now points to `/compete#signup`. Printed QR assets encode `https://hultprizeatuwindsor.ca/go`.
+The supplied build brief names eight pages; all eight are implemented. Existing `/team`, `/go`, and `/#signup` links still work. `/go` now points to `/compete#signup`. Printed QR assets encode `https://hultprizeuwindsor.ca/go`.
 
 ## Content and assets still needed
 
@@ -22,7 +22,7 @@ The supplied build brief names eight pages; all eight are implemented. Existing 
 
 ## Deployment
 
-1. Connect `hultprizeatuwindsor.ca` to the Vercel project and verify DNS in the domain account. The old README described `hultprizeuwindsor.ca`; repository edits do not alter DNS or Vercel domain configuration.
+1. Connect `hultprizeuwindsor.ca` (the confirmed domain; an earlier draft used `hultprizeatuwindsor.ca` in error) to the Vercel project and verify DNS in the domain account. Repository edits do not alter DNS or Vercel domain configuration.
 2. Set `VITE_FORM_ENDPOINT` in Vercel, then build and deploy.
 3. Redeploy `google-apps-script/Code.gs` separately. It now sends a confirmation email after saving a valid sign-up, with the official registration link and both Signal chats. The script owner must authorize MailApp permissions. A mail failure is logged without dropping the saved sign-up.
 4. Verify the live sheet and confirmation email with an intentional real submission after deployment. Local checks use mocks and send no emails.

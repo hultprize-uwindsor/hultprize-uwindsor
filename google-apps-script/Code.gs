@@ -67,7 +67,7 @@ function doPost(e) {
         'Registration closes November 20. The Grand Finale is February 5, 2027.',
         'Join the registered teams chat: https://signal.group/#CjQKIKs4d_yjcI_b8-HQDZOUCTPgrwHLO9afYy86-aIccZO2EhA2jvXrmEDUZ5fvaccFQciT',
         'Looking for a team? Join the mixer chat: https://signal.group/#CjQKIDgWmVxurnfxm-CnNUj-p6FY82u5bDTTlh0RSWC1Ag9xEhAqSS4Wby7U4Nd4wnjzEtLP',
-        'Find us at https://hultprizeatuwindsor.ca',
+        'Find us at https://hultprizeuwindsor.ca',
       ].join('\n\n'),
     });
   } catch (error) {
