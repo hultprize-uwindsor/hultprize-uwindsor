@@ -8,7 +8,7 @@ export interface Partner {
 
 export const PARTNERS: Partner[] = [
   { name: 'WEtech Alliance', role: 'Technology and Innovation Ecosystem Partner', url: 'https://www.wetech-alliance.com/', logo: '/images/partners/wetech-alliance.png' },
-  { name: 'Research and Innovation Office', role: 'University of Windsor, Institutional Research Partner', url: 'https://www.uwindsor.ca/research/' },
+  { name: 'Research and Innovation Office', role: 'University of Windsor, Institutional Research Partner', url: 'https://www.uwindsor.ca/research/', logo: '/images/partners/uwindsor.png' },
   { name: 'UWSA', role: "University of Windsor Students’ Alliance", url: 'https://uwsa.ca/', logo: '/images/partners/uwsa.png' },
   { name: 'GSS', role: 'Graduate Student Society, University of Windsor', url: 'https://uwindsorgss.ca/', logo: '/images/partners/gss.png' },
   { name: 'Alumni Association', role: 'University of Windsor Alumni Association', url: 'https://www.uwindsor.ca/alumni/' },
