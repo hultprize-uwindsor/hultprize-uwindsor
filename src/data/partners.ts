@@ -12,7 +12,7 @@ export const PARTNERS: Partner[] = [
   { name: 'UWSA', role: "University of Windsor Students’ Alliance", url: 'https://uwsa.ca/', logo: '/images/partners/uwsa.png' },
   { name: 'GSS', role: 'Graduate Student Society, University of Windsor', url: 'https://uwindsorgss.ca/', logo: '/images/partners/gss.png' },
   { name: 'Alumni Association', role: 'University of Windsor Alumni Association', url: 'https://www.uwindsor.ca/alumni/', logo: '/images/partners/uwindsor.png' },
-  { name: 'Student Centre', role: 'University of Windsor Student Centre', url: 'https://www.uwsa.ca/student-centre' },
+  { name: 'Student Centre', role: 'University of Windsor Student Centre', url: 'https://www.uwsa.ca/student-centre', logo: '/images/partners/uwsa.png' },
   { name: 'Picsume', role: 'Corporate Sponsor and Startup Ecosystem Supporter', url: 'https://www.picsume.com/' },
   { name: 'City of Windsor', role: 'Municipal Government Partner', url: 'https://www.citywindsor.ca/', logo: '/images/partners/city-of-windsor.png' },
   { name: 'Mayor Drew Dilkens', role: 'Local Government Representative and Advocate', url: 'https://www.citywindsor.ca/mayor-and-council/mayors-office', individual: true },
