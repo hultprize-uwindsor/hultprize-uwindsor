@@ -11,7 +11,7 @@ export const PARTNERS: Partner[] = [
   { name: 'Research and Innovation Office', role: 'University of Windsor, Institutional Research Partner', url: 'https://www.uwindsor.ca/research/', logo: '/images/partners/uwindsor.png' },
   { name: 'UWSA', role: "University of Windsor Students’ Alliance", url: 'https://uwsa.ca/', logo: '/images/partners/uwsa.png' },
   { name: 'GSS', role: 'Graduate Student Society, University of Windsor', url: 'https://uwindsorgss.ca/', logo: '/images/partners/gss.png' },
-  { name: 'Alumni Association', role: 'University of Windsor Alumni Association', url: 'https://www.uwindsor.ca/alumni/' },
+  { name: 'Alumni Association', role: 'University of Windsor Alumni Association', url: 'https://www.uwindsor.ca/alumni/', logo: '/images/partners/uwindsor.png' },
   { name: 'Student Centre', role: 'University of Windsor Student Centre', url: 'https://www.uwsa.ca/student-centre' },
   { name: 'Picsume', role: 'Corporate Sponsor and Startup Ecosystem Supporter', url: 'https://www.picsume.com/' },
   { name: 'City of Windsor', role: 'Municipal Government Partner', url: 'https://www.citywindsor.ca/', logo: '/images/partners/city-of-windsor.png' },
