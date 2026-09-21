@@ -22,6 +22,6 @@ export const PARTNERS: Partner[] = [
 // Only organisations explicitly marked confirmed in the supplied brief.
 export const CURRENT_PARTNERS: Partner[] = [
   { name: 'Fusion', url: 'https://www.uwindsor.ca/' },
-  { name: 'Sterling Cybersecurity and Advisory Group', url: 'https://www.sterlinginfo.com/' },
+  { name: 'Sterling Cybersecurity and Advisory Group', url: 'https://www.sterlinginfo.com/', logo: '/images/partners/sterling-cybersecurity-advisory-group.png' },
   { name: 'Hypercare', url: 'https://www.hypercare.com/' },
 ]
