@@ -16,7 +16,7 @@ export const PARTNERS: Partner[] = [
   { name: 'Picsume', role: 'Corporate Sponsor and Startup Ecosystem Supporter', url: 'https://www.picsume.com/', logo: '/images/partners/picsume.png' },
   { name: 'City of Windsor', role: 'Municipal Government Partner', url: 'https://www.citywindsor.ca/', logo: '/images/partners/city-of-windsor.png' },
   { name: 'Mayor Drew Dilkens', role: 'Local Government Representative and Advocate', url: 'https://www.citywindsor.ca/mayor-and-council/mayors-office', individual: true },
-  { name: 'Small Business and Entrepreneurship Centre', role: 'Small Business Development and Entrepreneurship Partner', url: 'https://www.webusinesscentre.com/', logo: '/images/partners/uwindsor.png' },
+  { name: 'Small Business and Entrepreneurship Centre', role: 'Small Business Development and Entrepreneurship Partner', url: 'https://www.webusinesscentre.com/', logo: '/images/partners/small-business-entrepreneurship-centre.png' },
 ]
 
 // Only organisations explicitly marked confirmed in the supplied brief.
