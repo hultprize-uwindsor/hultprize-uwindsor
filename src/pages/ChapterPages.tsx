@@ -14,7 +14,7 @@ const committee = [
   ['Yusriyah Rahman', 'Judges, Experts and Course Integrations Lead', 'rahman4n@uwindsor.ca', 'yusriyah-rahman'],
   ['Sura Gaafar', 'Events and Outreach Lead', 'gaafar@uwindsor.ca', 'sura-gaafar'],
   ['Yumna Sumya', 'Marketing and Media Coordinator', 'sumya@uwindsor.ca', 'yumna-sumya'],
-  ['Salma Sayeda', 'Marketing and Media Coordinator', 'dev.salmacodes@gmail.com', 'salma-syeda'],
+  ['Salma Syeda', 'Marketing and Media Coordinator', 'dev.salmacodes@gmail.com', 'salma-syeda'],
   ['Julia Adu-Bobie', 'Partnerships and Sponsorships Lead', 'adubobij@uwindsor.ca', 'julia-adu-bobie'],
 ]
 export function AboutPage() {
