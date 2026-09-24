@@ -16,6 +16,9 @@ main a:not(.btn):hover, .text-link:hover { text-decoration-thickness: 2px; }
 .chapter-section:not(.paper-pink, .paper-blue, .navy-band) + .chapter-section:not(.paper-pink, .paper-blue, .navy-band) { padding-top: 0; }
 /* The bottom fades to paper pink so full-strength pink never meets the dark-blue band below. */
 .home-hero { background: linear-gradient(180deg, transparent 72%, var(--paper-pink)), radial-gradient(ellipse at 85% 10%, #ff9ccc 0, transparent 50%), linear-gradient(120deg, var(--paper-pink), var(--pink)); padding: 128px 0; }
+/* Fills the screen below the 65px sticky header; svh keeps phones steady as the address bar moves.
+   Taller content still grows the hero rather than being cut off. */
+.home-hero { display: flex; align-items: center; min-height: calc(100svh - 65px); }
 .home-hero h1 { font-size: 3rem; margin-bottom: 24px; }
 .home-hero .prose { max-width: 66ch; }
 /* No blue ring against the pink gradient: the white pill separates the two. */
@@ -53,7 +56,8 @@ main a:not(.btn):hover, .text-link:hover { text-decoration-thickness: 2px; }
 .entry-card p { margin-bottom: 32px; }
 .entry-card a { margin-top: auto; font-weight: 700; }
 .timeline { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0; margin: 42px 0; list-style: none; }
-.timeline--full { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+/* Eight entries: two even rows of four. */
+.timeline--full { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 30px; }
 .timeline li { border-top: 2px solid #005596; padding: 24px 24px 0 0; position: relative; }
 .timeline li::before { content: ''; position: absolute; top: -7px; left: 0; width: 12px; height: 12px; background: #005596; border-radius: 50%; }
 .timeline strong { display: block; margin-bottom: 12px; }
@@ -77,24 +81,133 @@ main a:not(.btn):hover, .text-link:hover { text-decoration-thickness: 2px; }
 .committee-grid details { margin-top: 16px; }
 .committee-grid details p { margin-top: 12px; }
 summary { cursor: pointer; }
-.callout { padding: 36px; background: #f7f7f7; border-left: 4px solid #005596; border-radius: 0 16px 16px 0; max-width: 850px; }
-.callout ul { list-style: disc; padding-left: 22px; margin: 0; }
-.callout li + li { margin-top: 16px; }
-.callout .btn { margin-top: 24px; }
-.entry-steps { counter-reset: steps; list-style: none; padding: 0; max-width: 850px; }
-.entry-steps li { counter-increment: steps; position: relative; padding: 25px 25px 25px 70px; border-bottom: 1px solid #efefef; }
-.entry-steps li::before { content: counter(steps, decimal-leading-zero); position: absolute; left: 18px; top: 24px; font-size: 1.5rem; color: #002b51; font-weight: 700; }
-.entry-steps li > a:not(.btn) { display: table; margin-top: 16px; }
-.entry-steps li > .btn { display: flex; width: fit-content; max-width: 100%; margin-top: 16px; }
-.entry-steps .official-step { border: 2px solid #da2381; border-radius: 16px; background: #ffe8f5; margin-block: 12px; }
-.form-wrap { max-width: 850px; margin-top: 32px; }
-#signup > .container > h2, #signup > .container > .prose { margin-inline: auto; text-align: center; }
-#signup .form-wrap { margin-inline: auto; }
+/* Compete, mapped onto hultprize.org/how-it-works: full-bleed photo and navy split bands, centred short
+   headings, white cards on a tinted ground, numbered steps and a centred FAQ. Nothing here moves. */
+.compete-band > .container > h2, .compete-split h2, .signup-layout h2 { text-wrap: balance; }
+.compete-band > .container > h2 { margin-bottom: 48px; }
+/* First-screen actions under the page heading. The heading's rule moves below them. */
+.page-heading:has(+ .compete-actions) { padding-bottom: 0; }
+.page-heading:has(+ .compete-actions) > p:last-child { padding-bottom: 0; border-bottom: 0; }
+.compete-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding-block: 32px 64px; }
+/* Split band: the photo bleeds to the page edge; the panel text stays inside the 1200px column. */
+.compete-split { display: grid; grid-template-columns: minmax(32px, 1fr) minmax(0, 600px) minmax(0, 600px) minmax(32px, 1fr); background: var(--uw-blue-dark); color: #fff; }
+.compete-split > .campus-photo { position: relative; grid-row: 1; grid-column: 1 / 3; min-height: 480px; overflow: hidden; }
+.compete-split > .campus-photo img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; border-radius: 0; }
+/* The pitch photo is trimmed so the slide title cut off at its top edge and the event banner at its
+   right edge fall outside the frame; the presenters stay centred. */
+.compete-split--pitch > .campus-photo img { inset: -5% auto auto 0; width: 110%; height: 105%; max-width: none; object-position: 55% 20%; }
+.compete-split__panel { grid-row: 1; grid-column: 3; align-self: center; padding: clamp(64px, 8.9vw, 128px) 0 clamp(64px, 8.9vw, 128px) clamp(40px, 6.7vw, 96px); }
+.compete-split--reverse > .campus-photo { grid-column: 3 / 5; }
+.compete-split--reverse .compete-split__panel { grid-column: 2; padding-inline: 0 clamp(40px, 6.7vw, 96px); }
+.compete-split h2 { max-width: 14ch; margin-bottom: 32px; color: #fff; }
+.compete-split .eyebrow { color: var(--paper-blue); }
+/* Regular weight on navy: light white strokes look thinner than they measure. */
+.compete-split .prose, .compete-lead { max-width: 60ch; font-size: 1.25rem; line-height: 1.875rem; font-weight: 400; }
+.compete-lead { margin: 0 0 32px; }
+/* "Here is the part most people get wrong." leads the note that answers it. */
+.compete-note { max-width: 60ch; margin: 0; padding: 24px 28px; border-radius: 16px; background: var(--paper-blue); color: var(--ink); font-size: 1.125rem; line-height: 1.75rem; font-weight: 400; }
+.compete-note strong { display: block; margin-bottom: 4px; text-wrap: balance; }
+.compete-split .btn { margin-top: 40px; }
+.compete-split .btn--secondary { --btn-ring: transparent; }
+.compete-split :focus-visible { outline-color: #fff; }
+/* No photos (production until they are cleared): heading beside the copy across the column. */
+.compete-split--solo .compete-split__panel { grid-column: 2 / 4; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 64px; padding-inline: 0; }
+.compete-split--solo h2 { margin-bottom: 0; }
+/* Who can enter: one white card per rule; the UWindsor rule is the navy one. */
+.eligibility-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin: 0; padding: 0; list-style: none; }
+.eligibility-card { display: flex; flex-direction: column; gap: 16px; padding: 32px; border-radius: 16px; background: #fff; }
+.eligibility-card__label { color: var(--uw-blue); font-size: .8rem; line-height: 1rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+.eligibility-card p { margin: 0; font-size: 1.25rem; line-height: 1.75rem; font-weight: 500; text-wrap: pretty; }
+.eligibility-card--key { background: var(--uw-blue-dark); color: #fff; }
+.eligibility-card--key .eligibility-card__label { color: var(--paper-blue); }
+.eligibility-card--key p { font-size: 1.125rem; font-weight: 400; }
+.eligibility-card--key strong { display: block; margin-bottom: 8px; font-size: 1.5rem; line-height: 2rem; font-weight: 700; text-wrap: balance; }
+/* How to enter: numbered cards; the official registration step is wide and paper pink. */
+.journey { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px; margin: 0; padding: 0; list-style: none; }
+.journey-step { grid-column: span 2; display: flex; flex-direction: column; align-items: flex-start; padding: 40px; border-radius: 16px; background: var(--paper); }
+.journey-step--official { grid-column: span 4; background: var(--paper-pink); }
+.journey-step__number { margin-bottom: 24px; color: var(--uw-blue-dark); font-size: 3.5rem; line-height: 1; font-weight: 700; letter-spacing: -.05em; }
+.journey-step h3 { margin: 0 0 12px; font-size: 1.5rem; line-height: 2rem; overflow-wrap: break-word; }
+@media (min-width: 1001px) { .journey-step--official h3 { font-size: 2rem; line-height: 2.5rem; } }
+.journey-step p { margin: 0 0 24px; font-size: 1.125rem; line-height: 1.75rem; font-weight: 300; }
+.journey-step p:last-child { margin-bottom: 0; }
+/* Actions sit along the bottom of each row. */
+.journey-step .btn, .journey-step__link { margin-top: auto; }
+.journey-step .btn { max-width: 100%; }
+.journey-step__link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; text-wrap: balance; }
+/* Get on the list: the intro beside the form, both starting at the top of the section. */
+.signup-layout { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 64px; align-items: start; }
+.signup-layout h2 { margin-bottom: 24px; }
+.signup-layout .prose { font-size: 1.25rem; line-height: 2rem; }
+.compete-form .signup-form, .compete-form .signup-success { padding: 40px; }
 .signup-form, .signup-success { background: white; border-radius: 16px; }
-.faq { max-width: 850px; }
-.faq details { border-bottom: 1px solid rgb(25 25 25 / 15%); padding: 22px 0; }
-.faq summary { font-size: 1.125rem; font-weight: 600; }
-.faq details p { margin: 20px 0 0; max-width: 65ch; }
+/* FAQ: a centred column of rules, as national, each with a round toggle. Native details, so Enter opens it. */
+.faq { max-width: 800px; margin-inline: auto; border-top: 1px solid rgb(25 25 25 / 15%); }
+.faq details { border-bottom: 1px solid rgb(25 25 25 / 15%); }
+.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 80px; padding-block: 16px; font-size: 1.25rem; line-height: 1.75rem; font-weight: 600; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq__icon { position: relative; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--paper-blue); }
+.faq__icon::after { content: ''; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; border: solid var(--uw-blue); border-width: 0 2px 2px 0; transform: translate(-50%, -75%) rotate(45deg); }
+.faq details[open] .faq__icon { background: var(--uw-blue-dark); }
+.faq details[open] .faq__icon::after { border-color: #fff; transform: translate(-50%, -25%) rotate(-135deg); }
+/* The small gap above the answer keeps the summary's focus ring clear of it. */
+.faq details[open] > summary { padding-bottom: 8px; }
+.faq details p { max-width: 65ch; margin: 8px 0 28px; font-size: 1.125rem; line-height: 1.75rem; font-weight: 300; }
+/* Forced colours drop the card and toggle fills, so give them their own edge. */
+@media (forced-colors: active) {
+  .compete-note, .eligibility-card, .journey-step, .faq__icon { border: 1px solid CanvasText; }
+  .faq__icon::after, .faq details[open] .faq__icon::after { border-color: CanvasText; }
+}
+@media (max-width: 1000px) {
+  .eligibility-grid, .journey { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .journey-step, .journey-step--official { grid-column: auto; }
+  .signup-layout, .compete-split--solo .compete-split__panel { grid-template-columns: 1fr; gap: 32px; }
+}
+/* On tablets a lone last step spans the row, so it lies across it: numeral beside the words. */
+@media (min-width: 721px) and (max-width: 1000px) {
+  .journey-step:last-child:nth-child(odd) { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 40px; align-items: start; }
+  .journey-step:last-child:nth-child(odd) .journey-step__number { grid-row: 1 / span 3; margin: 0; }
+}
+/* The split stacks: photo first, then the panel, as national does on phones. */
+@media (max-width: 900px) {
+  .compete-split { grid-template-columns: 32px minmax(0, 1fr) 32px; }
+  .compete-split > .campus-photo, .compete-split--reverse > .campus-photo { grid-row: 1; grid-column: 1 / -1; min-height: 0; aspect-ratio: 3 / 2; }
+  .compete-split__panel, .compete-split--reverse .compete-split__panel, .compete-split--solo .compete-split__panel { grid-row: 2; grid-column: 2; padding: 64px 0; }
+}
+@media (max-width: 720px) {
+  .compete-band > .container > h2 { margin-bottom: 32px; }
+  .compete-actions { padding-block: 24px 48px; }
+  .compete-split { grid-template-columns: 24px minmax(0, 1fr) 24px; }
+  .compete-split .btn { margin-top: 32px; }
+  .compete-split .prose, .compete-lead { font-size: 1.125rem; line-height: 1.75rem; }
+  .compete-lead { margin-bottom: 24px; }
+  .compete-note { padding: 20px 24px; }
+  .eligibility-grid, .journey { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .eligibility-card { gap: 8px; padding: 24px; }
+  .eligibility-card p { font-size: 1.125rem; }
+  .eligibility-card--key strong { font-size: 1.375rem; line-height: 1.875rem; }
+  /* Phones: the numeral sits on the title's baseline, so no row is spent on it. */
+  .journey-step { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'num title' 'body body' 'action action'; column-gap: 16px; align-items: baseline; padding: 24px; }
+  .journey-step__number { grid-area: num; margin: 0; font-size: 2.5rem; }
+  .journey-step h3 { grid-area: title; margin: 0; font-size: 1.25rem; line-height: 1.75rem; }
+  .journey-step p, .journey-step p:last-child { grid-area: body; margin: 12px 0 0; }
+  .journey-step .btn, .journey-step__link { grid-area: action; justify-self: start; margin-top: 16px; }
+  .signup-layout .prose { font-size: 1.125rem; line-height: 1.75rem; }
+  .compete-form .signup-form, .compete-form .signup-success { padding: 24px; }
+  .faq summary { min-height: 64px; gap: 16px; font-size: 1.125rem; }
+  .faq__icon { width: 36px; height: 36px; }
+}
+@media (max-width: 540px) {
+  .compete-actions .btn, .journey-step .btn, .compete-split .btn { width: 100%; }
+  .eligibility-card { padding: 20px; }
+}
+/* Below 360px the Register pill (19px bold for contrast) still fits on one line inside its card. */
+@media (max-width: 359px) {
+  .journey-step { column-gap: 12px; padding: 20px 16px; }
+  .journey-step__number { font-size: 2rem; }
+  .journey-step h3 { font-size: 1.125rem; line-height: 1.5rem; }
+  .journey-step .btn { gap: 8px; padding-inline: 16px; }
+}
 .tier-list { display: grid; gap: 20px; }
 .tier-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr); gap: 16px 40px; background: #f7f7f7; border: 1px solid #efefef; border-radius: 16px; padding: 32px; }
 .tier-card--lead { background: #ffe8f5; }
@@ -146,7 +259,6 @@ summary { cursor: pointer; }
 .event-filters button[aria-pressed='true'] { background: #005596; color: white; }
 @media (max-width: 1000px) {
   .committee-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .timeline--full { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 30px; }
   .entry-card { padding: 26px; }
   .tier-card { grid-template-columns: 1fr; }
   .tier-card > div { max-width: 65ch; }
@@ -156,7 +268,8 @@ summary { cursor: pointer; }
   .stat-band > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 @media (max-width: 720px) {
-  .home-hero { padding-block: 64px; }
+  /* Centring supplies the space on most phones; small padding lets a 375x667 screen fit the whole hero. */
+  .home-hero { padding-block: 20px; }
   .home-hero h1 { font-size: 2.5rem; }
   .stat-band strong { font-size: 3rem; line-height: 3.5rem; }
   .stat-band strong.stat-long { font-size: 1.75rem; line-height: 2.25rem; }
@@ -171,7 +284,6 @@ summary { cursor: pointer; }
   .cta-band .container { flex-direction: column; align-items: flex-start; gap: 28px; }
   .committee-grid { gap: 32px 18px; }
   .committee-grid h3 { font-size: 1.2rem; }
-  .callout { padding: 26px; }
   .page-heading { padding-block: 52px 32px; }
   .contact-grid { gap: 32px; }
   .post-card__body { padding: 28px; }
@@ -179,8 +291,6 @@ summary { cursor: pointer; }
 }
 @media (max-width: 540px) {
   .stat-band { grid-template-columns: 1fr; }
-  .entry-steps li { padding-left: 25px; }
-  .entry-steps li::before { position: static; display: block; margin-bottom: 8px; }
 }
 @media (max-width: 400px) {
   .committee-grid { grid-template-columns: 1fr; }
@@ -213,3 +323,7 @@ summary { cursor: pointer; }
 .committee-grid--full-cards .portrait-placeholder { aspect-ratio: 3 / 4; }
 @media(max-width: 900px) { .committee-grid--full-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media(max-width: 600px) { .committee-grid--full-cards { grid-template-columns: 1fr; } }
+/* Then and now: arrow values are wider than single numbers, so they size to the card and stay on one line.
+   Every card is the same width, so all four share one size. */
+.stat-band--compare > div { container-type: inline-size; }
+.stat-band--compare strong { font-size: min(3.5rem, 100cqi / 6); line-height: 1.15; white-space: nowrap; }

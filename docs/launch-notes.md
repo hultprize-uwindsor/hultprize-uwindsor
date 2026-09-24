@@ -47,7 +47,9 @@ Partner URLs checked against official sites: [Sterling](https://www.sterlinginfo
 
 ## Partner motion update
 
-The site-wide Supported by strip uses the user-supplied ThreeDScrollTrigger motion, kept at the owner's request although hultprize.org has no marquee. A visible Pause/Play button stops it for touch and keyboard users (WCAG 2.2.2) and is hidden under reduced motion. The passive scroll-velocity tracking, exponential damping, wrapping and skew are preserved in `src/components/ThreeDScrollTrigger.tsx`. CSS replaces the example’s Tailwind helpers. Hover, keyboard focus, explicit pause, reduced motion and offscreen suspension are supported. Clone links remain clickable but are excluded from keyboard and screen-reader navigation. The original static-grid requirement is superseded by this later request.
+**Hidden for now.** At the owner's request the Supported by strip is not shown on any page. Set `SHOW_PARTNER_STRIP` to `true` in `src/data/partners.ts` to bring it back; everything below still applies when it returns. `scripts/check-partner-motion.mjs` skips itself while the strip is hidden.
+
+The site-wide Supported by strip uses the user-supplied ThreeDScrollTrigger motion, kept at the owner's request although hultprize.org has no marquee. At the owner's request it has no visible Pause button: hover and keyboard focus stop it, and reduced motion keeps it still, but touch users cannot pause it (WCAG 2.2.2). The passive scroll-velocity tracking, exponential damping, wrapping and skew are preserved in `src/components/ThreeDScrollTrigger.tsx`. CSS replaces the example’s Tailwind helpers. Hover, keyboard focus, explicit pause, reduced motion and offscreen suspension are supported. Clone links remain clickable but are excluded from keyboard and screen-reader navigation. The original static-grid requirement is superseded by this later request.
 
 Motion checks: `PLAYWRIGHT_CHANNEL=chrome node scripts/check-partner-motion.mjs` with the local preview at port 5174.
 

@@ -3,6 +3,7 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import { PartnerStrip } from './components/PartnerShowcase'
+import { SHOW_PARTNER_STRIP } from './data/partners'
 import HomePage from './pages/HomePage'
 import { AboutPage, YearOnePage, ThisYearPage, CompetePage, PartnersPage, ContactPage } from './pages/ChapterPages'
 import EventsPage, { EventPostPage, NotFoundPage } from './pages/EventsPage'
@@ -24,5 +25,5 @@ export default function App() {
     <Route path="/about" element={<AboutPage />} /><Route path="/year-one" element={<YearOnePage />} /><Route path="/this-year" element={<ThisYearPage />} />
     <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/contact" element={<ContactPage />} />
     <Route path="/team" element={<Navigate to="/about#team" replace />} /><Route path="/go" element={<GoRedirect />} /><Route path="*" element={<NotFoundPage />} />
-  </Routes></main><PartnerStrip /><Footer /></>
+  </Routes></main>{SHOW_PARTNER_STRIP && <PartnerStrip />}<Footer /></>
 }

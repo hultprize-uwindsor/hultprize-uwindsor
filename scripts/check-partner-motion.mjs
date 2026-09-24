@@ -4,6 +4,13 @@ const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5174'
 const browser = await chromium.launch(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {})
 async function transform(track) { return track.evaluate(el => getComputedStyle(el).transform) }
 try {
+ // The Supported by strip is hidden for now (SHOW_PARTNER_STRIP in src/data/partners.ts); nothing to check until it returns.
+ const probe = await browser.newPage()
+ await probe.goto(`${base}/`, { waitUntil: 'domcontentloaded' })
+ await probe.locator('main h1').waitFor()
+ const hidden = await probe.locator('.partner-strip').count() === 0
+ await probe.close()
+ if (hidden) { console.log('Skipped: the Supported by strip is hidden (SHOW_PARTNER_STRIP is false).'); process.exit(0) }
  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'no-preference' })
  page.setDefaultTimeout(10000)
  const errors = []
@@ -23,19 +30,8 @@ try {
  await page.waitForTimeout(180)
  assert.equal(await transform(track), hovered, 'Hover should pause motion')
  await page.mouse.move(0,0)
- // A visible button pauses the strip for touch and keyboard users (WCAG 2.2.2).
- const pause = page.getByRole('button', { name: 'Pause partner logos' })
- assert(await pause.isVisible())
- await pause.click()
- await page.mouse.move(0,0)
- const paused = await transform(track)
- await page.waitForTimeout(180)
- assert.equal(await transform(track), paused, 'Pause button should stop the strip')
- const play = page.getByRole('button', { name: 'Play partner logos' })
- await play.click()
- await page.mouse.move(0,0)
- await page.waitForTimeout(180)
- assert.notEqual(await transform(track), paused, 'Play button should restart the strip')
+ // The owner removed the visible pause button; hover and keyboard focus still stop the strip.
+ assert.equal(await page.getByRole('button', { name: /(?:Pause|Play) partner/ }).count(), 0)
  const originalLink = row.locator('.three-d-block:not([data-clone]) a').first()
  await originalLink.focus()
  assert.equal(await transform(track), 'none', 'Keyboard focus should expose a stationary list')
@@ -63,8 +59,7 @@ try {
  await page.emulateMedia({ reducedMotion: 'reduce' })
  await row.scrollIntoViewIfNeeded()
  assert.equal(await transform(track), 'none')
- assert.equal(await showcase.locator('.partner-strip__pause').isVisible(), false, 'No pause button when nothing moves')
- console.log('Desktop: cruising, hover/focus pause, visible pause button, accessible clones, reversal, offscreen suspension and reduced motion passed')
+ console.log('Desktop: cruising, hover/focus pause, accessible clones, reversal, offscreen suspension and reduced motion passed')
  await page.close()
  for (const path of ['/', '/year-one', '/partners']) {
   const mobile = await browser.newPage({ viewport: { width: 375, height: 812 }, reducedMotion: 'reduce' })

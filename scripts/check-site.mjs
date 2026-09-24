@@ -35,7 +35,8 @@ try {
       await page.locator('img').evaluateAll(images => Promise.all(images.map(i => i.decode().catch(() => {}))))
       const brokenImages = await page.locator('img').evaluateAll(images => images.filter(i => i.complete && i.naturalWidth === 0).map(i => i.src))
       assert.deepEqual(brokenImages, [], `${path}: missing image`)
-      assert.equal(await page.locator('.partner-strip .three-d-track').evaluate(el => getComputedStyle(el).transform), 'none')
+      // The Supported by strip is hidden for now (SHOW_PARTNER_STRIP in src/data/partners.ts).
+      if (await page.locator('.partner-strip').count()) assert.equal(await page.locator('.partner-strip .three-d-track').evaluate(el => getComputedStyle(el).transform), 'none')
       if (path === '/') await page.screenshot({ path: `/tmp/hult-site-check/${width}-hero.png` })
       if (path === '/about') await page.locator('.team-tree').screenshot({ path: `/tmp/hult-site-check/${width}-portraits.png` })
       if (path === '/' || path === '/about' || path === '/compete') await page.screenshot({ path: `/tmp/hult-site-check/${width}-${path.slice(1) || 'home'}.png`, fullPage: true })

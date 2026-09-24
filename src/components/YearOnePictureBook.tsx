@@ -60,7 +60,8 @@ export default function YearOnePictureBook() {
     const element = stage.current
     if (!element) return
     const observer = new ResizeObserver(([entry]) => {
-      setPageWidth(Math.min(540, Math.max(100, (entry.contentRect.width - 40) / 2)))
+      // About 12% smaller than filling the stage, so the book sits with some room around it.
+      setPageWidth(Math.min(475, Math.max(100, (entry.contentRect.width - 40) / 2 * 0.88)))
     })
     observer.observe(element)
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)')

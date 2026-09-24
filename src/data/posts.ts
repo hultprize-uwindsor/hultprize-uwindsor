@@ -31,8 +31,8 @@ export const POSTS: Post[] = [
     published: true,
   },
   {
-    slug: 'brand-and-pitch-bootcamp', title: 'Brand and pitch bootcamp begins', date: '2026-10-26', category: 'Upcoming',
-    excerpt: 'Build your brand and pitch with Sterling Cybersecurity and Advisory Group, from late October through November 30.',
+    slug: 'brand-and-pitch-bootcamp', title: 'Brand and pitch bootcamp begins', date: '2026-11-14', category: 'Upcoming',
+    excerpt: 'Build your brand and pitch with Sterling Cybersecurity and Advisory Group in five sessions: four weekly from the week of November 14, and the last in early January after exams.',
     body: [], published: false,
   },
   {

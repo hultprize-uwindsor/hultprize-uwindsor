@@ -23,6 +23,3 @@
   .partner-motion-card { flex-basis: 230px; width: 230px; }
   .partner-motion-logo { flex-basis: 180px; width: 180px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .partner-strip__pause { display: none; }
-}

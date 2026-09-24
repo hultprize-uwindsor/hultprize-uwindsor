@@ -20,21 +20,22 @@ export function Copy({ paragraphs }: { paragraphs: string[] }) {
 
 const homeStats = [['14', 'student startups in year one'], ['6', 'pitched at the Grand Finale'], ['2', 'teams at Nationals'], ['Best in North America', 'Hult Prize Foundation, 2026']]
 // Final values only: the national stat band does not count up.
-export function Stats({ items = homeStats }: { items?: string[][] }) {
-  return <div className="stat-band" style={{ '--stat-count': items.length } as React.CSSProperties}>{items.map(([value, label]) => <div key={label}><strong className={value.length > 10 ? 'stat-long' : ''}>{value}</strong><span>{label}</span></div>)}</div>
+export function Stats({ items = homeStats, className = '' }: { items?: string[][]; className?: string }) {
+  return <div className={`stat-band ${className}`} style={{ '--stat-count': items.length } as React.CSSProperties}>{items.map(([value, label]) => <div key={label}><strong className={value.length > 10 ? 'stat-long' : ''}>{value}</strong><span>{label}</span></div>)}</div>
 }
 
 const calendar = [
   ['September and October', 'Launch, information sessions, founder panel, course integration'],
-  ['Week of October 26', 'Brand and pitch bootcamp begins, run with Sterling Cybersecurity and Advisory Group'],
-  ['November', 'Team mixer, bootcamp continues to November 30'],
+  ['November', 'Team mixer'],
+  ['Week of November 14', 'Brand and pitch bootcamp begins, run with Sterling Cybersecurity and Advisory Group: four weekly sessions, then a fifth in January'],
   ['November 20', 'Registration closes'],
-  ['January', 'Checkpoints, mentor matching, mock pitch rounds'],
+  ['December', "Exams! Don't drown yourselves in coffee, we need you up and running in January"],
+  ['January', 'Fifth and final bootcamp session after exams, then checkpoints, mentor matching, mock pitch rounds'],
   ['February 5, 2027', 'Grand Finale'],
   ['April 2027', 'Canadian National Championships'],
 ]
 export function Timeline({ compact = false }: { compact?: boolean }) {
-  const items = compact ? [['October 1', 'Fusion x Hult HQ launch'], ['October 26', 'Brand and pitch bootcamp begins'], ['November 20', 'Registration closes'], ['February 5', 'Grand Finale'], ['April 2027', 'National Championships']] : calendar
+  const items = compact ? [['October 1', 'Fusion x Hult HQ launch'], ['Week of November 14', 'Brand and pitch bootcamp begins'], ['November 20', 'Registration closes'], ['February 5', 'Grand Finale'], ['April 2027', 'National Championships']] : calendar
   if (compact) return <EventTimeline items={items} />
   return <ol className={`timeline ${compact ? '' : 'timeline--full'}`}>{items.map(([date, description]) => <li key={date}><strong>{date}</strong><p>{description}</p></li>)}</ol>
 }

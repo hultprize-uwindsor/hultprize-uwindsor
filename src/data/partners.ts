@@ -25,3 +25,7 @@ export const CURRENT_PARTNERS: Partner[] = [
   { name: 'Sterling Cybersecurity and Advisory Group', url: 'https://www.sterlinginfo.com/', logo: '/images/partners/sterling-cybersecurity-advisory-group.png' },
   { name: 'Hypercare', url: 'https://www.hypercare.com/', logo: '/images/partners/hypercare.png' },
 ]
+
+// HIDDEN FOR NOW at the owner's request: the site-wide "Supported by" logo strip.
+// Set to true to show it again under every page (App.tsx).
+export const SHOW_PARTNER_STRIP = false
