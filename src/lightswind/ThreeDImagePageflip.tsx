@@ -67,6 +67,8 @@ export interface ThreeDImagePageflipProps {
     interactive?: boolean;
     /** Enable navigation buttons (default: true) */
     showControls?: boolean;
+    /** Turn pages with the arrow keys anywhere on the page (default: true). Pass false and handle keys on a container instead. */
+    keyboardNavigation?: boolean;
     /** Optional container class name */
     className?: string;
     /** Optional container inline style */
@@ -164,6 +166,7 @@ export const ThreeDImagePageflip = forwardRef<ThreeDImagePageflipHandle, ThreeDI
     pauseOnHover = true,
     interactive = true,
     showControls = true,
+    keyboardNavigation = true,
     className,
     style,
 }, ref) => {
@@ -228,13 +231,14 @@ export const ThreeDImagePageflip = forwardRef<ThreeDImagePageflipHandle, ThreeDI
 
     // Keyboard Navigation
     useEffect(() => {
+        if (!keyboardNavigation) return;
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "ArrowRight") flipNext();
             if (e.key === "ArrowLeft") flipPrev();
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [flipNext, flipPrev]);
+    }, [flipNext, flipPrev, keyboardNavigation]);
 
     const handleLeafClick = (index: number) => {
         if (!interactive) return;

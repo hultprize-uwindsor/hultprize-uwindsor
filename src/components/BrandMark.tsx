@@ -1,5 +1,5 @@
-// Display the standalone EF Hult Prize portion of the supplied multi-mark sheet.
-// The separate EF and UWindsor marks are outside this viewport.
+// Full-colour lockup for the white header. A white version for dark backgrounds
+// sits alongside it: /images/logos/hult-uwindsor-navbar-white.png.
 export default function BrandMark() {
-  return <span className="brand-mark"><img src="/images/logos/Hult Prize logos Horizontal White.png" alt="EF Hult Prize" width="1766" height="406" /></span>
+  return <img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" />
 }

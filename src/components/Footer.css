@@ -1,46 +1,74 @@
+/* hultprize.org footer layout on UWindsor dark blue: a 6-2-2-2 column grid with ruled headings. */
 .site-footer {
   margin-top: auto;
-  padding: 72px 0 0;
-  background: #002b51;
+  padding: 48px 0 0;
+  background: var(--uw-blue-dark);
   color: #fff;
+  font-size: .875rem;
+  line-height: 1.5;
 }
 
 .site-footer__inner {
   display: grid;
-  grid-template-columns: .8fr 1.2fr 1.2fr .8fr;
-  gap: 32px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 40px 24px;
 }
 
 .site-footer__col {
+  grid-column: span 2;
   min-width: 0;
+  overflow-wrap: break-word;
 }
 
-.site-footer h3 {
-  margin: 0 0 28px;
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.4;
-  letter-spacing: 0;
+.site-footer__parent {
+  grid-column: span 6;
 }
 
-.site-footer__col > p,
-.site-footer__links,
-.site-footer__social {
-  margin-top: 0;
-  font-size: 1rem;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
+.site-footer h3,
+.site-footer h4 {
+  margin: 0 0 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--grey);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.33;
 }
 
-.site-footer__col > p {
-  margin-bottom: 18px;
+.site-footer h4 {
+  margin-top: 32px;
+}
+
+.site-footer__parent h3 {
+  max-width: 226px;
+}
+
+.site-footer__marks {
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+/* Same width as the heading rule above it. */
+.site-footer__marks img {
+  width: 226px;
+  height: auto;
+}
+
+.site-footer p,
+.site-footer address {
+  margin: 0 0 12px;
+  font-style: normal;
+}
+
+.site-footer__parent p {
+  max-width: 34ch;
 }
 
 .site-footer__links {
   display: grid;
-  gap: 14px;
+  gap: 12px;
+  margin: 0;
   padding: 0;
-  margin-bottom: 0;
   list-style: none;
 }
 
@@ -49,131 +77,67 @@
   text-decoration: none;
 }
 
-.site-footer a:hover {
+.site-footer a:hover,
+.site-footer p a,
+.site-footer address a {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
 .site-footer a:focus-visible {
-  outline-color: #fff;
-}
-
-.site-footer__muted {
-  color: #d3e4ef;
-}
-
-.site-footer__date {
-  color: #fff;
-  font-size: 1rem;
-}
-
-.site-footer__social {
-  display: grid;
-  gap: 8px;
-}
-
-.site-footer__social a {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  border-radius: 8px;
-}
-
-.site-footer__social-icon {
-  display: grid;
-  place-items: center;
-  flex: 0 0 40px;
-  height: 40px;
-  border: 1px solid #555;
-  border-radius: 50%;
-  transition: background-color 150ms, border-color 150ms;
-}
-
-.site-footer__social a:hover .site-footer__social-icon,
-.site-footer__social a:focus-visible .site-footer__social-icon {
-  background-color: #333;
-  border-color: #fff;
-}
-
-.site-footer__social a:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 4px;
 }
 
-.site-footer__bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 24px;
-  padding-top: 24px;
-  padding-bottom: 28px;
-  color: #d3e4ef;
-  font-size: 0.75rem;
-  line-height: 1.7;
+.site-footer__date {
+  color: #fff;
 }
 
+/* 44px tap targets around 24px icons; the negative margin lines the first icon up with the text. */
+.site-footer__social {
+  display: flex;
+  margin: -10px 0 0 -10px;
+}
+
+.site-footer__social a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: #fff;
+}
+
+.site-footer__bottom {
+  margin-top: 48px;
+  padding-bottom: 24px;
+  font-size: .75rem;
+}
+
+/* The rule sits on the paragraph so it spans the content column, not the container padding. */
 .site-footer__bottom p {
   margin: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--grey);
 }
 
-.site-footer__official {
-  flex-shrink: 0;
-}
-
-.site-footer__mobile-break {
-  display: none;
-}
-
-@media (max-width: 1100px) {
-  .site-footer__inner {
-    grid-template-columns: 1fr 1fr;
-    column-gap: 32px;
-    row-gap: 40px;
+@media (max-width: 1000px) {
+  .site-footer__parent {
+    grid-column: 1 / -1;
   }
 
-  .site-footer__bottom {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 16px;
+  .site-footer__col:not(.site-footer__parent) {
+    grid-column: span 4;
   }
 }
 
-@media (max-width: 540px) {
-  .site-footer {
-    padding-top: 48px;
-  }
-
-  .site-footer__inner {
-    grid-template-columns: 1fr 1fr;
-    gap: 36px 24px;
-  }
-
-  .site-footer__explore {
-    grid-row: 1;
-    grid-column: 1;
-  }
-
-  .site-footer__next {
-    grid-row: 1;
-    grid-column: 2;
-  }
-
-  .site-footer h3 {
-    margin-bottom: 20px;
-  }
-
-  .site-footer__bottom {
-    padding-top: 20px;
-  }
-
-  .site-footer__mobile-break {
-    display: block;
+@media (max-width: 600px) {
+  .site-footer__col:not(.site-footer__parent) {
+    grid-column: span 6;
   }
 }
 
-.site-footer__display-wordmark { display: block; width: 100%; height: auto; margin-top: clamp(32px, 5vw, 80px); overflow: hidden; }
-.site-footer__display-wordmark text { fill: #fff; font-family: var(--font-sans); font-size: 190px; font-weight: 700; }
-
-.site-footer__display-wordmark { margin-inline: auto; padding-inline: clamp(16px, 2.222vw, 32px); }
-.site-footer__bottom { justify-content: center; align-items: center; text-align: center; }
+@media (max-width: 400px) {
+  .site-footer__col:not(.site-footer__parent) {
+    grid-column: 1 / -1;
+  }
+}

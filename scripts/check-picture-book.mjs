@@ -22,7 +22,16 @@ try {
     const copyBox = await page.locator('.picture-book-copy').boundingBox()
     const bookBox = await book.boundingBox()
     assert(width > 1200 ? copyBox.x + copyBox.width <= bookBox.x : copyBox.y + copyBox.height <= bookBox.y)
-    assert.equal(await book.getByRole('button').count(), 0)
+    // Previous/Next buttons make the book reachable without the hidden arrow-key listener.
+    const previous = book.getByRole('button', { name: 'Previous page' })
+    const next = book.getByRole('button', { name: 'Next page' })
+    assert.equal(await previous.getAttribute('aria-disabled'), 'true', 'Previous is disabled on the opening spread')
+    await next.click()
+    assert.equal(await leaves.nth(1).evaluate(el => el.style.transform), 'rotateY(-180deg)', 'Next turns a page')
+    assert.equal(await previous.getAttribute('aria-disabled'), 'false')
+    await previous.click()
+    assert.equal(await leaves.nth(1).evaluate(el => el.style.transform), 'rotateY(0deg)', 'Previous turns it back')
+    await page.waitForTimeout(750)
     await leaves.nth(1).click({ position: { x: 30, y: 30 } })
     const transforms = await leaves.nth(1).evaluate(el => new Promise(resolve => {
       const frames = []
@@ -55,5 +64,5 @@ try {
     assert.equal(await leaves.nth(7).evaluate(el => el.style.transform), 'rotateY(0deg)', 'can turn back from last spread')
     await page.close()
   }
-  console.log('Picture book: animated turns, page clicks, hidden controls, keyboard, responsive layout, reduced motion, pinned first/last spreads passed.')
+  console.log('Picture book: animated turns, page clicks, Previous/Next buttons, keyboard, responsive layout, reduced motion, pinned first/last spreads passed.')
 } finally { await browser.close() }

@@ -3,8 +3,9 @@
 .picture-book-copy { max-width: 440px; }
 .picture-book-copy h2 { margin-bottom: 24px; }
 .picture-book-copy > p:not(.eyebrow) { line-height: 1.7; margin-bottom: 18px; }
-.picture-book-copy .picture-book-hint { font-size: 14px; color: #646477; }
+.picture-book-copy .picture-book-hint { font-size: 14px; color: var(--uw-grey); }
 .picture-book-stage { min-width: 0; }
+.picture-book-controls { display: flex; justify-content: center; gap: 16px; margin-top: 24px; }
 @media (min-width: 1201px) {
   .container.picture-book-layout { padding-left: max(32px, calc((100vw - 1200px) / 2)); }
 }

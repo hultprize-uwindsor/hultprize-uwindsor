@@ -162,6 +162,9 @@ export function ThreeDScrollTriggerRow({ children, baseVelocity = 5, direction =
         stopAnimation.current?.()
         // Present the original block as a stationary horizontal list for keyboard use.
         if (trackRef.current) trackRef.current.style.transform = 'none'
+        // On narrow rows the focused logo can sit half outside the row; bring it fully into view.
+        const target = event.target
+        if (target instanceof HTMLElement) requestAnimationFrame(() => target.scrollIntoView({ block: 'nearest', inline: 'nearest' }))
         props.onFocusCapture?.(event)
       }}
       onBlurCapture={event => {

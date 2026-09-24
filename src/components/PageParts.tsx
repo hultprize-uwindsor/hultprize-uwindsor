@@ -1,5 +1,4 @@
 import EventTimeline from './EventTimeline'
-import CountUpText from './CountUpText'
 import type { ReactNode } from 'react'
 import { SITE } from '../data/site'
 
@@ -19,9 +18,10 @@ export function Copy({ paragraphs }: { paragraphs: string[] }) {
   return <div className="prose">{paragraphs.map(p => <p key={p}>{p}</p>)}</div>
 }
 
-const homeStats = [['14', 'student startups in year one'], ['6', 'pitched at the Grand Finale'], ['Top 8', 'in Canada at Nationals'], ['Best in North America', 'Hult Prize Foundation, 2026']]
-export function Stats({ items = homeStats, animate = true }: { items?: string[][]; animate?: boolean }) {
-  return <div className="stat-band" style={{ '--stat-count': items.length } as React.CSSProperties}>{items.map(([value, label]) => <div key={label}><strong className={value.length > 16 ? 'stat-long' : ''}>{animate ? <CountUpText value={value} /> : value}</strong><span>{label}</span></div>)}</div>
+const homeStats = [['14', 'student startups in year one'], ['6', 'pitched at the Grand Finale'], ['2', 'teams at Nationals'], ['Best in North America', 'Hult Prize Foundation, 2026']]
+// Final values only: the national stat band does not count up.
+export function Stats({ items = homeStats }: { items?: string[][] }) {
+  return <div className="stat-band" style={{ '--stat-count': items.length } as React.CSSProperties}>{items.map(([value, label]) => <div key={label}><strong className={value.length > 10 ? 'stat-long' : ''}>{value}</strong><span>{label}</span></div>)}</div>
 }
 
 const calendar = [
@@ -39,6 +39,6 @@ export function Timeline({ compact = false }: { compact?: boolean }) {
   return <ol className={`timeline ${compact ? '' : 'timeline--full'}`}>{items.map(([date, description]) => <li key={date}><strong>{date}</strong><p>{description}</p></li>)}</ol>
 }
 
-export function CTABand({ text = 'Registration closes November 20.' }: { text?: string }) {
-  return <section className="cta-band"><div className="container"><h2>{text}</h2><RegisterButton /></div></section>
+export function CTABand({ text = 'Registration closes November 20.', lede, className = '', children = <RegisterButton /> }: { text?: string; lede?: string; className?: string; children?: ReactNode }) {
+  return <section className={`cta-band ${className}`}><div className="container"><div><h2>{text}</h2>{lede && <p className="cta-band__lede">{lede}</p>}</div>{children}</div></section>
 }

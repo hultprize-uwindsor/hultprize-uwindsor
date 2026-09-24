@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PARTNERS, CURRENT_PARTNERS } from '../data/partners'
 import { ThreeDScrollTriggerContainer, ThreeDScrollTriggerRow } from './ThreeDScrollTrigger'
@@ -18,10 +19,12 @@ export function PartnerGrid({ linked = false }: { linked?: boolean }) {
 
 export function PartnerStrip() {
   const partners = [...PARTNERS.filter(p => !p.individual), ...CURRENT_PARTNERS]
+  // Hover pauses for mouse users; this button does it for touch and keyboard (WCAG 2.2.2).
+  const [paused, setPaused] = useState(false)
   return <section className="partner-strip" id="supporters" aria-label="Our partners">
-    <div className="container"><p className="eyebrow">Our partners</p><div className="partner-strip__heading"><h2>Supported by</h2></div></div>
+    <div className="container"><p className="eyebrow">Our partners</p><div className="partner-strip__heading"><h2>Supported by</h2><button type="button" className="btn btn--secondary partner-strip__pause" aria-label={paused ? 'Play partner logos' : 'Pause partner logos'} onClick={() => setPaused(!paused)}>{paused ? 'Play' : 'Pause'}</button></div></div>
     <ThreeDScrollTriggerContainer>
-      <ThreeDScrollTriggerRow baseVelocity={1} direction={1} aria-label="Supporting organisations">
+      <ThreeDScrollTriggerRow baseVelocity={1} direction={1} paused={paused} aria-label="Supporting organisations">
         {partners.map(partner => (
           <a className="partner-motion-logo" key={partner.name} href={partner.url} target="_blank" rel="noopener noreferrer">
             {partner.logo ? (

@@ -11,6 +11,8 @@ export const SITE = {
   signalRegisteredUrl: 'https://signal.group/#CjQKIKs4d_yjcI_b8-HQDZOUCTPgrwHLO9afYy86-aIccZO2EhA2jvXrmEDUZ5fvaccFQciT',
   signalLookingUrl: 'https://signal.group/#CjQKIDgWmVxurnfxm-CnNUj-p6FY82u5bDTTlh0RSWC1Ag9xEhAqSS4Wby7U4Nd4wnjzEtLP',
   registrationUrl: 'https://www.hultprize.org/register',
+  // The national site. Linked from the header text link and the footer marks only.
+  globalUrl: 'https://www.hultprize.org/',
   linkedinUrl: 'https://www.linkedin.com/company/hult-prize-at-the-university-of-windsor/',
   // Not currently shown on the site (pulled per request). Kept here so it's
   // a one-line change to bring back, or swap for the next milestone.

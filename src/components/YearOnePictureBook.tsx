@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ThreeDImagePageflip, type PageFlipLeaf } from '../lightswind/ThreeDImagePageflip'
+import { ThreeDImagePageflip, type PageFlipLeaf, type ThreeDImagePageflipHandle } from '../lightswind/ThreeDImagePageflip'
 import { CAMPUS_PHOTOS, YEAR_ONE_PHOTOS } from '../data/assets'
 import './YearOnePictureBook.css'
 
@@ -7,17 +7,18 @@ const photos = [CAMPUS_PHOTOS.room, ...YEAR_ONE_PHOTOS]
 type BookFace = { src: string; alt: string; spread?: 'left' | 'right' }
 
 function createPages(landscape: boolean[]): PageFlipLeaf[] {
-  const faces: BookFace[] = [photos[0]]
+  // Each photo is described once; repeated faces (pinned cover, spread halves, padding) get empty alt.
+  const faces: BookFace[] = [{ ...photos[0], alt: '' }]
   photos.forEach((photo, index) => {
     if (landscape[index]) {
       // An open spread is the back of one leaf and the front of the next.
-      if (faces.length % 2 === 0) faces.push(faces[faces.length - 1])
-      faces.push({ ...photo, spread: 'left' }, { ...photo, spread: 'right' })
+      if (faces.length % 2 === 0) faces.push({ ...faces[faces.length - 1], alt: '' })
+      faces.push({ ...photo, spread: 'left' }, { ...photo, spread: 'right', alt: '' })
     } else {
       faces.push(photo)
     }
   })
-  if (faces.length % 2) faces.push(photos[photos.length - 1])
+  if (faces.length % 2) faces.push({ ...photos[photos.length - 1], alt: '' })
   return Array.from({ length: faces.length / 2 }, (_, index) => {
     const front = faces[index * 2]
     const back = faces[index * 2 + 1]
@@ -36,6 +37,9 @@ function createPages(landscape: boolean[]): PageFlipLeaf[] {
 export default function YearOnePictureBook() {
   const [pages, setPages] = useState<PageFlipLeaf[]>([])
   const stage = useRef<HTMLDivElement>(null)
+  const book = useRef<ThreeDImagePageflipHandle>(null)
+  // keepOpen pins the first and last leaves, so turning runs from leaf 1 to leaf length - 1.
+  const [turned, setTurned] = useState(1)
   const [pageWidth, setPageWidth] = useState(230)
   const [reducedMotion, setReducedMotion] = useState(false)
 
@@ -76,13 +80,20 @@ export default function YearOnePictureBook() {
         <h2 id="pictures-title">Year one in pictures</h2>
         <p>Student pitches, conversations around the tables, and a community coming together for Windsor’s first Hult Prize campus round.</p>
         <p>Take a look back at the people and moments that made our first year.</p>
-        <p className="picture-book-hint">Click a page to turn it.</p>
+        <p className="picture-book-hint">Click a page, or use the buttons, to turn it.</p>
       </div>
-      <div ref={stage} className="picture-book-stage" role="region" aria-label="Hult Prize in pictures">
+      {/* Arrow keys turn pages only while focus is in the book; clicking a page focuses it. */}
+      <div ref={stage} className="picture-book-stage" role="region" aria-label="Hult Prize in pictures" tabIndex={-1} onKeyDown={e => {
+        if (e.key === 'ArrowRight' && turned < pages.length - 1) book.current?.next()
+        if (e.key === 'ArrowLeft' && turned > 1) book.current?.prev()
+      }}>
         {pages.length > 0 && <ThreeDImagePageflip
+          ref={book}
           pages={pages}
+          onPageChange={setTurned}
           showPageNumbers={false}
           showControls={false}
+          keyboardNavigation={false}
           keepOpen
           defaultTurnedIndex={1}
           pageWidth={pageWidth}
@@ -92,6 +103,12 @@ export default function YearOnePictureBook() {
           duration={reducedMotion ? 0 : 0.65}
           peekAngle={reducedMotion ? 0 : 14}
         />}
+        {/* aria-disabled rather than disabled, so focus stays on a button that reaches the end. */}
+        {pages.length > 0 && <div className="picture-book-controls">
+          <button type="button" className="btn btn--secondary" onClick={() => { if (turned > 1) book.current?.prev() }} aria-disabled={turned <= 1}>Previous page</button>
+          <button type="button" className="btn btn--secondary" onClick={() => { if (turned < pages.length - 1) book.current?.next() }} aria-disabled={turned >= pages.length - 1}>Next page</button>
+          <p className="visually-hidden" aria-live="polite">Spread {turned} of {pages.length - 1}</p>
+        </div>}
       </div>
     </div>
   </section>

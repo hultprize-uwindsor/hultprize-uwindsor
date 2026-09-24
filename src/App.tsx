@@ -9,7 +9,6 @@ import EventsPage, { EventPostPage, NotFoundPage } from './pages/EventsPage'
 import GoRedirect from './pages/GoRedirect'
 import './chapter.css'
 import './motion.css'
-import useSiteMotion from './hooks/useSiteMotion'
 
 const titles: Record<string, string> = { '/': 'Home', '/about': 'About', '/year-one': 'Year one', '/this-year': 'This year', '/events': 'Events', '/compete': 'Compete', '/partners': 'Partners', '/contact': 'Find us' }
 export default function App() {
@@ -20,8 +19,7 @@ export default function App() {
     if (target) target.scrollIntoView({ block: 'start', behavior: 'instant' })
     else window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }, [pathname, hash])
-  useSiteMotion(pathname)
-  return <><a href="#main" className="skip-link">Skip to content</a><Header /><main id="main" tabIndex={-1}><Routes>
+  return <><a href="#main" className="skip-link">Skip to main content</a><Header /><main id="main" tabIndex={-1}><Routes>
     <Route path="/" element={hash === '#signup' ? <Navigate to="/compete#signup" replace /> : <HomePage />} />
     <Route path="/about" element={<AboutPage />} /><Route path="/year-one" element={<YearOnePage />} /><Route path="/this-year" element={<ThisYearPage />} />
     <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/contact" element={<ContactPage />} />

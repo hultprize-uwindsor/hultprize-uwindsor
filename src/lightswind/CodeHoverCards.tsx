@@ -154,7 +154,6 @@ const CodeHoverCards: React.FC<CodeHoverCardsProps> = ({
                   ref={(el) => { cardRefs.current[card.id] = el; }}
                   className={cn(
                     'code-hover-card__surface relative w-full h-full flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-200',
-                    'hover:scale-105 active:scale-95',
                     showBorder && 'border'
                   )}
                   style={{
@@ -190,7 +189,7 @@ const CodeHoverCards: React.FC<CodeHoverCardsProps> = ({
                   }}
                 >
                   {/* Team photographs replace the original icon. */}
-                  {card.image ? <img className="code-hover-card__photo transition-transform duration-200 group-hover:scale-110" src={card.image} alt={card.title ?? ''} width="1080" height="1440" loading="lazy" draggable={false} /> : IconComponent && <div className="relative z-10 text-foreground"><IconComponent size={iconSize} className="transition-transform duration-200 group-hover:scale-110" /></div>}
+                  {card.image ? <img className="code-hover-card__photo transition-transform duration-300 group-hover:scale-105" src={card.image} alt={card.description ? `Portrait card of ${card.title}, ${card.description}` : card.title ?? ''} width="1080" height="1440" loading="lazy" draggable={false} /> : IconComponent && <div className="relative z-10 text-foreground"><IconComponent size={iconSize} className="transition-transform duration-200 group-hover:scale-110" /></div>}
 
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 pointer-events-none z-[5]" />
@@ -198,7 +197,7 @@ const CodeHoverCards: React.FC<CodeHoverCardsProps> = ({
                   {/* Character background */}
                   <div
                     aria-hidden="true"
-                    className="code-hover-card__characters absolute inset-0 font-mono text-sm leading-tight opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden break-all text-foreground"
+                    className="code-hover-card__characters absolute inset-0 text-sm leading-tight opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden break-all text-foreground"
                     style={{
                       WebkitMaskImage:
                         'radial-gradient(' +

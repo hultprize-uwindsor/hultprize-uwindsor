@@ -1,5 +1,5 @@
 @font-face {
-  font-family: 'EF Circular';
+  font-family: 'EF Circular VF';
   src: url('/fonts/ef-circular-latin.woff2') format('woff2');
   font-style: normal;
   font-weight: 100 900;
@@ -8,7 +8,7 @@
 }
 
 @font-face {
-  font-family: 'EF Circular';
+  font-family: 'EF Circular VF';
   src: url('/fonts/ef-circular-utilities.woff2') format('woff2');
   font-style: normal;
   font-weight: 100 900;
@@ -28,7 +28,17 @@
   --hp-green: #279d49;
   --uw-blue: #005596;
   --uw-yellow: #ffce00;
-  --uw-grey: #52565d;
+  --uw-grey: #58595b;
+
+  /* Visual brief palette: pink belongs to the competition, blue to Windsor. */
+  --ink: #191919;
+  --pink: #ff329b;
+  --pink-text: #da2381;
+  --paper-pink: #ffe8f5;
+  --paper-blue: #e3f7ff;
+  --paper: #f7f7f7;
+  --grey: #efefef;
+  --uw-blue-dark: #002b51;
 
   --color-bg: var(--hp-white);
   --color-bg-alt: var(--hp-grey-light);
@@ -36,14 +46,11 @@
   --color-text-muted: var(--uw-grey);
   --color-inverse-bg: var(--hp-black);
   --color-inverse-text: var(--hp-white);
-  --color-accent: #da2381;
-  --color-accent-strong: #aa105e;
   --color-uwindsor: var(--uw-blue);
   --color-uwindsor-accent: var(--uw-yellow);
-  --color-border: #dedfe2;
   --color-danger: #b52e25;
 
-  --font-sans: 'EF Circular', Helvetica, 'Open Sans', 'Gill Sans MT', 'Gill Sans', Corbel, Arial, sans-serif;
+  --font-sans: 'EF Circular VF', Helvetica, 'Open Sans', 'Gill Sans MT', 'Gill Sans', Corbel, Arial, sans-serif;
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 32px;
@@ -61,6 +68,21 @@ html,
 body {
   margin: 0;
   padding: 0;
+}
+
+/* The sticky header must never cover the focused element (WCAG 2.4.11). Applied to content only:
+   on html it also scrolled the page whenever a control inside the header took focus. */
+:where(main, .partner-strip, .site-footer) :is(a, button, summary, input, select, textarea, [tabindex]) {
+  scroll-margin-top: 80px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 body {
@@ -109,16 +131,32 @@ h3,
 h4 {
   font-weight: 700;
   line-height: 1.17;
-  letter-spacing: -0.015em;
   margin: 0 0 0.5em;
 }
 
+/* hultprize.org scale: h1 56/64 and h2 48/56 on desktop, 48/56 and 40/48 on phones.
+   Leading is the size plus 8px, so smaller heading overrides stay tight too. */
+h1,
+h2 {
+  line-height: calc(1em + 8px);
+}
+
 h1 {
-  font-size: clamp(2.5rem, 4vw, 3.5rem);
+  font-size: 3.5rem;
 }
 
 h2 {
-  font-size: clamp(2.125rem, 4vw, 3rem);
+  font-size: 3rem;
+}
+
+@media (max-width: 720px) {
+  h1 {
+    font-size: 3rem;
+  }
+
+  h2 {
+    font-size: 2.5rem;
+  }
 }
 
 h3 {
@@ -137,64 +175,80 @@ section[id] {
   scroll-margin-top: 88px;
 }
 
+/* Buttons follow hultprize.org: only the pill behind the label scales on hover,
+   150ms cubic-bezier(.4, 0, .95, 1). Fill, ring and label never change. */
 .btn {
+  --btn-fill: transparent;
+  --btn-ring: transparent;
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   min-height: 48px;
   padding: 11px 24px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 999px;
+  background: none;
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 1rem;
   line-height: 1.5;
   cursor: pointer;
   text-decoration: none;
-  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--btn-fill);
+  box-shadow: inset 0 0 0 1px var(--btn-ring);
+  transition: transform 150ms cubic-bezier(.4, 0, .95, 1);
 }
 
 .btn--primary {
-  background: var(--color-accent);
+  --btn-fill: var(--pink);
   color: var(--hp-white);
-}
-
-.btn--primary:hover {
-  background: var(--color-accent-strong);
 }
 
 .btn--dark {
-  background: var(--hp-black);
+  --btn-fill: var(--ink);
   color: var(--hp-white);
 }
 
-.btn--dark:hover {
-  background: #34363b;
-}
-
 .btn--secondary {
-  background: transparent;
-  border-color: currentColor;
-  color: var(--hp-black);
+  --btn-fill: var(--hp-white);
+  --btn-ring: var(--uw-blue);
+  color: var(--uw-blue);
 }
 
-.btn--secondary:hover {
-  background: #f0f0f0;
-}
-
-.btn--light {
-  background: #fff;
-  color: var(--hp-black);
-}
-
-.btn--light:hover {
-  background: #eee;
-}
-
+/* Hover only where hovering exists, so a tap does not leave the pill enlarged. */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .btn:hover:not(:disabled) {
-    transform: scale(1.035);
+  .btn:hover:not(:disabled, [aria-disabled='true'])::before {
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn:active:not(:disabled, [aria-disabled='true'])::before {
+    transform: scale(.95);
+  }
+}
+
+/* The fill lives on ::before, which forced colours flatten, so give the button its own edge. */
+@media (forced-colors: active) {
+  .btn {
+    border: 1px solid ButtonText;
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled='true'] {
+    border-color: GrayText;
+    color: GrayText;
   }
 }
 
@@ -202,7 +256,8 @@ section[id] {
   width: 100%;
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn[aria-disabled='true'] {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -234,7 +289,7 @@ section[id] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn {
+  .btn::before {
     transition: none;
   }
 }

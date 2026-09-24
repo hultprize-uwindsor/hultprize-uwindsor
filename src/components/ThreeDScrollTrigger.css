@@ -10,3 +10,4 @@
   .three-d-track { transform: none !important; will-change: auto; user-select: auto; }
   .three-d-block[data-clone] { display: none; }
 }
+.three-d-row:focus-within { scroll-padding-inline: 8px; }
