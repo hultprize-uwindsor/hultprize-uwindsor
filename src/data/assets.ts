@@ -17,6 +17,9 @@ export const CAMPUS_PHOTOS = {
   applause: photo('student-applause', 'Students applauding from their seats in the audience', 'Students supporting the teams'),
   teams: photo('teams-onstage', 'Student teams holding small trophies onstage alongside event attendees', 'Teams on the Grand Finale stage'),
   community: photo('community-onstage', 'A group of event participants posing onstage between two campus sponsor banners', 'The community behind the campus round'),
+  // Used only on Compete, so that page does not repeat photos shown elsewhere.
+  stage: photo('pitch-on-stage', 'A student in a black suit and glasses speaks into a microphone beside a wooden podium, gesturing as she pitches to the audience', 'A student pitches from the stage'),
+  teamwork: photo('team-laptop', 'Three students in black T-shirts sit together at a table around a laptop, two of them smiling as they work', 'Teammates working together'),
   director: photo('campus-presentation', 'An organiser addressing the room with a microphone beside two event attendees', 'Addressing the campus community'),
 }
 export const YEAR_ONE_PHOTOS: PhotoSlide[] = SHOW_EVENT_PHOTOS ? [

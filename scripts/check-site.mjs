@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdirSync } from 'node:fs'
 
 const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
-const paths = ['/', '/about', '/year-one', '/this-year', '/events', '/compete', '/partners', '/contact']
+const paths = ['/', '/about', '/year-one', '/this-year', '/events', '/compete', '/partners', '/partners/fusion', '/partners/sterling', '/partners/wetech', '/contact']
 const browser = await chromium.launch(process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {})
 const errors = []
 mkdirSync('/tmp/hult-site-check', { recursive: true })
@@ -65,7 +65,7 @@ try {
     assert.equal(footerLinks.filter(href => href.startsWith('https://signal.group/#')).length, 2)
     if (width === 375) {
       await page.getByRole('button', { name: 'Menu', exact: true }).click()
-      await page.locator('.program-menu summary').click()
+      await page.locator('.program-menu summary', { hasText: 'The program' }).click()
       await page.getByRole('link', { name: 'Year one', exact: true }).first().click()
       await page.waitForURL('**/year-one')
       assert.equal(await page.getByRole('button', { name: 'Menu', exact: true }).getAttribute('aria-expanded'), 'false')
@@ -87,10 +87,23 @@ try {
     assert(await page.locator('main h1').innerText())
     await page.goto(base + '/events/fusion-launch')
     assert.equal(await page.locator('main h1').innerText(), 'Page not found')
+    // Partners is a dropdown: Overview plus one page per community partner.
+    await page.goto(base + '/')
+    if (width === 375) await page.getByRole('button', { name: 'Menu', exact: true }).click()
+    await page.locator('.program-menu summary', { hasText: 'Partners' }).click()
+    const partnerLinks = page.locator('.program-menu', { hasText: 'Overview' }).getByRole('link')
+    assert.deepEqual(await partnerLinks.allInnerTexts(), ['Overview', 'Fusion', 'Sterling Cybersecurity and Advisory Group', 'WEtech Alliance'])
+    await partnerLinks.filter({ hasText: 'Sterling' }).click()
+    await page.waitForURL('**/partners/sterling')
+    // The URL changes before React renders the new page, so wait for its heading.
+    await page.locator('main h1', { hasText: 'Sterling Cybersecurity and Advisory Group' }).waitFor()
+    assert.match(await page.title(), /^Sterling Cybersecurity and Advisory Group \|/)
+    await page.goto(base + '/partners/nope')
+    assert.equal(await page.locator('main h1').innerText(), 'Page not found')
     await page.close()
   }
   assert.deepEqual(errors, [])
-  console.log('Passed: eight pages at 375px and 1440px; links, forms, FAQ keyboard controls, navigation, redirects, draft visibility, images and reduced motion.')
+  console.log(`Passed: ${paths.length} pages at 375px and 1440px; partners dropdown and partner pages; links, forms, FAQ keyboard controls, navigation, redirects, draft visibility, images and reduced motion.`)
 } finally {
   await browser.close()
 }

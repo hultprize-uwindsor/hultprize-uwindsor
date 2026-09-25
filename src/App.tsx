@@ -8,10 +8,12 @@ import HomePage from './pages/HomePage'
 import { AboutPage, YearOnePage, ThisYearPage, CompetePage, PartnersPage, ContactPage } from './pages/ChapterPages'
 import EventsPage, { EventPostPage, NotFoundPage } from './pages/EventsPage'
 import GoRedirect from './pages/GoRedirect'
+import PartnerPage from './pages/PartnerPage'
+import { COMMUNITY_PARTNERS } from './data/communityPartners'
 import './chapter.css'
 import './motion.css'
 
-const titles: Record<string, string> = { '/': 'Home', '/about': 'About', '/year-one': 'Year one', '/this-year': 'This year', '/events': 'Events', '/compete': 'Compete', '/partners': 'Partners', '/contact': 'Find us' }
+const titles: Record<string, string> = { ...Object.fromEntries(COMMUNITY_PARTNERS.map(p => [`/partners/${p.slug}`, p.name])), '/': 'Home', '/about': 'About', '/year-one': 'Year one', '/this-year': 'This year', '/events': 'Events', '/compete': 'Compete', '/partners': 'Partners', '/contact': 'Find us' }
 export default function App() {
   const { pathname, hash } = useLocation()
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function App() {
   return <><a href="#main" className="skip-link">Skip to main content</a><Header /><main id="main" tabIndex={-1}><Routes>
     <Route path="/" element={hash === '#signup' ? <Navigate to="/compete#signup" replace /> : <HomePage />} />
     <Route path="/about" element={<AboutPage />} /><Route path="/year-one" element={<YearOnePage />} /><Route path="/this-year" element={<ThisYearPage />} />
-    <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/contact" element={<ContactPage />} />
+    <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/partners/:slug" element={<PartnerPage />} /><Route path="/contact" element={<ContactPage />} />
     <Route path="/team" element={<Navigate to="/about#team" replace />} /><Route path="/go" element={<GoRedirect />} /><Route path="*" element={<NotFoundPage />} />
   </Routes></main>{SHOW_PARTNER_STRIP && <PartnerStrip />}<Footer /></>
 }

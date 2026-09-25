@@ -20,12 +20,19 @@ try {
   assert.equal(await page.locator('.stat-band strong').first().innerText(), '14', 'stats show final values')
 
   const header = page.locator('.site-header')
+  // Start from the top so the next scroll is genuinely downward, then wait for the state, not a fixed delay.
+  const headerHidden = () => page.evaluate(() => document.querySelector('.site-header').classList.contains('site-header--hidden'))
+  await page.evaluate(() => scrollTo(0, 0))
+  await page.waitForFunction(() => scrollY === 0)
+  // Let the scroll event at 0 fire before jumping; two scrolls in one frame coalesce into one event.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   await page.evaluate(() => scrollTo(0, 900))
-  await page.waitForTimeout(250)
-  assert.match(await header.getAttribute('class'), /site-header--hidden/, 'header hides on scroll down')
+  await page.waitForFunction(() => document.querySelector('.site-header').classList.contains('site-header--hidden'), null, { timeout: 2000 }).catch(() => {})
+  assert(await headerHidden(), 'header hides on scroll down')
   await page.evaluate(() => scrollBy(0, -40))
-  await page.waitForTimeout(250)
-  assert.doesNotMatch(await header.getAttribute('class'), /site-header--hidden/, 'header returns on scroll up')
+  await page.waitForFunction(() => !document.querySelector('.site-header').classList.contains('site-header--hidden'), null, { timeout: 2000 }).catch(() => {})
+  assert(!(await headerHidden()), 'header returns on scroll up')
+  await page.waitForTimeout(200)
   assert.notEqual(await header.evaluate(el => getComputedStyle(el).boxShadow), 'none', 'returning header is raised')
   assert.equal(await header.evaluate(el => getComputedStyle(el).transitionDuration.split(',')[0]), '0.15s')
 
@@ -72,5 +79,5 @@ try {
   }
   assert.deepEqual(errors, [])
   await page.close()
-  console.log('Passed: no page fade, reveals or count-ups; hide-on-scroll header; pill hover; team overlay, FAQ and form feedback; one typeface; reduced motion; eight pages at two widths.')
+  console.log('Passed: no page fade, reveals or count-ups; hide-on-scroll header; pill hover; team overlay, FAQ and form feedback; one typeface; reduced motion; pages at two widths.')
 } finally { await browser.close(); clearTimeout(watchdog) }

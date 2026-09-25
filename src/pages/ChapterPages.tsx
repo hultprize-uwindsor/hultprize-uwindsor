@@ -33,7 +33,7 @@ export function YearOnePage() {
   return <><PageHeader title="Year one" subtitle="What happened the first time Windsor entered." />{SHOW_EVENT_PHOTOS && <div className="container"><CampusPhoto photo="room" priority className="campus-photo--wide" /></div>}<Section eyebrow="2025 to 2026" title="A first year worth building on"><Copy paragraphs={copy.yearOne} /><Stats items={[[ '14', 'startups registered'], ['6', 'at the Grand Finale'], ['Top 8', 'in Canada'], ['$8,000', 'raised from partners']]} /></Section>{YEAR_ONE_PHOTOS.length > 0 && <YearOnePictureBook />}</>
 }
 export function ThisYearPage() {
-  return <><PageHeader title="This year" subtitle="2026 to 2027." /><Section title="What we are trying to do"><Copy paragraphs={copy.yearPlan} /></Section><Section title="Then and now" tint="paper-pink"><p>Year one → This year’s targets</p><Stats className="stat-band--compare" items={[[ '14 → 20', 'Startups registered'], ['6 → 10+', 'Teams at the Grand Finale'], ['$8K → $10K', 'Raised from partners\u00a0· minimum target'], ['4 → 6', 'Campus events']]} /></Section><Section title="The calendar"><Timeline /></Section><Section title="What teams get" tint="paper-blue"><Copy paragraphs={copy.yearBenefits} /></Section><CTABand /></>
+  return <><PageHeader title="This year" subtitle="2026 to 2027." /><Section title="What we are trying to do"><Copy paragraphs={copy.yearPlan} /></Section><Section title="Then and now" tint="paper-pink section-centred"><p>Year one → This year’s targets</p><Stats className="stat-band--compare" items={[[ '14 → 20', 'Startups registered'], ['6 → 10+', 'Teams at the Grand Finale'], ['$8K → $10K', 'Raised from partners\u00a0· minimum target'], ['4 → 6', 'Campus events']]} /></Section><Section title="The calendar"><Timeline /></Section><Section title="What teams get" tint="paper-blue"><Copy paragraphs={copy.yearBenefits} /></Section><CTABand /></>
 }
 // Compete follows hultprize.org/how-it-works: full-bleed photo and navy split bands, centred short
 // headings, white cards on a tinted ground, numbered steps and a centred FAQ. The copy is unchanged;
@@ -63,7 +63,7 @@ function stepAction(step: string) {
 }
 // Full-bleed photo beside a navy panel, as on hultprize.org/how-it-works. Without photos the panel
 // sets the heading beside the copy so the band still fills the column.
-function SplitBand({ photo, reverse = false, labelId, head, children }: { photo: 'pitch' | 'applause'; reverse?: boolean; labelId: string; head: ReactNode; children: ReactNode }) {
+function SplitBand({ photo, reverse = false, labelId, head, children }: { photo: 'stage' | 'teamwork'; reverse?: boolean; labelId: string; head: ReactNode; children: ReactNode }) {
   return <section className={`compete-split compete-split--${photo}${reverse ? ' compete-split--reverse' : ''}${SHOW_EVENT_PHOTOS ? '' : ' compete-split--solo'}`} aria-labelledby={labelId}>
     <CampusPhoto photo={photo} /><div className="compete-split__panel"><div>{head}</div><div>{children}</div></div>
   </section>
@@ -77,7 +77,7 @@ export function CompetePage() {
   return <><PageHeader title="Compete" subtitle="An idea, two to four people, four minutes." />
     {/* On phones the header's Register sits behind Menu, so both actions go on the first screen. */}
     <div className="container compete-actions"><RegisterButton /><Link className="btn btn--secondary" to="#signup">Get on the list</Link></div>
-    <SplitBand photo="pitch" labelId="start-here" head={<h2 id="start-here">You can start here</h2>}>
+    <SplitBand photo="stage" labelId="start-here" head={<h2 id="start-here">You can start here</h2>}>
       <p className="compete-lead">{introLead}</p>
       {introRest.map(paragraph => { const [title, ...rest] = sentences(paragraph); return <p key={paragraph} className="compete-note"><strong>{title}</strong> {rest.join(' ')}</p> })}
     </SplitBand>
@@ -100,7 +100,7 @@ export function CompetePage() {
       <div><h2 id="signup-title">Get on the list</h2><p className="prose">Tell us who you are and we will keep you posted on deadlines, workshops and team matching.</p></div>
       <div className="compete-form"><SignupForm /></div>
     </div></section>
-    <SplitBand photo="applause" reverse labelId="no-team" head={<><p className="eyebrow">No team yet</p><h2 id="no-team">Most people start this way.</h2></>}><Copy paragraphs={copy.noTeam} /><a className="btn btn--secondary" href={SITE.signalLookingUrl} target="_blank" rel="noopener noreferrer">{'Join the mixer chat\u00a0↗'}</a></SplitBand>
+    <SplitBand photo="teamwork" reverse labelId="no-team" head={<><p className="eyebrow">No team yet</p><h2 id="no-team">Most people start this way.</h2></>}><Copy paragraphs={copy.noTeam} /><a className="btn btn--secondary" href={SITE.signalLookingUrl} target="_blank" rel="noopener noreferrer">{'Join the mixer chat\u00a0↗'}</a></SplitBand>
     <Band labelId="questions" title="Questions" className="section-centred"><div className="faq">{copy.faq.map(item => { const [q, ...answer] = item.split('?'); return <details key={q}><summary><span>{q}?</span><span className="faq__icon" aria-hidden="true" /></summary><p>{answer.join('?').trim()}</p></details> })}</div></Band>
     <CTABand />
   </>

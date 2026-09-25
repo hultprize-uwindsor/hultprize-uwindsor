@@ -45,7 +45,7 @@ main a:not(.btn):hover, .text-link:hover { text-decoration-thickness: 2px; }
 @media (min-width: 721px) { .navy-band .stat-band { margin-top: 96px; } }
 /* Four cards are narrowest here, so arrow values such as 14 → 20 would split. */
 @media (min-width: 1001px) and (max-width: 1199px) { .stat-band strong { font-size: 3rem; line-height: 3.5rem; } }
-.section-centred > .container > .eyebrow, .section-centred > .container > h2 { text-align: center; }
+.section-centred > .container > .eyebrow, .section-centred > .container > h2, .section-centred > .container > p { text-align: center; }
 /* Doubled class: .campus-photo img comes later in this file. */
 .campus-photo.campus-photo--bleed img { aspect-ratio: 2940 / 1286; border-radius: 0; }
 .card-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
@@ -95,7 +95,9 @@ summary { cursor: pointer; }
 .compete-split > .campus-photo img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; border-radius: 0; }
 /* The pitch photo is trimmed so the slide title cut off at its top edge and the event banner at its
    right edge fall outside the frame; the presenters stay centred. */
-.compete-split--pitch > .campus-photo img { inset: -5% auto auto 0; width: 110%; height: 105%; max-width: none; object-position: 55% 20%; }
+/* Focal points chosen from crop previews at both the desktop (about 1.2:1) and phone (3:2) shapes. */
+.compete-split--stage > .campus-photo img { object-position: 60% 40%; }
+.compete-split--teamwork > .campus-photo img { object-position: 55% 40%; }
 .compete-split__panel { grid-row: 1; grid-column: 3; align-self: center; padding: clamp(64px, 8.9vw, 128px) 0 clamp(64px, 8.9vw, 128px) clamp(40px, 6.7vw, 96px); }
 .compete-split--reverse > .campus-photo { grid-column: 3 / 5; }
 .compete-split--reverse .compete-split__panel { grid-column: 2; padding-inline: 0 clamp(40px, 6.7vw, 96px); }
@@ -327,3 +329,13 @@ summary { cursor: pointer; }
    Every card is the same width, so all four share one size. */
 .stat-band--compare > div { container-type: inline-size; }
 .stat-band--compare strong { font-size: min(3.5rem, 100cqi / 6); line-height: 1.15; white-space: nowrap; }
+/* Community partner pages: copy beside a logo card. */
+.partner-profile { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 64px; align-items: start; }
+.partner-card { display: grid; gap: 24px; justify-items: start; padding: 32px; border-radius: 16px; background: var(--paper); }
+.paper-blue .partner-card { background: #fff; }
+.partner-card__logo { display: grid; place-items: center; width: 100%; min-height: 140px; padding: 24px; border-radius: 16px; background: #fff; border: 1px solid var(--grey); }
+.partner-card__logo img { max-height: 88px; width: auto; object-fit: contain; }
+@media (max-width: 900px) {
+  .partner-profile { grid-template-columns: 1fr; gap: 32px; }
+  .partner-card { max-width: 420px; }
+}
