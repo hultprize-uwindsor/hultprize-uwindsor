@@ -206,6 +206,7 @@
 .journey-visual { position:relative; min-height:460px; border-radius:30px; overflow:hidden; }
 .journey-visual > img { width:100%; height:460px; object-fit:cover; }
 .journey-metric { position:absolute; left:24px; bottom:24px; padding:24px; background:#ffffffed; border-radius:20px; display:flex; align-items:center; gap:24px; }
+.journey-metric__number { display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
 .journey-metric strong { font-size:3.5rem; line-height:1; font-weight:500; letter-spacing:-.06em; }
 .journey-metric span { max-width:13ch; font-size:.85rem; }
 .journey-experience--simple { height:auto; }

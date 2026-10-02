@@ -14,7 +14,7 @@ The Jeton-inspired rebuild covers all 13 published routes and the 404 page. Hult
 
 ## Content
 
-The season runs October 1, 2026–April 11, 2027. Five workshops run November 7–January 9; registration closes November 20; touch base is January 2; Grand Finale is February 5; Uwill Discover is March 13; Nationals in Calgary are April 10–11. The campus winner gets nine weeks before Nationals. Campus prizes are $1,000, $500 and $250 CAD; the global prize is US$1 million in seed funding.
+The season runs October 1, 2026–April 11, 2027. Five workshops run November 7–January 9; registration closes November 20; touch base is January 2; Grand Finale is February 5; Uwill Discover is March 13; Nationals in Calgary are April 10–11. Up to three teams can represent UWindsor at Nationals, with nine weeks to prepare after the Grand Finale. Campus prizes are $1,000, $500 and $250 CAD; the global prize is US$1 million in seed funding.
 
 The owner’s headings remain: “Where we started”, “Our goals”, “Mark Your Calendars” and “The Team”. Fusion welcomes students from every institution. Published past events are labelled as past events. Workshop and Grand Finale posts remain drafts until session times and locations are confirmed.
 

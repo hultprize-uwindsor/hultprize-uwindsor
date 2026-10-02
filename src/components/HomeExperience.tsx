@@ -9,7 +9,7 @@ const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const steps = [
   { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2–4', metric: 'students. One team.', photo: CAMPUS_PHOTOS.teamwork, icon: '✳' },
   { title: 'Pitch.', label: 'Make your case', text: 'Five workshops to shape your business and sharpen your pitch. Four minutes to make it count.', number: '4', metric: 'minutes to pitch.', photo: CAMPUS_PHOTOS.stage, icon: '↗' },
-  { title: 'Compete.', label: 'Take it further', text: 'Pitch at Windsor on February 5. The campus winner goes to Nationals in Calgary on April 10–11.', number: '01', metric: 'team represents Windsor.', photo: CAMPUS_PHOTOS.teams, icon: '◎' },
+  { title: 'Compete.', label: 'Take it further', text: 'Pitch at Windsor on February 5. Up to three teams can represent UWindsor at Nationals in Calgary on April 10–11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photo: CAMPUS_PHOTOS.teams, icon: '◎' },
 ]
 
 /** A pinned title zoom, five independent card paths, then accumulating action words. */
@@ -117,7 +117,7 @@ export function JourneyExperience() {
       <h2 id="journey-heading" className="visually-hidden">Build, pitch and compete</h2>
       <div className="journey-stages">{steps.map((step, index) => <div className={`journey-experience__stage${active === index ? ' is-active' : ''}`} key={step.title} role="tabpanel" aria-labelledby={`journey-tab-${index}`} id={`journey-panel-${index}`} aria-hidden={active !== index} inert={active !== index}>
         <div className="journey-copy"><p className="eyebrow">{step.label}</p><p className="journey-word">{step.title}</p><p className="journey-description">{step.text}</p><Link to="/compete" className="text-link" onFocus={() => setPaused(true)}>How to compete <span aria-hidden="true">↗</span></Link></div>
-        <div className="journey-visual">{SHOW_EVENT_PHOTOS ? <img src={step.photo.src} alt={step.photo.alt} loading="lazy" /> : <BrandScene variant="blue" active={active === index} />}<div className="journey-metric"><strong>{step.number}</strong><span>{step.metric}</span></div></div>
+        <div className="journey-visual">{SHOW_EVENT_PHOTOS ? <img src={step.photo.src} alt={step.photo.alt} loading="lazy" /> : <BrandScene variant="blue" active={active === index} />}<div className="journey-metric"><div className="journey-metric__number">{step.prefix && <span>{step.prefix}</span>}<strong>{step.number}</strong></div><span>{step.metric}</span></div></div>
       </div>)}</div>
     </div></div>
   </section>
