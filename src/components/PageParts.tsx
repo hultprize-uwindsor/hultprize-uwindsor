@@ -1,17 +1,18 @@
 import EventTimeline from './EventTimeline'
+import { RevealText, RollingLabel } from './MotionText'
 import type { ReactNode } from 'react'
 import { SITE } from '../data/site'
 
 export function RegisterButton({ children = 'Register your team' }: { children?: ReactNode }) {
-  return <a className="btn btn--primary" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer">{children}<span aria-hidden="true">↗</span></a>
+  return <a className="btn btn--primary" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer">{typeof children === 'string' ? <RollingLabel>{children}</RollingLabel> : children}<span aria-hidden="true">↗</span></a>
 }
 
 export function PageHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return <header className="page-heading container"><p className="eyebrow">Hult Prize at the University of Windsor</p><h1>{title}</h1><p>{subtitle}</p></header>
+  return <header className="page-heading"><div className="container"><div><p className="eyebrow">Hult Prize · UWindsor</p><h1 data-text-reveal><RevealText>{title}</RevealText></h1></div><p className="page-heading__intro">{subtitle}</p></div></header>
 }
 
 export function Section({ eyebrow, title, children, tint = '', id }: { eyebrow?: string; title?: string; children: ReactNode; tint?: string; id?: string }) {
-  return <section className={`section chapter-section ${tint}`} id={id}><div className="container">{eyebrow && <p className="eyebrow">{eyebrow}</p>}{title && <h2>{title}</h2>}{children}</div></section>
+  return <section className={`section chapter-section ${tint}`} id={id}><div className="container">{eyebrow && <p className="eyebrow">{eyebrow}</p>}{title && <h2 data-text-reveal><RevealText>{title}</RevealText></h2>}{children}</div></section>
 }
 
 export function Copy({ paragraphs }: { paragraphs: string[] }) {
@@ -25,21 +26,20 @@ export function Stats({ items = homeStats, className = '' }: { items?: string[][
 }
 
 const calendar = [
-  ['September and October', 'Launch, information sessions, founder panel, course integration'],
-  ['November', 'Team mixer'],
-  ['Week of November 14', 'Brand and pitch bootcamp begins, run with Sterling Cybersecurity and Advisory Group: four weekly sessions, then a fifth in January'],
-  ['November 20', 'Registration closes'],
-  ['December', "Exams! Don't drown yourselves in coffee, we need you up and running in January"],
-  ['January', 'Fifth and final bootcamp session after exams, then checkpoints, mentor matching, mock pitch rounds'],
+  ['October 1, 2026', 'Fusion x Hult HQ launch'],
+  ['November 7, 2026', 'Workshop series opens: five sessions through January 9, 2027'],
+  ['November 20, 2026', 'Registration closes'],
+  ['January 2, 2027', 'Touch base'],
   ['February 5, 2027', 'Grand Finale'],
-  ['April 2027', 'Canadian National Championships'],
+  ['March 13, 2027', 'Uwill Discover Conference'],
+  ['April 10–11, 2027', 'National Championships in Calgary'],
 ]
 export function Timeline({ compact = false }: { compact?: boolean }) {
-  const items = compact ? [['October 1', 'Fusion x Hult HQ launch'], ['Week of November 14', 'Brand and pitch bootcamp begins'], ['November 20', 'Registration closes'], ['February 5', 'Grand Finale'], ['April 2027', 'National Championships']] : calendar
+  const items = compact ? [calendar[0], ['November 7, 2026', 'Workshop series opens'], calendar[2], calendar[4], calendar[6]] : calendar
   if (compact) return <EventTimeline items={items} />
   return <ol className={`timeline ${compact ? '' : 'timeline--full'}`}>{items.map(([date, description]) => <li key={date}><strong>{date}</strong><p>{description}</p></li>)}</ol>
 }
 
 export function CTABand({ text = 'Registration closes November 20.', lede, className = '', children = <RegisterButton /> }: { text?: string; lede?: string; className?: string; children?: ReactNode }) {
-  return <section className={`cta-band ${className}`}><div className="container"><div><h2>{text}</h2>{lede && <p className="cta-band__lede">{lede}</p>}</div>{children}</div></section>
+  return <section className={`cta-band ${className}`}><div className="container"><div><h2 data-text-reveal><RevealText>{text}</RevealText></h2>{lede && <p className="cta-band__lede">{lede}</p>}</div>{children}</div></section>
 }

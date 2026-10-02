@@ -16,11 +16,14 @@ export const SITE = {
   linkedinUrl: 'https://www.linkedin.com/company/hult-prize-at-the-university-of-windsor/',
   // Not currently shown on the site (pulled per request). Kept here so it's
   // a one-line change to bring back, or swap for the next milestone.
-  launchDay: 'September 29, 2026',
-  launchDayDetail: '1:00–3:00 PM, Joyce Entrepreneurship Centre (2nd floor). Join our Fusion x Hult Prize launch, where UWindsor Hult Prize gets an HQ of its own.',
+  launchDay: 'October 1, 2026',
+  launchDayDetail: '2:00–4:00 PM, Joyce Entrepreneurship Centre (2nd floor). Join the Fusion launch, where Hult Prize at UWindsor gets an HQ of its own.',
   registrationCloses: 'November 20',
   qualifierFinals: 'February 5, 2027',
-  // The Google Apps Script Web App URL that receives sign-up form submissions
-  // and appends a row to the team's Google Sheet. Set at deploy time.
-  formEndpoint: import.meta.env.VITE_FORM_ENDPOINT ?? '',
 }
+
+// One switch for arrivals site-wide: card groups below the first screen and photos still loading. UI feedback is unaffected.
+export const REVEAL_ON_SCROLL = true
+
+// The page content fades in on load and on each page change: opacity only, 300ms, never the header. Off under reduced motion.
+export const FADE_IN_ON_LOAD = true

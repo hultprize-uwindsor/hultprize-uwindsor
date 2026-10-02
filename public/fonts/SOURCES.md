@@ -1,9 +1,5 @@
-# Typography reference
+# Fonts
 
-EF Circular is the typeface served by [Hult Prize](https://www.hultprize.org/).
-These public webfont subsets are used to match the requested site design.
+The active site uses Inter Variable, downloaded from https://rsms.me/inter/font-files/InterVariable.woff2 and licensed under the SIL Open Font License in INTER-LICENSE.txt. Its upstream project is https://github.com/rsms/inter.
 
-- `ef-circular-latin.woff2`: https://www.ef.com/assetscdn/ef-global/fonts/v1.9.2/variable/EF-Circular-VF-Latin.woff2
-- `ef-circular-utilities.woff2`: https://www.ef.com/assetscdn/ef-global/fonts/v1.9.2/variable/EF-Circular-VF-Utilities.woff2
-
-The supplied logo files remain in `public/images/logos/` with their original proportions and colors.
+EF Circular files remain as legacy source assets but are not referenced by the active site or included in production output. They were obtained from ef.com in an earlier iteration; their presence does not establish a redistribution licence.

@@ -1,158 +1,60 @@
-.signup-form {
+.signup-form,
+.signup-success {
+  position: relative;
   width: 100%;
   margin: 0;
-  padding: 32px;
-  background: var(--color-bg-alt);
-  border-radius: var(--radius-md);
+  padding: clamp(24px, 4vw, 48px);
+  color: var(--color-text, #101d38);
+  background: #fff;
+  border-radius: 28px;
 }
-
-.signup-form__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px 18px;
-  margin-bottom: 28px;
-}
-
-.signup-field {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  min-width: 0;
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.signup-field:has(input[type='tel']),
-.signup-field--radio {
-  grid-column: 1 / -1;
-}
-
-.signup-field--radio {
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-.signup-field--radio legend {
-  font-weight: 500;
-  font-size: 1rem;
-  padding: 0;
-  margin-bottom: 9px;
-}
-
+.signup-form__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 24px 18px; margin-bottom: 28px; }
+.signup-field { display: flex; flex-direction: column; gap: 10px; min-width: 0; font-weight: 500; font-size: .95rem; }
+.signup-field small { margin-left: 5px; font-size: .8rem; color: #647084; font-weight: 400; }
+.signup-field:has(input[type='tel']), .signup-field--radio { grid-column: 1 / -1; }
+.signup-field--radio { border: 0; padding: 0; margin: 0; }
+.signup-field--radio legend { padding: 0; margin-bottom: 12px; font-size: .95rem; font-weight: 500; }
 .signup-field input[type='text'],
 .signup-field input[type='email'],
 .signup-field input[type='tel'],
 .signup-field select {
   width: 100%;
   min-width: 0;
-  min-height: 48px;
-  padding: 11px 12px;
-  border: 1px solid #d8dade;
-  border-radius: 16px;
-  background: #fff;
-  color: var(--color-text);
-  font-family: var(--font-sans);
+  min-height: 58px;
+  padding: 16px 18px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  background: #f9eff4;
+  color: #14213b;
+  font: inherit;
   font-size: 1rem;
   font-weight: 400;
 }
+.signup-form :is(input, select, button) { scroll-margin-block: 100px; }
+.signup-field input::placeholder { color: #6e6670; }
+.signup-field input:focus, .signup-field select:focus { border-color: var(--color-pink, #e9007f); outline: 2px solid #e9007f24; outline-offset: 2px; }
+.signup-field input[aria-invalid='true'], .signup-field select[aria-invalid='true'] { border-color: #b7283e; }
+.signup-radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.signup-radio { display: flex; align-items: center; justify-content: center; flex: 1 1 auto; gap: 8px; min-height: 48px; padding: 12px 14px; border: 1px solid #eadde4; border-radius: 100px; background: #fff; font-weight: 400; cursor: pointer; }
+.signup-radio input { margin: 0; accent-color: #d90076; }
+.signup-radio:has(input:checked) { border-color: #d90076; color: #a60059; background: #fff0f8; }
+.signup-error { color: #a61e37; font-size: .85rem; font-weight: 400; font-style: normal; }
+.signup-error--form { margin: 20px 0 0; padding: 16px; border-radius: 12px; background: #fff0f3; }
+.signup-disclaimer { margin: 20px 0 0; color: #5e6777; font-size: .875rem; font-weight: 400; line-height: 1.65; }
+.signup-disclaimer a { color: #243650; text-underline-offset: 3px; }
+.signup-form > button[type='submit'] { width: 100%; min-height: 58px; padding: 16px 24px; border: none; border-radius: 100px; background: #d90076; color: #fff; font-size: 1rem; font-weight: 500; }
+.signup-form > button[type='submit']:hover { background: #b90064; }
+.signup-form > button[type='submit']:disabled { cursor: progress; opacity: .65; }
+.signup-success__mark { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; color: #d90076; background: #fbe4f0; font-size: 26px; margin-bottom: 28px; }
+.signup-success h3 { color: #14213b; font-size: clamp(1.75rem, 3vw, 2.5rem); letter-spacing: -.045em; font-weight: 400; }
+.signup-success .btn { margin-top: 28px; }
+.form-trap { position: absolute; overflow: hidden; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+@media (max-width: 720px) { .signup-form, .signup-success { border-radius: 22px; } }
 
-.signup-field input::placeholder {
-  color: #767980;
-  font-size: 0.875rem;
+@media (max-width: 380px) {
+  .signup-form, .signup-success { padding:24px 20px; }
+  .signup-field :is(input, select) { padding-inline:14px; }
 }
-
-.signup-field input:focus,
-.signup-field select:focus {
-  border-color: var(--color-text);
-}
-
-.signup-field input[aria-invalid='true'],
-.signup-field select[aria-invalid='true'] {
-  border-color: var(--color-danger);
-}
-
-.signup-radio-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.signup-radio {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1 1 auto;
-  gap: 7px;
-  min-height: 44px;
-  padding: 10px;
-  border: 1px solid #d8dade;
-  border-radius: 16px;
-  background: #fff;
-  font-weight: 400;
-  cursor: pointer;
-}
-
-.signup-radio input {
-  margin: 0;
-  accent-color: var(--color-text);
-}
-
-.signup-radio:has(input:checked) {
-  border-color: var(--color-text);
-  font-weight: 600;
-}
-
-.signup-error {
-  color: var(--color-danger);
-  font-size: 0.8rem;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.signup-error--form {
-  margin: 16px 0 0;
-}
-
-.signup-disclaimer {
-  margin: 18px 0 0;
-  color: var(--color-text-muted);
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.7;
-}
-
-.signup-disclaimer a {
-  text-underline-offset: 3px;
-}
-
-.signup-success {
-  width: 100%;
-  margin: 0;
-  padding: 32px;
-  background: var(--color-bg-alt);
-  border-radius: var(--radius-md);
-}
-
-.signup-success h3 {
-  color: var(--color-text);
-  font-size: 1.625rem;
-  letter-spacing: -0.035em;
-}
-
-.signup-success .btn {
-  margin-top: 24px;
-}
-
-@media (max-width: 1000px) and (min-width: 721px), (max-width: 480px) {
-  .signup-form__grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 720px) {
-  .signup-form,
-  .signup-success {
-    padding: 24px;
-  }
+@media (max-height: 560px) {
+  .signup-form :is(input, select, button) { scroll-margin-block: 28px 88px; }
 }

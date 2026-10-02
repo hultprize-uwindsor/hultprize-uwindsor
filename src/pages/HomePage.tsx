@@ -1,18 +1,22 @@
 import { Link } from 'react-router-dom'
-import copy from '../data/copy.json'
-import CampusPhoto from '../components/CampusPhoto'
-import { SHOW_EVENT_PHOTOS } from '../data/assets'
-import { Copy, CTABand, RegisterButton, Section, Stats, Timeline } from '../components/PageParts'
+import BrandScene from '../components/BrandScene'
+import { RevealText, RollingLabel } from '../components/MotionText'
+import { FloatingIntroduction, JourneyExperience, ProgrammeFeature } from '../components/HomeExperience'
+import { GlobalPrize } from '../components/GlobalPrize'
+import { Stats, Timeline } from '../components/PageParts'
+import { SITE } from '../data/site'
+import { upcomingPosts, formatPostDate } from '../data/posts'
 
-// Section order follows the hultprize.org homepage: hero, intro and numbers on a dark-blue band,
-// a full-bleed photo, then the ways in. A winners section waits for real student quotes.
 export default function HomePage() {
-  return <>
-    <section className="home-hero"><div className="container"><h1>One idea, 4&nbsp;minutes, $1,000,000.</h1><Copy paragraphs={copy.homeHero} /><div className="button-row"><RegisterButton /><Link className="btn btn--secondary" to="/partners">Partner with us</Link></div></div></section>
-    <Section title="Built here. Ready to go further." tint="navy-band"><Copy paragraphs={copy.homeIntro} /><Link className="btn btn--secondary" to="/about">About the competition</Link><Stats /></Section>
-    <CampusPhoto photo="room" className="campus-photo--bleed" />
-    <Section eyebrow="Find your place" title="Three ways in" tint="section-centred"><div className="card-row">{['Compete', 'Partner', 'Understand it'].map((title, i) => <article className="entry-card" key={title}><CampusPhoto photo={(["pitch", "community", "audience"] as const)[i]} className="entry-card__photo" />{!SHOW_EVENT_PHOTOS && <span className="card-number" aria-hidden="true">0{i + 1}</span>}<h3>{title}</h3><p>{copy.homeCards[i]}</p><Link to={['/compete', '/partners', '/about'][i]}>{['How to enter', 'How partnership works', 'About the competition'][i]} <span aria-hidden="true">→</span></Link></article>)}</div></Section>
-    <Section eyebrow="2026 to 2027" title="The dates that matter" tint="paper-blue" id="key-dates"><Timeline compact /><Link className="text-link" to="/this-year">The full calendar →</Link></Section>
-    <CTABand lede="Four minutes is less time than it sounds." />
-  </>
+  const upcoming=upcomingPosts()[0]
+  return <div className="home-page">
+    <section className="home-hero" aria-labelledby="home-title"><BrandScene/><div className="container home-hero__inner"><div><p className="eyebrow">Hult Prize at the University of Windsor</p><h1 id="home-title" data-text-reveal><RevealText>One idea.<br />4 minutes.<br />$1,000,000.</RevealText></h1></div><div className="home-hero__aside"><p>Build a business that changes something.</p><p className="home-hero__detail">Start at Windsor. Compete for US$1 million in seed funding at the global final.</p><a className="btn btn--white" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer"><RollingLabel>Register your team</RollingLabel><span aria-hidden="true">↗</span></a></div></div><a className="home-scroll" href="#discover" aria-label="Scroll to explore">↓ <span>Scroll to explore</span></a></section>
+    <div id="discover"><FloatingIntroduction /></div>
+    <JourneyExperience />
+    <ProgrammeFeature />
+    <section className="section home-results"><div className="container"><div className="home-results__heading"><span className="tag">Where we started</span><h2 data-text-reveal><RevealText>Windsor showed up.</RevealText></h2><p>Fourteen startups. Two teams at Nationals.<br />Named Best Program in North America.</p><Link className="text-link" to="/year-one">Our first season <span aria-hidden="true">↗</span></Link></div><Stats /></div></section>
+    <GlobalPrize />
+    <section className="section home-calendar" id="key-dates"><div className="container"><div><span className="tag">2026–2027</span><h2 data-text-reveal><RevealText>Mark Your<br />Calendars</RevealText></h2><p>From the first workshop to Calgary.</p><Link className="text-link" to="/this-year#calendar">The full calendar <span aria-hidden="true">↗</span></Link></div><Timeline compact /></div></section>
+    {upcoming&&<section className="home-next-event"><div className="container"><span className="tag">Up next</span><Link to={`/events/${upcoming.slug}`}><time dateTime={upcoming.date}>{formatPostDate(upcoming.date)}</time><h2>{upcoming.title}</h2><span className="home-next-event__arrow" aria-hidden="true">↗</span></Link></div></section>}
+  </div>
 }

@@ -1,9 +1,24 @@
-/* hultprize.org has no card lifts or content fades, so only colour feedback remains here.
-   Button, header, partner strip and book motion live with their components. */
-:root { --motion-fast: 180ms; }
-.text-link, .site-footer a, .event-filters button, .faq summary { transition: color var(--motion-fast) ease, background-color var(--motion-fast) ease, border-color var(--motion-fast) ease; }
-.signup-field input, .signup-field select { transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease; }
-.faq summary:hover { color: #005596; }
-@media (prefers-reduced-motion: reduce) {
-  .text-link, .site-footer a, .event-filters button, .faq summary, .signup-field input, .signup-field select { transition: none; }
+/* Jeton's timing language: clipped characters, staggered label turnover, expo-out arrivals. */
+.reveal-word { display:inline-block; white-space:nowrap; padding-bottom:.12em; margin-bottom:-.12em; overflow:clip; vertical-align:bottom; }
+.reveal-letter { display:inline-block; transform-origin:50% 100%; }
+[data-motion="waiting"] .reveal-letter { transform:translate3d(0,115%,0) rotate(9deg); }
+[data-motion="done"] .reveal-letter { transform:translate3d(0,0,0); transition:transform 950ms cubic-bezier(.23,1,.32,1); transition-delay:calc(min(var(--char-index), 45) * 12ms); }
+.rolling-label { display:inline-grid; min-width:0; max-width:100%; position:relative; overflow:clip; line-height:1.5; vertical-align:middle; padding-block:1px; margin-block:-1px; }
+.rolling-label__row { grid-area:1 / 1; display:block; white-space:normal; }
+.rolling-label__word { display:inline-block; white-space:nowrap; overflow:clip; vertical-align:bottom; }
+.rolling-label__char { display:inline-block; transform-origin:50% 50%; transition:transform 450ms cubic-bezier(.165,.84,.44,1); transition-delay:calc(var(--char-index) * 7ms); }
+.rolling-label__row--next { position:absolute; inset:1px 0; }
+.rolling-label__row--next .rolling-label__char { transform:translateY(120%) rotate(12deg); }
+:is(a,button):is(:hover,:focus-visible) > .rolling-label > .rolling-label__row:not(.rolling-label__row--next) .rolling-label__char { transform:translateY(-110%); transition-duration:250ms; transition-timing-function:cubic-bezier(.55,.085,.68,.53); }
+:is(a,button):is(:hover,:focus-visible) > .rolling-label > .rolling-label__row--next .rolling-label__char { transform:translateY(0) rotate(0); transition-duration:500ms; transition-delay:calc(120ms + var(--char-index) * 7ms); }
+.btn { max-width:100%; transition:background 300ms cubic-bezier(.645,.045,.355,1),color 300ms,scale 300ms cubic-bezier(.645,.045,.355,1); }
+.btn:hover { transform:none; scale:.98; }
+.btn:active { scale:.95; }
+.btn:hover > .rolling-label { transform:none; }
+.btn > .rolling-label { transition:none; }
+@media(prefers-reduced-motion:reduce) {
+ [data-motion] .reveal-letter { transform:none!important; transition:none!important; }
+ .rolling-label__char { transform:none!important; transition:none!important; }
+ .rolling-label__row--next { visibility:hidden; }
+ .btn:hover,.btn:active { scale:1; }
 }

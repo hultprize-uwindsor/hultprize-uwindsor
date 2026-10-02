@@ -6,7 +6,7 @@
 .team-tree .team-tree__row { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; align-items: stretch; }
 .team-tree .team-tree__row--director { grid-template-columns: minmax(0, 1fr); }
 .team-tree__label { width: fit-content; margin: 0 auto 20px; padding: 8px 18px; border: 1px solid var(--grey); border-radius: 99px; background: #fff; color: var(--ink); font-size: .7rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; white-space: nowrap; }
-.team-tree__card { width: calc(100% - 28px); max-width: 330px; justify-self: center; display: flex; flex-direction: column; padding: 10px 10px 0; background: #fff; border: 1px solid var(--grey); border-radius: 16px; box-shadow: 0 8px 28px #53203908; transition: border-color 220ms ease, box-shadow 220ms ease; }
+.team-tree__card { width: calc(100% - 28px); max-width: 330px; justify-self: center; display: flex; flex-direction: column; padding: 10px 10px 0; background: #fff; border: 1px solid var(--grey); border-radius: 16px; box-shadow: 0 8px 28px #53203908; transition: border-color var(--motion-fast) var(--ease-ui), box-shadow var(--motion-fast) var(--ease-ui); }
 .team-tree__row--director .team-tree__card { box-shadow: 0 12px 36px #002b5110; }
 .team-tree__card:hover, .team-tree__card:focus-within { border-color: var(--uw-blue); box-shadow: 0 12px 30px #002b511a; }
 .team-tree__details { display: flex; flex: 1; flex-direction: column; padding: 0 12px; }

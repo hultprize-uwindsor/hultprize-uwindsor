@@ -1,0 +1,34 @@
+.scroll-to-top {
+  position: fixed;
+  right: max(20px, calc(env(safe-area-inset-right) + 12px));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  z-index: 15;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--uw-blue);
+  border-radius: 16px;
+  background: var(--uw-blue);
+  color: #fff;
+  box-shadow: 0 3px 12px rgb(0 0 0 / 18%);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .scroll-to-top:hover {
+    background: #ffb4df;
+    color: var(--uw-blue);
+  }
+}
+
+.scroll-to-top:focus-visible {
+  outline: 3px solid #ffb4df;
+  outline-offset: 3px;
+}
+
+@media (max-width: 1180px) {
+  .scroll-to-top { bottom: max(22px, env(safe-area-inset-bottom)); }
+}
+body:has(.signup-form:focus-within) .scroll-to-top { visibility: hidden; pointer-events: none; }

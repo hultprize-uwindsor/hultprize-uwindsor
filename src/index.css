@@ -1,295 +1,56 @@
-@font-face {
-  font-family: 'EF Circular VF';
-  src: url('/fonts/ef-circular-latin.woff2') format('woff2');
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  unicode-range: U+0020-007D;
-}
-
-@font-face {
-  font-family: 'EF Circular VF';
-  src: url('/fonts/ef-circular-utilities.woff2') format('woff2');
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  unicode-range: U+007E, U+00A0-00BF, U+00D7, U+02BB-02DD, U+0394, U+03A9, U+03BC, U+03C0, U+2013-2788;
-}
-
+@font-face { font-family: 'Inter'; src: url('/fonts/inter-variable.woff2') format('woff2'); font-style:normal; font-weight:100 900; font-display:swap; }
 :root {
-  color-scheme: light;
-
-  --hp-black: #191919;
-  --hp-white: #ffffff;
-  --hp-grey-light: #f5f5f5;
-  --hp-grey-mid: #85888d;
-  --hp-pink: #da2381;
-  --hp-pink-bright: #ff329b;
-  --hp-green: #279d49;
-  --uw-blue: #005596;
-  --uw-yellow: #ffce00;
-  --uw-grey: #58595b;
-
-  /* Visual brief palette: pink belongs to the competition, blue to Windsor. */
-  --ink: #191919;
-  --pink: #ff329b;
-  --pink-text: #da2381;
-  --paper-pink: #ffe8f5;
-  --paper-blue: #e3f7ff;
-  --paper: #f7f7f7;
-  --grey: #efefef;
-  --uw-blue-dark: #002b51;
-
-  --color-bg: var(--hp-white);
-  --color-bg-alt: var(--hp-grey-light);
-  --color-text: var(--hp-black);
-  --color-text-muted: var(--uw-grey);
-  --color-inverse-bg: var(--hp-black);
-  --color-inverse-text: var(--hp-white);
-  --color-uwindsor: var(--uw-blue);
-  --color-uwindsor-accent: var(--uw-yellow);
-  --color-danger: #b52e25;
-
-  --font-sans: 'EF Circular VF', Helvetica, 'Open Sans', 'Gill Sans MT', 'Gill Sans', Corbel, Arial, sans-serif;
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 32px;
-  --max-width: 1264px;
-
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
+  color-scheme:light;
+  --pink:#ff329b; --pink-text:#be125e; --paper-pink:#fff0f7; --paper-blue:#edf4f8; --paper:#f7f7f8; --grey:#e4e8ed;
+  --uw-blue:#005596; --uw-blue-dark:#002b51; --uw-grey:#53616f; --ink:#002b51;
+  --hp-black:#002b51; --hp-white:#fff; --hp-pink:#da2381; --hp-pink-bright:#ff329b; --hp-grey-light:#f7f7f8; --hp-grey-mid:#687789;
+  --color-bg:#fff; --color-bg-alt:#fff0f7; --color-text:#002b51; --color-text-muted:#53616f; --color-inverse-bg:#002b51; --color-inverse-text:#fff; --color-uwindsor:#005596; --color-danger:#b52e25;
+  --font-sans:'Inter',Arial,sans-serif; --max-width:1600px; --radius-sm:12px; --radius-md:20px; --radius-lg:36px;
+  --motion-fast:180ms; --motion-reveal:700ms; --motion-stagger:80ms; --ease-ui:cubic-bezier(.22,1,.36,1); --ease-move:cubic-bezier(.22,1,.36,1);
+  font-family:var(--font-sans); font-optical-sizing:auto; -webkit-font-smoothing:antialiased;
 }
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-/* The sticky header must never cover the focused element (WCAG 2.4.11). Applied to content only:
-   on html it also scrolled the page whenever a control inside the header took focus. */
-:where(main, .partner-strip, .site-footer) :is(a, button, summary, input, select, textarea, [tabindex]) {
-  scroll-margin-top: 80px;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-body {
-  font-family: var(--font-sans);
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.55;
-}
-
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-main {
-  flex: 1;
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
-
-a {
-  color: inherit;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
-.container {
-  width: 100%;
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding-inline: 32px;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  font-weight: 700;
-  line-height: 1.17;
-  margin: 0 0 0.5em;
-}
-
-/* hultprize.org scale: h1 56/64 and h2 48/56 on desktop, 48/56 and 40/48 on phones.
-   Leading is the size plus 8px, so smaller heading overrides stay tight too. */
-h1,
-h2 {
-  line-height: calc(1em + 8px);
-}
-
-h1 {
-  font-size: 3.5rem;
-}
-
-h2 {
-  font-size: 3rem;
-}
-
-@media (max-width: 720px) {
-  h1 {
-    font-size: 3rem;
-  }
-
-  h2 {
-    font-size: 2.5rem;
-  }
-}
-
-h3 {
-  font-size: clamp(1.15rem, 2vw, 1.5rem);
-}
-
-p {
-  margin: 0 0 1em;
-}
-
-.section {
-  padding-block: clamp(64px, 8.9vw, 128px);
-}
-
-section[id] {
-  scroll-margin-top: 88px;
-}
-
-/* Buttons follow hultprize.org: only the pill behind the label scales on hover,
-   150ms cubic-bezier(.4, 0, .95, 1). Fill, ring and label never change. */
-.btn {
-  --btn-fill: transparent;
-  --btn-ring: transparent;
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-height: 48px;
-  padding: 11px 24px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.5;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  background: var(--btn-fill);
-  box-shadow: inset 0 0 0 1px var(--btn-ring);
-  transition: transform 150ms cubic-bezier(.4, 0, .95, 1);
-}
-
-.btn--primary {
-  --btn-fill: var(--pink);
-  color: var(--hp-white);
-}
-
-.btn--dark {
-  --btn-fill: var(--ink);
-  color: var(--hp-white);
-}
-
-.btn--secondary {
-  --btn-fill: var(--hp-white);
-  --btn-ring: var(--uw-blue);
-  color: var(--uw-blue);
-}
-
-/* Hover only where hovering exists, so a tap does not leave the pill enlarged. */
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .btn:hover:not(:disabled, [aria-disabled='true'])::before {
-    transform: scale(1.05);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .btn:active:not(:disabled, [aria-disabled='true'])::before {
-    transform: scale(.95);
-  }
-}
-
-/* The fill lives on ::before, which forced colours flatten, so give the button its own edge. */
-@media (forced-colors: active) {
-  .btn {
-    border: 1px solid ButtonText;
-  }
-
-  .btn:disabled,
-  .btn[aria-disabled='true'] {
-    border-color: GrayText;
-    color: GrayText;
-  }
-}
-
-.btn--block {
-  width: 100%;
-}
-
-.btn:disabled,
-.btn[aria-disabled='true'] {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  background: var(--hp-white);
-  color: var(--hp-black);
-  padding: 10px 16px;
-  z-index: 1000;
-}
-
-.skip-link:focus {
-  left: 12px;
-  top: 12px;
-}
-
-:focus-visible {
-  outline: 2px solid var(--hp-black);
-  outline-offset: 4px;
-}
-
-@media (max-width: 720px) {
-  .container {
-    padding-inline: 24px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .btn::before {
-    transition: none;
-  }
-}
+* { box-sizing:border-box; }
+html { scroll-padding-bottom:100px; }
+body { margin:0; font-family:var(--font-sans); color:var(--ink); background:white; line-height:1.6; }
+#root { min-height:100vh; display:flex; flex-direction:column; }
+main { flex:1; min-width:0; }
+img,svg { display:block; max-width:100%; }
+img { height:auto; }
+button,input,select,textarea { font:inherit; }
+button,a,input,select,textarea { -webkit-tap-highlight-color:transparent; }
+button { cursor:pointer; }
+a { color:inherit; text-decoration-thickness:1px; text-underline-offset:5px; }
+p { margin:0 0 1.2em; }
+h1,h2,h3,h4 { margin:0; font-weight:500; line-height:1.06; letter-spacing:-.045em; }
+h1 { font-size:clamp(3.5rem,8vw,8.5rem); }
+h2 { font-size:clamp(2.5rem,5vw,5rem); }
+h3 { font-size:clamp(1.35rem,2vw,2rem); letter-spacing:-.035em; }
+figure { margin:0; }
+ul,ol { padding-left:1.4em; }
+:focus-visible { outline:3px solid var(--uw-blue); outline-offset:5px; }
+main :is(section,h2,h3)[id] { scroll-margin-top:28px; }
+:where(main,.site-footer) :is(a,button,input,summary,select,textarea,[tabindex]) { scroll-margin-block:100px; }
+.container { width:100%; max-width:var(--max-width); margin-inline:auto; padding-inline:clamp(24px,3.55vw,64px); }
+.section { padding-block:clamp(72px,8vw,136px); }
+.eyebrow { font-size:.8rem; line-height:1.4; font-weight:500; letter-spacing:.01em; margin:0 0 24px; }
+.tag { display:inline-flex; align-items:center; padding:5px 12px; border:1px solid currentColor; border-radius:99px; font-size:.75rem; line-height:1.3; margin-bottom:24px; }
+.prose { max-width:66ch; font-size:clamp(1rem,1.5vw,1.1875rem); line-height:1.8; }
+.prose p:last-child { margin-bottom:0; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:20px; min-height:50px; padding:13px 23px; border:1px solid transparent; border-radius:15px; font-size:.9375rem; line-height:1.5; font-weight:500; text-decoration:none; transition:background .2s,color .2s,transform .2s; }
+.btn > span { transition:transform .25s; }
+.btn:hover > span { transform:translate(3px,-2px); }
+.btn:hover { transform:translateY(-2px); }
+.btn--primary { background:var(--pink); color:#00213d; }
+.btn--secondary { background:var(--paper-pink); color:var(--uw-blue-dark); }
+.btn--dark { background:var(--uw-blue-dark); color:white; }
+.btn--white { background:white; color:var(--uw-blue-dark); }
+.btn--outline { border-color:currentColor; background:transparent; color:inherit; }
+.text-link { display:inline-flex; align-items:center; gap:12px; min-height:44px; font-size:.9375rem; }
+.paper-pink { background:var(--paper-pink); }
+.paper-blue { background:var(--paper-blue); }
+.visually-hidden { position:absolute!important; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+.skip-link { position:fixed; top:12px; left:12px; transform:translateY(-200%); background:white; padding:12px 20px; z-index:200; }
+.skip-link:focus { transform:none; }
+@media(max-width:720px) { .container { padding-inline:24px; } h1 { font-size:clamp(3rem,12vw,4.5rem); } .section { padding-block:72px; } .btn { padding-inline:20px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
+@media print { .site-header,.scroll-to-top,.story-drawer,.site-footer { display:none!important; } body { background:white!important; } }

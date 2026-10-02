@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { SITE } from '../data/site'
+import { submissionKey, submitForm } from '../lib/submitForm'
 import './SignupForm.css'
 
 type TeamStatus = 'yes' | 'no' | 'looking' | ''
@@ -38,6 +39,14 @@ export default function SignupForm() {
   const [form, setForm] = useState<FormState>(INITIAL_STATE)
   const [status, setStatus] = useState<Status>('idle')
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
+  const [errorMessage, setErrorMessage] = useState('')
+  const [website, setWebsite] = useState('')
+  const request = useRef<{ content: string; id: string } | null>(null)
+  const inFlight = useRef(false)
+  const formId = useId()
+  const successHeading = useRef<HTMLHeadingElement>(null)
+  // The focused submit button disappears on success, so focus lands on the confirmation instead of the page.
+  useEffect(() => { if (status === 'success') successHeading.current?.focus() }, [status])
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -60,42 +69,37 @@ export default function SignupForm() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!validate()) return
+    if (inFlight.current) return
+    const formElement = e.currentTarget as HTMLFormElement
+    if (!validate()) {
+      // Focus the first field to fix, so the submit button does not jump away under a pointer left with nothing to do.
+      requestAnimationFrame(() => formElement.querySelector<HTMLElement>('[aria-invalid="true"], fieldset:has(.signup-error) input')?.focus())
+      return
+    }
 
+    inFlight.current = true
     setStatus('submitting')
+    setErrorMessage('')
 
-    const payload = new URLSearchParams({
+    const payload = {
+      action: 'signup',
       name: form.name.trim(),
       email: form.email.trim(),
       program: form.program.trim(),
       year: form.year,
       phone: form.phone.trim(),
       teamStatus: form.teamStatus,
-      submittedAt: new Date().toISOString(),
-      source: 'uwindsor-hultprize-site',
-    })
-
-    if (!SITE.formEndpoint) {
-      // No endpoint configured yet (local/dev preview), so report an error.
-      console.warn('VITE_FORM_ENDPOINT is not set; form submission skipped.')
-      setStatus('error')
-      return
+      website,
     }
-
-    try {
-      // Google Apps Script web apps don't return CORS headers we can read,
-      // so we send a simple (no-preflight) request and treat a non-throwing
-      // fetch as success. Genuine offline/network failures still land in catch.
-      await fetch(SITE.formEndpoint, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: payload.toString(),
-      })
+    request.current = submissionKey(payload, request.current)
+    const result = await submitForm(payload, request.current.id)
+    inFlight.current = false
+    if (result.ok) {
       setStatus('success')
       setForm(INITIAL_STATE)
-    } catch (err) {
-      console.error('Sign-up submission failed', err)
+      request.current = null
+    } else {
+      setErrorMessage(result.message)
       setStatus('error')
     }
   }
@@ -103,7 +107,8 @@ export default function SignupForm() {
   if (status === 'success') {
     return (
       <div className="signup-success" role="status">
-        <h3>You're on the list! 🎉</h3>
+        <span className="signup-success__mark" aria-hidden="true">✓</span>
+        <h3 ref={successHeading} tabIndex={-1}>You're on the list.</h3>
         <p>
           Thanks for signing up. We'll be in touch by email with next steps.
         </p>
@@ -116,7 +121,7 @@ export default function SignupForm() {
           .
         </p>
         <p className="signup-disclaimer"><a href={SITE.signalRegisteredUrl} target="_blank" rel="noopener noreferrer">Join the registered teams chat ↗</a></p>
-        <button className="btn btn--dark" onClick={() => setStatus('idle')}>
+        <button type="button" className="btn btn--dark" onClick={() => setStatus('idle')}>
           Submit another response
         </button>
       </div>
@@ -124,50 +129,68 @@ export default function SignupForm() {
   }
 
   return (
-    <form className="signup-form" onSubmit={handleSubmit} noValidate>
+    <form className="signup-form" onSubmit={handleSubmit} noValidate aria-busy={status === 'submitting'}>
+      <div className="form-trap" aria-hidden="true">
+        <label>Leave this blank<input name="website" autoComplete="off" tabIndex={-1} value={website} onChange={e => setWebsite(e.target.value)} /></label>
+      </div>
       <div className="signup-form__grid">
         <label className="signup-field">
           <span>Full name *</span>
           <input
             type="text"
+            name="name"
+            maxLength={120}
+            required
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             autoComplete="name"
             aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? `${formId}-name-error` : undefined}
           />
-          {errors.name && <em className="signup-error">{errors.name}</em>}
+          {errors.name && <em className="signup-error" id={`${formId}-name-error`}>{errors.name}</em>}
         </label>
 
         <label className="signup-field">
           <span>Email *</span>
           <input
             type="email"
+            name="email"
+            maxLength={254}
+            required
             value={form.email}
             onChange={(e) => update('email', e.target.value)}
             autoComplete="email"
             aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? `${formId}-email-error` : undefined}
           />
-          {errors.email && <em className="signup-error">{errors.email}</em>}
+          {errors.email && <em className="signup-error" id={`${formId}-email-error`}>{errors.email}</em>}
         </label>
 
         <label className="signup-field">
           <span>Program *</span>
           <input
             type="text"
+            name="program"
+            maxLength={160}
+            required
             value={form.program}
             onChange={(e) => update('program', e.target.value)}
             placeholder="e.g. Mechanical Engineering"
             aria-invalid={!!errors.program}
+            aria-describedby={errors.program ? `${formId}-program-error` : undefined}
           />
-          {errors.program && <em className="signup-error">{errors.program}</em>}
+          {errors.program && <em className="signup-error" id={`${formId}-program-error`}>{errors.program}</em>}
         </label>
 
         <label className="signup-field">
           <span>Year *</span>
           <select
+            name="year"
+            required
             value={form.year}
             onChange={(e) => update('year', e.target.value)}
             aria-invalid={!!errors.year}
+            aria-describedby={errors.year ? `${formId}-year-error` : undefined}
           >
             <option value="" disabled>
               Select your year
@@ -178,13 +201,15 @@ export default function SignupForm() {
               </option>
             ))}
           </select>
-          {errors.year && <em className="signup-error">{errors.year}</em>}
+          {errors.year && <em className="signup-error" id={`${formId}-year-error`}>{errors.year}</em>}
         </label>
 
         <label className="signup-field">
-          <span>Phone number (optional, to join the chat)</span>
+          <span>Phone number <small>Optional</small></span>
           <input
             type="tel"
+            name="phone"
+            maxLength={40}
             value={form.phone}
             onChange={(e) => update('phone', e.target.value)}
             autoComplete="tel"
@@ -192,7 +217,7 @@ export default function SignupForm() {
           />
         </label>
 
-        <fieldset className="signup-field signup-field--radio">
+        <fieldset className="signup-field signup-field--radio" aria-describedby={errors.teamStatus ? `${formId}-team-error` : undefined}>
           <legend>Do you have a team? *</legend>
           <div className="signup-radio-group">
             {(
@@ -205,16 +230,17 @@ export default function SignupForm() {
               <label key={value} className="signup-radio">
                 <input
                   type="radio"
-                  name="teamStatus"
+                  name={`${formId}-teamStatus`}
                   value={value}
                   checked={form.teamStatus === value}
+                  aria-invalid={!!errors.teamStatus}
                   onChange={() => update('teamStatus', value)}
                 />
                 <span>{label}</span>
               </label>
             ))}
           </div>
-          {errors.teamStatus && <em className="signup-error">{errors.teamStatus}</em>}
+          {errors.teamStatus && <em className="signup-error" id={`${formId}-team-error`}>{errors.teamStatus}</em>}
         </fieldset>
       </div>
 
@@ -223,7 +249,7 @@ export default function SignupForm() {
         className="btn btn--dark btn--block"
         disabled={status === 'submitting'}
       >
-        {status === 'submitting' ? 'Submitting…' : 'Sign up'}
+        {status === 'submitting' ? 'Saving your details…' : 'Keep me in the loop'}
       </button>
 
       <p className="signup-disclaimer">
@@ -237,8 +263,7 @@ export default function SignupForm() {
 
       {status === 'error' && (
         <p className="signup-error signup-error--form" role="alert">
-          Something went wrong sending your response. Please try again, or
-          email us directly at{' '}
+          {errorMessage}{' '}
           <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.
         </p>
       )}

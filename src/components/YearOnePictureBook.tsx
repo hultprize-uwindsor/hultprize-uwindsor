@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ThreeDImagePageflip, type PageFlipLeaf, type ThreeDImagePageflipHandle } from '../lightswind/ThreeDImagePageflip'
 import { CAMPUS_PHOTOS, YEAR_ONE_PHOTOS } from '../data/assets'
 import './YearOnePictureBook.css'
@@ -42,6 +42,7 @@ export default function YearOnePictureBook() {
   const [turned, setTurned] = useState(1)
   const [pageWidth, setPageWidth] = useState(230)
   const [reducedMotion, setReducedMotion] = useState(false)
+  const pageHeight = Math.round(pageWidth * 1.43)
 
   useEffect(() => {
     let cancelled = false
@@ -56,13 +57,14 @@ export default function YearOnePictureBook() {
     return () => { cancelled = true }
   }, [])
 
-  useEffect(() => {
+  // Measured before the first paint, so the reserved space is right from the first frame and the copy beside it never jumps.
+  useLayoutEffect(() => {
     const element = stage.current
     if (!element) return
-    const observer = new ResizeObserver(([entry]) => {
-      // About 12% smaller than filling the stage, so the book sits with some room around it.
-      setPageWidth(Math.min(475, Math.max(100, (entry.contentRect.width - 40) / 2 * 0.88)))
-    })
+    // About 12% smaller than filling the stage, so the book sits with some room around it. The stage has no padding.
+    const fit = (width: number) => setPageWidth(Math.min(475, Math.max(100, (width - 40) / 2 * 0.88)))
+    fit(element.clientWidth)
+    const observer = new ResizeObserver(([entry]) => fit(entry.contentRect.width))
     observer.observe(element)
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => setReducedMotion(preference.matches)
@@ -79,12 +81,12 @@ export default function YearOnePictureBook() {
       <div className="picture-book-copy">
         <p className="eyebrow">2025 to 2026</p>
         <h2 id="pictures-title">Year one in pictures</h2>
-        <p>Student pitches, conversations around the tables, and a community coming together for Windsor’s first Hult Prize campus round.</p>
-        <p>Take a look back at the people and moments that made our first year.</p>
+        <p>Photos from Windsor’s first campus round: teams, pitches and judges.</p>
         <p className="picture-book-hint">Click a page, or use the buttons, to turn it.</p>
       </div>
       {/* Arrow keys turn pages only while focus is in the book; clicking a page focuses it. */}
-      <div ref={stage} className="picture-book-stage" role="region" aria-label="Hult Prize in pictures" tabIndex={-1} onKeyDown={e => {
+      {/* Holds the book's space while its photos load: page + 40 stage + 48 padding, then 24 + 48 for the buttons. */}
+      <div ref={stage} className="picture-book-stage" style={{ minHeight: pageHeight + 160 }} role="region" aria-label="Hult Prize in pictures" tabIndex={-1} onKeyDown={e => {
         if (e.key === 'ArrowRight' && turned < pages.length - 1) book.current?.next()
         if (e.key === 'ArrowLeft' && turned > 1) book.current?.prev()
       }}>
@@ -98,7 +100,7 @@ export default function YearOnePictureBook() {
           keepOpen
           defaultTurnedIndex={1}
           pageWidth={pageWidth}
-          pageHeight={Math.round(pageWidth * 1.43)}
+          pageHeight={pageHeight}
           shadowIntensity={0}
           accentColor="#ffb4df"
           duration={reducedMotion ? 0 : 0.65}

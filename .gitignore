@@ -27,6 +27,9 @@ dist-ssr
 .env
 .env.local
 
+# Local agent checkouts
+.claude/worktrees/
+
 
 # Keep original event photography local; commit only web-sized exports.
 public/images/local-event-photos-2026/

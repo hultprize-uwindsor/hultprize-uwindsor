@@ -15,48 +15,48 @@ export const COMMUNITY_PARTNERS: CommunityPartner[] = [
   {
     slug: 'fusion',
     name: 'Fusion',
-    subtitle: 'Where Hult Prize UWindsor is based on campus.',
+    subtitle: 'Our campus headquarters.',
     url: 'https://www.uwindsor.ca/fusion/',
     logo: '/images/partners/uwindsor.png',
     // Sources: uwindsor.ca/fusion and uwindsor.ca/fusion/304/your-space-create.
     about: [
-      'Fusion, the Fusion Innovation and Entrepreneurship Network, is a university-wide platform at the University of Windsor, within the Office of Innovation, Partnerships and Entrepreneurship. It supports students, faculty, researchers and graduates from across the University by creating pathways into entrepreneurship, innovation and commercialisation.',
-      'The Fusion Reactor offers flexible space for individual work, team collaboration, mentorship, workshops, events and venture development, and the University of Windsor MakerSpace gives students tools and resources to help turn ideas into prototypes.',
+      'Fusion is the University of Windsor’s Innovation and Entrepreneurship Network. It supports students, faculty, researchers and graduates through the Office of Innovation, Partnerships and Entrepreneurship.',
+      'The Fusion Reactor provides space for team work, mentoring, workshops and events. The University’s MakerSpace provides tools and resources for prototyping.',
     ],
     // Opening hours are left out: Fusion lists 8:30am to 4:30pm, and our Contact page says 9am to 4pm.
     withUs: [
-      'Hult Prize UWindsor sits inside Fusion, a hub on campus for people building things. Our teams work there, argue about their business models there, and run into people building their own things. We run sessions and events out of it through the year.',
+      'Fusion is our campus headquarters. Teams meet here to develop their businesses, attend workshops and connect with other students.',
       'Fusion is on the 2nd floor of the Joyce Entrepreneurship Centre, 2455 Wyandotte St. W., at the southeast corner of Wyandotte Street West and Sunset Avenue.',
     ],
   },
   {
     slug: 'sterling',
     name: 'Sterling Cybersecurity and Advisory Group',
-    subtitle: 'Running our brand and pitch bootcamp.',
+    subtitle: 'Our brand and pitch workshop partner.',
     url: 'https://www.sterlinginfo.com/',
     logo: '/images/partners/sterling-cybersecurity-advisory-group.png',
     // Sources: sterlinginfo.com, sterlinginfo.com/who-we-are and sterlinginfo.com/wesecure.
     about: [
-      'Sterling Cybersecurity and Advisory Group provides cybersecurity, governance, risk and compliance services to organisations. It started in 1993 as a hardware company and, by 2005, had moved fully into information security and operational risk consulting.',
-      'It oversees WEsecure, a free six-month cybersecurity program for Windsor Essex startups, run with WEtech Alliance and the University of Windsor School of Computer Science.',
+      'Sterling provides cybersecurity, governance, risk and compliance services. Founded in 1993, it moved into information security and operational risk consulting in 2005.',
+      'Through WEsecure, Sterling also offers a free six-month cybersecurity program for Windsor-Essex startups with WEtech Alliance and UWindsor’s School of Computer Science.',
     ],
     withUs: [
-      'Sterling Cybersecurity and Advisory Group runs our brand and pitch bootcamp with us: four weekly sessions from the week of November 14, and a fifth in early January after exams.',
+      'Sterling Cybersecurity and Advisory Group supports brand and pitch training. This year’s workshop series runs from November 7, 2026, through January 9, 2027, with five sessions.',
     ],
   },
   {
     slug: 'wetech',
     name: 'WEtech Alliance',
-    subtitle: 'Technology and innovation ecosystem partner.',
+    subtitle: 'Our technology and innovation partner.',
     url: 'https://www.wetech-alliance.com/',
     logo: '/images/partners/wetech-alliance.png',
     // Source: wetech-alliance.com/who-we-are.
     about: [
-      'WEtech Alliance has supported technology and innovation in the Windsor-Essex and Chatham-Kent regions of Ontario since 2011. It is a non-profit organisation that gives entrepreneurs and companies business services, training, intellectual property and commercialisation support, mentorship and connections, to help them bring new ideas to market and scale up.',
+      'WEtech Alliance is a non-profit supporting technology businesses in Windsor-Essex and Chatham-Kent. Since 2011, it has provided business advice, training, mentoring and support for intellectual property and commercialisation.',
       'It is one of seventeen Regional Innovation Centres in Ontario.',
     ],
     withUs: [
-      'WEtech Alliance was one of the ten organisations that funded Hult Prize UWindsor in its first year, 2025 to 2026, as our technology and innovation ecosystem partner. It is one of our community partners.',
+      'WEtech Alliance helped fund our first season in 2025–2026 as the technology and innovation partner. Its support was part of the ten-partner effort that brought the campus competition to Windsor.',
     ],
   },
 ]

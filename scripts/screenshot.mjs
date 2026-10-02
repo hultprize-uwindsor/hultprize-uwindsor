@@ -14,7 +14,8 @@ const targets = [
 
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 for (const t of targets) {
-  const page = await browser.newPage({ viewport: { width: t.width, height: t.height } })
+  // Full-page shots never scroll, so without reduced motion the groups below the fold would stay faint, waiting to arrive.
+  const page = await browser.newPage({ viewport: { width: t.width, height: t.height }, reducedMotion: 'reduce' })
   await page.goto(t.url, { waitUntil: 'networkidle' })
   await page.screenshot({ path: path.join(outDir, `${t.name}.png`), fullPage: true })
   await page.close()

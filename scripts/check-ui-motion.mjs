@@ -1,0 +1,91 @@
+import { chromium } from 'playwright'
+import assert from 'node:assert/strict'
+import { mkdir } from 'node:fs/promises'
+const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
+const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {})
+const errors = []
+await mkdir('/tmp/hult-ui-motion', { recursive: true })
+try {
+  for (const reducedMotion of ['no-preference', 'reduce']) {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion })
+    page.on('pageerror', error => errors.push(error.message))
+    await page.goto(base, { waitUntil: 'domcontentloaded' })
+    const programme = page.locator('.program-menu').first()
+    const reveal = programme.locator('.program-menu__reveal')
+    const panel = programme.locator('.program-menu__panel')
+    assert(await reveal.evaluate(el => el.inert), 'closed desktop links are inert')
+    await programme.locator('summary').hover()
+    await page.waitForFunction(() => document.querySelector('.program-menu').open)
+    assert.equal(await reveal.evaluate(el => el.inert), false)
+    const transition = await panel.evaluate(el => getComputedStyle(el).transition)
+    if (reducedMotion === 'no-preference') assert(transition.includes('0.6s cubic-bezier(0.23, 1, 0.32, 1)'), 'desktop reveal uses reference timing')
+    else assert(transition.includes('none'))
+    await page.waitForTimeout(650)
+    await page.screenshot({ path: `/tmp/hult-ui-motion/desktop-menu-${reducedMotion}.png` })
+    await page.mouse.click(30, 250)
+    assert.equal(await programme.evaluate(el => el.open), false)
+    await programme.locator('summary').focus()
+    await page.keyboard.press('ArrowUp')
+    assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), '/about', 'keyboard can focus newly opened links')
+    await page.keyboard.press('Escape')
+    assert(await programme.locator('summary').evaluate(el => el === document.activeElement))
+    await page.goto(`${base}/partners?partner=fusion`, { waitUntil: 'domcontentloaded' })
+    const drawer = page.locator('.story-drawer')
+    await drawer.waitFor({ state: 'visible' })
+    assert(await drawer.evaluate(el => el.matches(':modal')))
+    assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden')
+    if (reducedMotion === 'no-preference') {
+      const openAnimation = await drawer.locator('.story-drawer__panel').evaluate(el => el.getAnimations().map(a => ({ frames: a.effect.getKeyframes(), timing: a.effect.getTiming() })))
+      assert(openAnimation.some(a => a.timing.duration === 600 && a.frames[0].transform === 'translateX(120%)'), 'desktop drawer moves in from the right')
+    }
+    await page.waitForTimeout(650)
+    await drawer.getByRole('button', { name: 'Close panel' }).click()
+    if (reducedMotion === 'no-preference') assert(await drawer.isVisible(), 'drawer remains modal through its exit animation')
+    await drawer.waitFor({ state: 'hidden' })
+    assert.equal(await page.evaluate(() => document.body.style.overflow), '')
+    for (const width of [390, 768, 1180]) {
+      await page.setViewportSize({ width, height: 844 })
+      await page.goto(base, { waitUntil: 'domcontentloaded' })
+      const toggle = page.getByRole('button', { name: 'Menu', exact: true })
+      const menu = page.getByRole('dialog', { name: 'Main menu' })
+      await toggle.click()
+      assert(await menu.isVisible())
+      if (reducedMotion === 'no-preference') {
+        const motion = await menu.locator('.mobile-navigation__background').evaluate(el => el.getAnimations().map(a => ({ frames: a.effect.getKeyframes(), timing: a.effect.getTiming() })))
+        assert(motion.some(a => a.timing.duration === 800 && a.frames[0].transform === 'translateY(100%)'), 'mobile menu wipes up from bottom')
+      }
+      await page.keyboard.press('Tab')
+      assert(await menu.evaluate(el => el.contains(document.activeElement)), 'focus stays within animated modal')
+      await page.waitForTimeout(850)
+      if (width === 390) await page.screenshot({ path: `/tmp/hult-ui-motion/mobile-menu-${reducedMotion}.png` })
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+      await page.keyboard.press('Escape')
+      await menu.waitFor({ state: 'hidden' })
+      assert.equal(await page.evaluate(() => document.body.style.overflow), '')
+      assert(await toggle.evaluate(el => el === document.activeElement))
+      await toggle.click()
+      await menu.getByRole('link', { name: 'Year one', exact: true }).click()
+      await page.waitForURL('**/year-one')
+      await menu.waitFor({ state: 'hidden' })
+      await toggle.click()
+      await page.setViewportSize({ width: 1440, height: 900 })
+      await menu.waitFor({ state: 'hidden' })
+      assert.equal(await page.evaluate(() => document.body.style.overflow), '', 'resize clears the modal lock')
+    }
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto(`${base}/partners?partner=fusion`, { waitUntil: 'domcontentloaded' })
+    await drawer.waitFor({ state: 'visible' })
+    if (reducedMotion === 'no-preference') {
+      const motion = await drawer.locator('.story-drawer__panel').evaluate(el => el.getAnimations().map(a => a.effect.getKeyframes()))
+      assert(motion.some(frames => frames[0].transform === 'translateY(120%)'), 'mobile drawer rises from bottom')
+    }
+    await page.waitForTimeout(650)
+    await page.screenshot({ path: `/tmp/hult-ui-motion/mobile-drawer-${reducedMotion}.png` })
+    await page.keyboard.press('Escape')
+    await drawer.waitFor({ state: 'hidden' })
+    assert.equal(await page.evaluate(() => document.body.style.overflow), '')
+    await page.close()
+  }
+  assert.deepEqual(errors, [])
+  console.log('Passed: measured desktop menu timing; keyboard, inert links, animated mobile enter/exit, focus and resize; desktop/mobile drawer direction and exit; reduced motion; no runtime errors.')
+} finally { await browser.close() }

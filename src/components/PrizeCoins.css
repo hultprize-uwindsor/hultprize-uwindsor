@@ -1,0 +1,14 @@
+.prize-coins {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .prize-coins { pointer-events: none; }
+}

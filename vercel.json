@@ -1,8 +1,64 @@
 {
   "redirects": [
-    { "source": "/go", "destination": "/compete#signup", "statusCode": 307 }
+    {
+      "source": "/go",
+      "destination": "/compete#signup",
+      "statusCode": 307
+    },
+    {
+      "source": "/team",
+      "destination": "/about#team",
+      "statusCode": 308
+    }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/about",
+      "destination": "/about/index.html"
+    },
+    {
+      "source": "/year-one",
+      "destination": "/year-one/index.html"
+    },
+    {
+      "source": "/this-year",
+      "destination": "/this-year/index.html"
+    },
+    {
+      "source": "/compete",
+      "destination": "/compete/index.html"
+    },
+    {
+      "source": "/partners",
+      "destination": "/partners/index.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact/index.html"
+    },
+    {
+      "source": "/events",
+      "destination": "/events/index.html"
+    },
+    {
+      "source": "/partners/fusion",
+      "destination": "/partners/fusion/index.html"
+    },
+    {
+      "source": "/partners/sterling",
+      "destination": "/partners/sterling/index.html"
+    },
+    {
+      "source": "/partners/wetech",
+      "destination": "/partners/wetech/index.html"
+    },
+    {
+      "source": "/events/registration-closes-november-20",
+      "destination": "/events/registration-closes-november-20/index.html"
+    },
+    {
+      "source": "/events/fusion-launch",
+      "destination": "/events/fusion-launch/index.html"
+    }
   ]
 }

@@ -1,143 +1,51 @@
-/* hultprize.org footer layout on UWindsor dark blue: a 6-2-2-2 column grid with ruled headings. */
-.site-footer {
-  margin-top: auto;
-  padding: 48px 0 0;
-  background: var(--uw-blue-dark);
-  color: #fff;
-  font-size: .875rem;
-  line-height: 1.5;
-}
-
-.site-footer__inner {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 40px 24px;
-}
-
-.site-footer__col {
-  grid-column: span 2;
-  min-width: 0;
-  overflow-wrap: break-word;
-}
-
-.site-footer__parent {
-  grid-column: span 6;
-}
-
-.site-footer h3,
-.site-footer h4 {
-  margin: 0 0 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--grey);
-  color: #fff;
-  font-size: .75rem;
-  font-weight: 500;
-  line-height: 1.33;
-}
-
-.site-footer h4 {
-  margin-top: 32px;
-}
-
-.site-footer__parent h3 {
-  max-width: 226px;
-}
-
-.site-footer__marks {
-  display: inline-block;
-  margin-bottom: 20px;
-}
-
-/* Same width as the heading rule above it. */
-.site-footer__marks img {
-  width: 226px;
-  height: auto;
-}
-
-.site-footer p,
-.site-footer address {
-  margin: 0 0 12px;
-  font-style: normal;
-}
-
-.site-footer__parent p {
-  max-width: 34ch;
-}
-
-.site-footer__links {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.site-footer a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.site-footer a:hover,
-.site-footer p a,
-.site-footer address a {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.site-footer a:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 4px;
-}
-
-.site-footer__date {
-  color: #fff;
-}
-
-/* 44px tap targets around 24px icons; the negative margin lines the first icon up with the text. */
-.site-footer__social {
-  display: flex;
-  margin: -10px 0 0 -10px;
-}
-
-.site-footer__social a {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  color: #fff;
-}
-
-.site-footer__bottom {
-  margin-top: 48px;
-  padding-bottom: 24px;
-  font-size: .75rem;
-}
-
-/* The rule sits on the paragraph so it spans the content column, not the container padding. */
-.site-footer__bottom p {
-  margin: 0;
-  padding-top: 24px;
-  border-top: 1px solid var(--grey);
-}
-
+.site-footer { padding: clamp(72px, 8vw, 128px) 0 calc(105px + env(safe-area-inset-bottom)); background: var(--paper-pink); color: var(--uw-blue-dark); font-size: 14px; line-height: 1.6; }
+.site-footer__invitation { display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; padding-bottom: clamp(56px, 7vw, 100px); }
+.site-footer__eyebrow { display: inline-flex; border: 1px solid rgb(0 43 81 / 25%); border-radius: 30px; padding: 5px 12px; margin-bottom: 30px; font-size: 12px; line-height: 1.4; }
+.site-footer__invitation h2 { margin: 0; font-size: clamp(45px, 5.6vw, 90px); line-height: 1.02; letter-spacing: -.06em; font-weight: 400; }
+.site-footer__invitation-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; max-width: 275px; padding-bottom: 5px; }
+.site-footer__invitation-actions > .btn { background: var(--pink); color: #00213d; border-color: var(--pink); border-radius: 15px; font-size: 16px; min-height: 55px; padding: 15px 24px; gap: 24px; }
+.site-footer__invitation-actions > .btn:hover { background: var(--uw-blue-dark); color: #fff; border-color: var(--uw-blue-dark); text-decoration: none; }
+.site-footer__invitation-actions p { font-size: 13px; line-height: 1.7; opacity: .8; }
+.site-footer__inner { display: grid; grid-template-columns: .75fr 1fr 1.2fr 1.3fr; gap: 24px; padding-top: 40px; border-top: 1px solid rgb(0 43 81 / 16%); }
+.site-footer__group { min-width: 0; overflow-wrap: break-word; }
+.site-footer__group > summary { display: flex; justify-content: space-between; align-items: center; min-height:44px; margin-bottom:12px; list-style: none; font-size: 13px; line-height: 1.5; color: #586579; }
+.site-footer__group > summary::-webkit-details-marker { display: none; }
+.site-footer__group > summary > span { display: none; }
+.site-footer__links { display: grid; gap:3px; list-style: none; margin: 0; padding: 0; }
+.site-footer__links a { display:inline-flex; align-items:center; min-width:44px; min-height:44px; padding-block:6px; gap:6px; }
+.site-footer a { color: inherit; text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.site-footer a:focus-visible, .site-footer summary:focus-visible { outline: 2px solid var(--uw-blue-dark); outline-offset: 4px; }
+.site-footer p, .site-footer address { margin: 0; font-style: normal; }
+.site-footer__directions { display:inline-flex; align-items:center; min-height:44px; margin-top:12px; gap:6px; }
+.site-footer__email { margin-top: 16px !important; font-size: 13px; }
+.site-footer__email > a { display:inline-block; min-height:44px; max-width:100%; padding-block:10px; overflow-wrap:anywhere; }
+.site-footer__email > span { display: block; margin-bottom: 2px; font-size: 12px; color: #586579; }
+.site-footer__social { display: flex; gap: 6px; margin-top: 24px; }
+.site-footer__social a { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid rgb(0 43 81 / 20%); border-radius: 50%; transition: background-color .2s; }
+.site-footer__social a:hover { background: #fff; }
+.site-footer__brand { display: block; width: min(100%, 1100px); margin: clamp(64px, 8vw, 128px) auto 44px; }
+.site-footer__brand img { display: block; width: 100%; height: auto; object-fit: contain; }
+.site-footer__bottom { display: flex; justify-content: space-between; gap: 24px; padding-top: 24px; border-top: 1px solid rgb(0 43 81 / 16%); font-size: 12px; color: #586579; }
 @media (max-width: 1000px) {
-  .site-footer__parent {
-    grid-column: 1 / -1;
-  }
-
-  .site-footer__col:not(.site-footer__parent) {
-    grid-column: span 4;
-  }
+  .site-footer__invitation { gap: 24px; }
+  .site-footer__inner { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
 }
-
-@media (max-width: 600px) {
-  .site-footer__col:not(.site-footer__parent) {
-    grid-column: span 6;
-  }
+@media (max-width: 700px) {
+  .site-footer { padding-block:64px calc(112px + env(safe-area-inset-bottom)); }
+  .site-footer__invitation { display: block; padding-bottom: 44px; }
+  .site-footer__eyebrow { margin-bottom: 24px; }
+  .site-footer__invitation h2 { font-size: clamp(44px, 8.9vw, 62px); letter-spacing: -.065em; }
+  .site-footer__invitation-actions { margin-top: 32px; gap: 16px; }
+  .site-footer__inner { display: block; padding-top: 0; }
+  .site-footer__group { border-bottom: 1px solid rgb(0 43 81 / 16%); }
+  .site-footer__group > summary { min-height: 66px; margin: 0; padding: 18px 0; font-size: 17px; color: var(--uw-blue-dark); cursor: pointer; }
+  .site-footer__group > summary > span { display: block; font-size: 23px; font-weight:300; line-height:1; transition:transform .2s; }
+  .site-footer__group[open] > summary > span { transform: rotate(45deg); }
+  .site-footer__group-content { padding: 4px 0 24px; }
+  .site-footer__links { gap: 4px; }
+  .site-footer__links a { display: inline-flex; align-items: center; min-height:44px; gap:6px; }
+  .site-footer__brand { margin-block: 52px 32px; }
+  .site-footer__bottom { flex-direction: column; gap: 8px; padding-top: 20px; }
 }
-
-@media (max-width: 400px) {
-  .site-footer__col:not(.site-footer__parent) {
-    grid-column: 1 / -1;
-  }
-}
+@media (prefers-reduced-motion: reduce) { .site-footer__social a { transition: none; } }

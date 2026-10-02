@@ -260,7 +260,7 @@ module.exports = plugin.withOptions(
       ".dark .border": {
         borderColor: "hsl(var(--border))",
       },
-      // Directional border variants — default to theme border color
+      // Directional border variants, defaulting to the theme border color
       ".border-t": {
         borderTopWidth: "1px",
         borderTopColor: "hsl(var(--border))",

@@ -9,7 +9,7 @@ export function PartnerGrid({ linked = false }: { linked?: boolean }) {
       <ThreeDScrollTriggerRow baseVelocity={.8} direction={1} aria-label="Year one partners">
         {PARTNERS.map(partner => {
           const content = <>{partner.individual ? <strong className="partner-person">{partner.name}</strong> : <div className="partner-placeholder">{partner.name}</div>}{!linked && <p>{partner.role}</p>}</>
-          return linked ? <Link className="partner-motion-card" key={partner.name} to="/year-one" aria-label={`${partner.name} — meet our year one partners`}>{content}</Link> : <a className="partner-motion-card" key={partner.name} href={partner.url} target="_blank" rel="noopener noreferrer">{content}</a>
+          return linked ? <Link className="partner-motion-card" key={partner.name} to="/year-one" aria-label={`${partner.name}: meet our year one partners`}>{content}</Link> : <a className="partner-motion-card" key={partner.name} href={partner.url} target="_blank" rel="noopener noreferrer">{content}</a>
         })}
       </ThreeDScrollTriggerRow>
     </ThreeDScrollTriggerContainer>
