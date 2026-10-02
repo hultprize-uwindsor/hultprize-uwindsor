@@ -1,5 +1,5 @@
 import EventTimeline from './EventTimeline'
-import { RevealText, RollingLabel } from './MotionText'
+import { HeroTitle, RevealText, RollingLabel } from './MotionText'
 import type { ReactNode } from 'react'
 import { SITE } from '../data/site'
 
@@ -8,7 +8,7 @@ export function RegisterButton({ children = 'Register your team' }: { children?:
 }
 
 export function PageHeader({ title, subtitle }: { title: string; subtitle: string }) {
-  return <header className="page-heading"><div className="container"><div><p className="eyebrow">Hult Prize · UWindsor</p><h1 data-text-reveal><RevealText>{title}</RevealText></h1></div><p className="page-heading__intro">{subtitle}</p></div></header>
+  return <header className="page-heading"><div className="container"><div><p className="eyebrow">Hult Prize · UWindsor</p><HeroTitle>{title}</HeroTitle></div><p className="page-heading__intro">{subtitle}</p></div></header>
 }
 
 export function Section({ eyebrow, title, children, tint = '', id }: { eyebrow?: string; title?: string; children: ReactNode; tint?: string; id?: string }) {

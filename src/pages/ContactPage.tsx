@@ -1,4 +1,4 @@
-import { RevealText, RollingLabel } from '../components/MotionText'
+import { HeroTitle, RevealText, RollingLabel } from '../components/MotionText'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import copy from '../data/copy.json'
@@ -71,7 +71,7 @@ const rankOf = (role: string, topic: string) => role === topic ? '' : role.split
 export default function ContactPage() {
   return <div className="contact-page">
     <header className="page-heading contact-hero"><div className="container">
-      <div><p className="eyebrow">Hult Prize · UWindsor</p><h1 data-text-reveal><RevealText>Find us.</RevealText></h1></div>
+      <div><p className="eyebrow">Hult Prize · UWindsor</p><HeroTitle>Find us.</HeroTitle></div>
       <div className="contact-hero__intro"><p>Visit Fusion, ask about the competition or contact the team.</p><div className="contact-actions">
         <Link className="btn btn--dark" to="?enquiry=general" state={{drawer:true}}><RollingLabel>Ask the team</RollingLabel><span aria-hidden="true">↗</span></Link>
         <a className="btn btn--white" href={DIRECTIONS} target="_blank" rel="noopener noreferrer"><RollingLabel>Get directions</RollingLabel><NewTab glued={false} /></a>
@@ -139,8 +139,8 @@ export default function ContactPage() {
       <ul className="contact-people">{whoToAsk.map(({ topic, more, members }) => <li key={topic} className={`contact-people__group${topic === 'Campus Director' ? ' contact-people__group--general' : ''}`}>
         <div className="contact-people__heading"><h3>{topic}</h3>{topic === 'Campus Director' && <p>For anything else, start here.</p>}</div>
         <ul className="contact-people__names">{members.map(([name, role, email, portrait]) => { const rank = rankOf(role, topic); return <li key={email}>
-          <div className="contact-people__identity"><Link className="contact-people__profile" to={`?member=${portrait}`} state={{drawer:true}}><strong>{name}</strong><span aria-hidden="true">↗</span><span className="visually-hidden"> — view profile</span></Link>{rank && <span className="contact-people__rank">{rank}</span>}</div>
-          <a href={`mailto:${email}`}><Icon name="email" /><span><EmailText address={email} /></span><span className="visually-hidden"> — email {name}</span></a>
+          <div className="contact-people__identity"><Link className="contact-people__profile" to={`?member=${portrait}`} state={{drawer:true}}><strong>{name}</strong><span aria-hidden="true">↗</span><span className="visually-hidden">, view profile</span></Link>{rank && <span className="contact-people__rank">{rank}</span>}</div>
+          <a href={`mailto:${email}`}><Icon name="email" /><span><EmailText address={email} /></span><span className="visually-hidden">, email {name}</span></a>
         </li> })}</ul>
         {more && <p className="contact-people__more"><More to={more[0]}>{more[1]}</More></p>}
       </li>)}</ul>

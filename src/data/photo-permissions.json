@@ -1,5 +1,13 @@
 {
   "approvedForPublication": false,
+  "homeGalleryFiles": [
+    "team-pitch.jpg",
+    "pitch-feedback.jpg",
+    "student-applause.jpg",
+    "campus-presentation.jpg",
+    "teams-onstage.jpg",
+    "community-onstage.jpg"
+  ],
   "captionDate": "February 5, 2026",
   "dateSource": "Camera metadata; awaiting event/date confirmation"
 }

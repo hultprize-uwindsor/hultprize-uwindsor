@@ -35,12 +35,15 @@ export default defineConfig(({ mode }) => {
           // The redesign self-hosts licensed Inter; retired font files are not shipped.
           ['fonts', 'ef-circular-latin.woff2'].join(sep),
           ['fonts', 'ef-circular-utilities.woff2'].join(sep),
-          ...(!photoPermissions.approvedForPublication ? [['images', 'year-one'].join(sep)] : []),
         ]
         cpSync(publicDir, resolve(options.dir ?? 'dist'), {
           recursive: true,
           filter(source) {
             const path = relative(publicDir, source)
+            const eventFolder = ['images', 'year-one'].join(sep)
+            if (!photoPermissions.approvedForPublication && path.startsWith(`${eventFolder}${sep}`)) {
+              return photoPermissions.homeGalleryFiles.some(file => path === `${eventFolder}${sep}${file}`)
+            }
             return !excluded.some(folder => path === folder || path.startsWith(`${folder}${sep}`))
           },
         })

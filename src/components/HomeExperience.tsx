@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CAMPUS_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/assets'
-import { RegisterButton } from './PageParts'
-import { RevealText, RollingLabel } from './MotionText'
 import BrandScene from './BrandScene'
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
@@ -121,23 +119,4 @@ export function JourneyExperience() {
       </div>)}</div>
     </div></div>
   </section>
-}
-
-export function ProgrammeFeature() {
-  const ref = useRef<HTMLElement>(null)
-  useEffect(() => {
-    const el = ref.current!
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)')
-    let frame = 0
-    const draw = () => {
-      frame = 0
-      const rect = el.getBoundingClientRect()
-      const progress = reduce.matches ? 1 : clamp((innerHeight - rect.top) / (innerHeight * .8))
-      el.style.setProperty('--feature-reveal', String(progress))
-    }
-    const update = () => { if (!frame) frame = requestAnimationFrame(draw) }
-    draw(); addEventListener('scroll', update, { passive: true }); addEventListener('resize', update); reduce.addEventListener('change', update)
-    return () => { cancelAnimationFrame(frame); removeEventListener('scroll', update); removeEventListener('resize', update); reduce.removeEventListener('change', update) }
-  }, [])
-  return <section ref={ref} className="programme-feature"><div className="programme-feature__scene"><BrandScene variant="blue" controls /></div><div className="container"><span className="tag">The 2026–2027 programme</span><h2 data-text-reveal><RevealText>Your idea.<br />Room to grow.</RevealText></h2><p>Workshops, mentors and a team beside you.<br />From your first pitch to the next stage.</p><div className="hero-actions"><RegisterButton /><Link to="/this-year" className="btn btn--outline"><RollingLabel>Explore the programme</RollingLabel><span aria-hidden="true">↗</span></Link></div></div></section>
 }

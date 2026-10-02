@@ -19,7 +19,7 @@ export const socialImage = (path: string) => `/images/social/${path === '/' ? 'h
 const page = (path: string, title: string, description: string, type: PageMetadata['type'] = 'website'): PageMetadata => ({
   path, title, description, type,
   image: socialImage(path),
-  imageAlt: `${title} — ${META_SITE_NAME}`,
+  imageAlt: `${title}: ${META_SITE_NAME}`,
 })
 
 // One source for client navigation, static HTML heads, social cards and the sitemap.

@@ -44,14 +44,8 @@
 .journey-experience .is-active .journey-visual { transform:translate3d(0,0,0) rotate(0deg) scale(1); opacity:1; }
 .journey-metric { transform:translateY(80px) rotate(-7deg); transition:transform 1000ms cubic-bezier(.23,1,.32,1); }
 .is-active .journey-metric { transform:none; transition-delay:220ms; }
-/* The next colour field opens from a rounded inset to fill the viewport. */
-.programme-feature { --feature-reveal:0; overflow:clip; background:white; }
-.programme-feature__scene { position:absolute; inset:0; clip-path:inset(calc((1 - var(--feature-reveal)) * 9%) round calc((1 - var(--feature-reveal)) * 100px)); transform:scale(calc(.87 + var(--feature-reveal) * .13)); will-change:clip-path,transform; }
-.programme-feature .brand-scene { transform:scale(calc(1.15 - var(--feature-reveal) * .15)); }
-.home-hero [data-text-reveal] .reveal-word { overflow:clip; padding-bottom:.09em; margin-bottom:-.09em; }
 .home-hero { min-height:100svh; }
 .home-hero__inner { will-change:transform; }
-.programme-feature .scene-control { top:32px; right:32px; }
 @media(max-width:1100px) { .floating-intro .floating-card { width:195px; padding:20px; } .intro-action { gap:24px; } .intro-action > span { width:64px; height:64px; border-radius:18px; font-size:48px; } }
 @media(max-width:760px) {
  .home-hero { padding-top:150px; padding-bottom:110px; }
@@ -76,10 +70,6 @@
  .journey-copy > :nth-child(3) { min-height:5.1em; }
  .journey-word { font-size:clamp(3.5rem,16vw,6rem); }
  .journey-metric { max-width:calc(100% - 32px); padding:16px; gap:16px; }
- .programme-feature__scene { clip-path:inset(calc((1 - var(--feature-reveal)) * 5%) round calc((1 - var(--feature-reveal)) * 40px)); }
- .programme-feature { min-height:min(680px,100svh); padding-top:clamp(68px,12svh,110px); padding-bottom:110px; }
- .programme-feature h2 { font-size:clamp(2.5rem,11vw,5rem); }
- .programme-feature .scene-control { top:28px; right:24px; }
 }
 @media(max-width:380px) {
  .journey-tabs { gap:4px; }
@@ -95,7 +85,6 @@
  .journey-experience__sticky { padding-block:56px 100px; }
  .journey-experience__top { margin-bottom:32px; }
  .journey-visual,.journey-visual > img { min-height:0; height:300px; }
- .programme-feature { min-height:580px; padding-block:100px; }
 }
 @media(prefers-reduced-motion:reduce) {
  .floating-intro { height:auto; padding:96px 24px; }
@@ -106,8 +95,6 @@
  .intro-actions { display:none; }
  .journey-copy > *, .journey-experience .journey-visual, .journey-metric { transform:none!important; transition:none!important; }
  .journey-experience__stage { transition:none; }
- .programme-feature__scene { clip-path:none!important; transform:none!important; }
- .programme-feature .brand-scene { transform:none!important; }
 }
 @media(max-width:760px) and (prefers-reduced-motion:reduce) {
  .floating-intro__cards { grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }

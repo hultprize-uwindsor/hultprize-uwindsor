@@ -1,5 +1,7 @@
-/* Jeton's timing language: clipped characters, staggered label turnover, expo-out arrivals. */
-.reveal-word { display:inline-block; white-space:nowrap; padding-bottom:.12em; margin-bottom:-.12em; overflow:clip; vertical-align:bottom; }
+.hero-title { overflow:visible; padding-inline-end:.12em; padding-bottom:.12em; margin-bottom:-.12em; font-kerning:normal; }
+/* Settled text is never masked. Entrances get extra room for glyph overhang. */
+.reveal-word { display:inline-block; white-space:nowrap; padding-bottom:.12em; margin-bottom:-.12em; overflow:visible; vertical-align:bottom; }
+[data-reveal-mask="active"] .reveal-word { overflow:clip; padding-inline:.18em; margin-inline:-.18em; }
 .reveal-letter { display:inline-block; transform-origin:50% 100%; }
 [data-motion="waiting"] .reveal-letter { transform:translate3d(0,115%,0) rotate(9deg); }
 [data-motion="done"] .reveal-letter { transform:translate3d(0,0,0); transition:transform 950ms cubic-bezier(.23,1,.32,1); transition-delay:calc(min(var(--char-index), 45) * 12ms); }
@@ -17,6 +19,7 @@
 .btn:hover > .rolling-label { transform:none; }
 .btn > .rolling-label { transition:none; }
 @media(prefers-reduced-motion:reduce) {
+ [data-reveal-mask="active"] .reveal-word { overflow:visible; }
  [data-motion] .reveal-letter { transform:none!important; transition:none!important; }
  .rolling-label__char { transform:none!important; transition:none!important; }
  .rolling-label__row--next { visibility:hidden; }

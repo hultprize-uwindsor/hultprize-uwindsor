@@ -1,5 +1,10 @@
 import { Children, Fragment, isValidElement, type CSSProperties, type ReactNode } from 'react'
 
+/** Native text shaping keeps word endings and punctuation outside character masks. */
+export function HeroTitle({ children, id }: { children: ReactNode; id?: string }) {
+  return <h1 id={id} className="hero-title" data-hero-reveal>{children}</h1>
+}
+
 /** Two character tracks reproduce the staggered vertical label turnover. */
 export function RollingLabel({ children }: { children: string }) {
   let index = 0

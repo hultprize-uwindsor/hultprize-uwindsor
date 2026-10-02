@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import BrandScene from '../components/BrandScene'
-import { RevealText, RollingLabel } from '../components/MotionText'
-import { FloatingIntroduction, JourneyExperience, ProgrammeFeature } from '../components/HomeExperience'
+import { HeroTitle, RevealText, RollingLabel } from '../components/MotionText'
+import { FloatingIntroduction, JourneyExperience } from '../components/HomeExperience'
+import { ProgrammeFeature } from '../components/ProgrammeFeature'
 import { GlobalPrize } from '../components/GlobalPrize'
 import { Stats, Timeline } from '../components/PageParts'
 import { SITE } from '../data/site'
@@ -10,7 +11,7 @@ import { upcomingPosts, formatPostDate } from '../data/posts'
 export default function HomePage() {
   const upcoming=upcomingPosts()[0]
   return <div className="home-page">
-    <section className="home-hero" aria-labelledby="home-title"><BrandScene/><div className="container home-hero__inner"><div><p className="eyebrow">Hult Prize at the University of Windsor</p><h1 id="home-title" data-text-reveal><RevealText>One idea.<br />4 minutes.<br />$1,000,000.</RevealText></h1></div><div className="home-hero__aside"><p>Build a business that changes something.</p><p className="home-hero__detail">Start at Windsor. Compete for US$1 million in seed funding at the global final.</p><a className="btn btn--white" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer"><RollingLabel>Register your team</RollingLabel><span aria-hidden="true">↗</span></a></div></div><a className="home-scroll" href="#discover" aria-label="Scroll to explore">↓ <span>Scroll to explore</span></a></section>
+    <section className="home-hero" aria-labelledby="home-title"><BrandScene/><div className="container home-hero__inner"><div><p className="eyebrow">Hult Prize at the University of Windsor</p><HeroTitle id="home-title">One idea.<br />4 minutes.<br />$1,000,000.</HeroTitle></div><div className="home-hero__aside"><p>Build a business that changes something.</p><p className="home-hero__detail">Start at Windsor. Compete for US$1 million in seed funding at the global final.</p><a className="btn btn--white" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer"><RollingLabel>Register your team</RollingLabel><span aria-hidden="true">↗</span></a></div></div><a className="home-scroll" href="#discover" aria-label="Scroll to explore">↓ <span>Scroll to explore</span></a></section>
     <div id="discover"><FloatingIntroduction /></div>
     <JourneyExperience />
     <ProgrammeFeature />

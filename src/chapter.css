@@ -211,11 +211,6 @@
 .journey-metric span { max-width:13ch; font-size:.85rem; }
 .journey-experience--simple { height:auto; }
 .journey-experience--simple .journey-experience__sticky { position:relative; }
-.programme-feature { position:relative; min-height:820px; display:flex; align-items:center; color:white; padding:150px 0; }
-.programme-feature > .container { position:relative; z-index:1; pointer-events:none; }
-.programme-feature a { pointer-events:auto; }
-.programme-feature h2 { font-size:clamp(3.5rem,7.7vw,7.5rem); max-width:12ch; margin-bottom:32px; }
-.programme-feature p { font-size:1.2rem; }
 .hero-actions { display:flex; gap:16px; flex-wrap:wrap; margin-top:32px; }
 .home-results__heading { text-align:center; max-width:850px; margin:0 auto 90px; }
 .home-results__heading h2 { margin-bottom:32px; }
@@ -309,9 +304,6 @@
  .journey-description { font-size:1rem; }
  .journey-visual,.journey-visual > img { height:360px; min-height:0; }
  .journey-metric { left:16px; bottom:16px; padding:20px; }
- .programme-feature { min-height:780px; padding:120px 0; }
- .programme-feature h2 { font-size:clamp(3rem,12vw,5rem); }
- .programme-feature p { font-size:1rem; max-width:28ch; }
  .hero-actions { align-items:flex-start; flex-direction:column; }
  .home-results__heading { margin-bottom:48px; }
  .home-calendar > .container { grid-template-columns:1fr; gap:48px; }
