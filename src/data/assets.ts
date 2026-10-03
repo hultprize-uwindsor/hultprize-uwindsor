@@ -28,7 +28,7 @@ export const YEAR_ONE_PHOTOS: PhotoSlide[] = SHOW_EVENT_PHOTOS ? [
   CAMPUS_PHOTOS.community,
 ] : []
 
-// Selected for the homepage phone gallery at the website owner's request.
+// Selected for the homepage galleries at the website owner's request.
 // Leave dates out of this selection until the event date is confirmed.
 export const HOME_EVENT_PHOTOS: PhotoSlide[] = permissions.homeGalleryFiles.flatMap(file => {
   const image = Object.values(CAMPUS_PHOTOS).find(item => item.src === `/images/year-one/${file}`)

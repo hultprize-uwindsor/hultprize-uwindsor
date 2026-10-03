@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CAMPUS_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/assets'
-import BrandScene from './BrandScene'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { CAMPUS_PHOTOS, HOME_EVENT_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/assets'
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const steps = [
-  { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2–4', metric: 'students. One team.', photo: CAMPUS_PHOTOS.teamwork, icon: '✳' },
-  { title: 'Pitch.', label: 'Make your case', text: 'Five workshops to shape your business and sharpen your pitch. Four minutes to make it count.', number: '4', metric: 'minutes to pitch.', photo: CAMPUS_PHOTOS.stage, icon: '↗' },
-  { title: 'Compete.', label: 'Take it further', text: 'Pitch at Windsor on February 5. Up to three teams can represent UWindsor at Nationals in Calgary on April 10–11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photo: CAMPUS_PHOTOS.teams, icon: '◎' },
+  { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2–4', metric: 'students. One team.', photos: [HOME_EVENT_PHOTOS[3], HOME_EVENT_PHOTOS[2]], icon: '✳' },
+  { title: 'Pitch.', label: 'Make your case', text: 'Five workshops to shape your business and sharpen your pitch. Four minutes to make it count.', number: '4', metric: 'minutes to pitch.', photos: [HOME_EVENT_PHOTOS[0], HOME_EVENT_PHOTOS[1]], icon: '↗' },
+  { title: 'Compete.', label: 'Take it further', text: 'Pitch at Windsor on February 5. Up to three teams can represent UWindsor at Nationals in Calgary on April 10–11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photos: [HOME_EVENT_PHOTOS[4], HOME_EVENT_PHOTOS[5]], icon: '◎' },
 ]
+const PHOTO_DURATION = 3500
+const STAGE_DURATION = PHOTO_DURATION * 2
 
 /** A pinned title zoom, five independent card paths, then accumulating action words. */
 export function FloatingIntroduction() {
@@ -71,40 +73,78 @@ export function FloatingIntroduction() {
   </div></section>
 }
 
-/** The next scene plays through three useful stages, with direct keyboard controls. */
+/** Six event photos play through the three stages with shared playback controls. */
 export function JourneyExperience() {
   const ref = useRef<HTMLElement>(null)
   const [active, setActive] = useState(0)
+  const [photo, setPhoto] = useState(0)
   const [paused, setPaused] = useState(false)
-  const [reduced, setReduced] = useState(false)
-  const selection = useRef<(index: number) => void>(() => {})
+  const [visible, setVisible] = useState(false)
+  const [pageVisible, setPageVisible] = useState(!document.hidden)
+  const [reduced, setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches)
   const playback = useRef(0)
+  const galleryFocus = useRef(0)
+  const playing = visible && pageVisible && !paused && !reduced
+
   useEffect(() => {
-    const el = ref.current!
     const media = matchMedia('(prefers-reduced-motion: reduce)')
     const change = () => setReduced(media.matches)
-    change(); media.addEventListener('change', change)
-    let visible = false, frame = 0, previous = 0
+    const visibility = () => setPageVisible(!document.hidden)
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: .12 })
+    observer.observe(ref.current!)
+    media.addEventListener('change', change)
+    document.addEventListener('visibilitychange', visibility)
+    return () => { observer.disconnect(); cancelAnimationFrame(galleryFocus.current); media.removeEventListener('change', change); document.removeEventListener('visibilitychange', visibility) }
+  }, [])
+
+  useEffect(() => {
+    if (!playing) return
+    let frame = 0, previous = 0
     const tick = (time: number) => {
-      frame = 0
-      if (!visible || paused || media.matches || document.hidden) { previous = 0; return }
-      if (previous) playback.current += Math.min(60, time - previous)
+      const before = playback.current
+      if (previous) playback.current += time - previous
       previous = time
-      const progress = Math.min(1, playback.current / 5600)
-      el.style.setProperty('--journey-playback', String(progress))
-      if (progress === 1) { playback.current = 0; setActive(index => (index + 1) % steps.length) }
+      if (playback.current >= STAGE_DURATION) {
+        playback.current = 0
+        setPhoto(0)
+        setActive(index => (index + 1) % steps.length)
+      } else if (before < PHOTO_DURATION && playback.current >= PHOTO_DURATION) setPhoto(1)
+      ref.current?.style.setProperty('--journey-playback', String(playback.current / STAGE_DURATION))
       frame = requestAnimationFrame(tick)
     }
-    const start = () => { if (!frame) frame = requestAnimationFrame(tick) }
-    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) start() }, { threshold: .4 })
-    observer.observe(el)
-    const visibility = () => { previous = 0; if (!document.hidden) start() }
-    selection.current = index => { playback.current = 0; el.style.setProperty('--journey-playback', '0'); setActive(index) }
-    media.addEventListener('change', start); document.addEventListener('visibilitychange', visibility)
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); media.removeEventListener('change', change); media.removeEventListener('change', start); document.removeEventListener('visibilitychange', visibility) }
-  }, [paused])
-  const choose = (index: number) => { setPaused(true); selection.current(index) }
-  return <section ref={ref} className="journey-experience journey-experience--simple" aria-labelledby="journey-heading" onFocusCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.journey-play')) setPaused(true) }}>
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [playing])
+
+  const choose = (index: number, photoIndex = 0) => {
+    cancelAnimationFrame(galleryFocus.current)
+    galleryFocus.current = 0
+    setPaused(true)
+    playback.current = photoIndex * PHOTO_DURATION
+    ref.current?.style.setProperty('--journey-playback', String(playback.current / STAGE_DURATION))
+    setActive(index)
+    setPhoto(photoIndex)
+  }
+  const choosePhoto = (direction: number) => {
+    const next = (active * 2 + photo + direction + HOME_EVENT_PHOTOS.length) % HOME_EVENT_PHOTOS.length
+    const stage = Math.floor(next / 2)
+    choose(stage, next % 2)
+    // The old controls become inert. Wait for the new panel's visibility before focusing.
+    if (stage !== active) {
+      const focusControl = () => {
+        galleryFocus.current = 0
+        const button = ref.current?.querySelector<HTMLButtonElement>(`#journey-panel-${stage} .journey-gallery__${direction > 0 ? 'next' : 'previous'}`)
+        if (!button || button.closest('[inert]')) return
+        if (getComputedStyle(button).visibility !== 'visible') {
+          galleryFocus.current = requestAnimationFrame(focusControl)
+          return
+        }
+        button.focus({ preventScroll: true })
+      }
+      galleryFocus.current = requestAnimationFrame(focusControl)
+    }
+  }
+  return <section ref={ref} className={`journey-experience journey-experience--simple${playing ? ' is-playing' : ''}`} aria-labelledby="journey-heading" onFocusCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.journey-play')) setPaused(true) }}>
     <div className="journey-experience__sticky"><div className="container">
       <div className="journey-experience__top"><span className="tag">From idea to impact</span><div className="journey-controls"><div className="journey-tabs" role="tablist" aria-label="Competition journey">{steps.map((step, index) => <button key={step.title} role="tab" aria-selected={active === index} aria-controls={`journey-panel-${index}`} id={`journey-tab-${index}`} onClick={() => choose(index)} onKeyDown={event => {
         if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return
@@ -115,7 +155,11 @@ export function JourneyExperience() {
       <h2 id="journey-heading" className="visually-hidden">Build, pitch and compete</h2>
       <div className="journey-stages">{steps.map((step, index) => <div className={`journey-experience__stage${active === index ? ' is-active' : ''}`} key={step.title} role="tabpanel" aria-labelledby={`journey-tab-${index}`} id={`journey-panel-${index}`} aria-hidden={active !== index} inert={active !== index}>
         <div className="journey-copy"><p className="eyebrow">{step.label}</p><p className="journey-word">{step.title}</p><p className="journey-description">{step.text}</p><Link to="/compete" className="text-link" onFocus={() => setPaused(true)}>How to compete <span aria-hidden="true">↗</span></Link></div>
-        <div className="journey-visual">{SHOW_EVENT_PHOTOS ? <img src={step.photo.src} alt={step.photo.alt} loading="lazy" /> : <BrandScene variant="blue" active={active === index} />}<div className="journey-metric"><div className="journey-metric__number">{step.prefix && <span>{step.prefix}</span>}<strong>{step.number}</strong></div><span>{step.metric}</span></div></div>
+        <div className="journey-visual" role="region" aria-roledescription="carousel" aria-label={`${step.title.replace('.', '')}: past events`}>
+          {step.photos.map((image, photoIndex) => <figure key={image.src} className={`journey-gallery__photo${photoIndex === photo ? ' is-active' : ''}`} aria-hidden={photoIndex !== photo} role="group" aria-roledescription="slide" aria-label={`${index * 2 + photoIndex + 1} of ${HOME_EVENT_PHOTOS.length}`}><img src={image.src} alt={image.alt} loading="lazy" draggable="false" /></figure>)}
+          <div className="journey-gallery__toolbar"><span className="journey-gallery__count" aria-hidden="true">{String(index * 2 + photo + 1).padStart(2, '0')} / {String(HOME_EVENT_PHOTOS.length).padStart(2, '0')}</span><div><button className="journey-gallery__previous" type="button" aria-label="Previous journey photo" onClick={() => choosePhoto(-1)}><ArrowLeft size={18} /></button><button className="journey-gallery__next" type="button" aria-label="Next journey photo" onClick={() => choosePhoto(1)}><ArrowRight size={18} /></button></div></div>
+          <div className="journey-metric"><div className="journey-metric__number">{step.prefix && <span>{step.prefix}</span>}<strong>{step.number}</strong></div><span>{step.metric}</span></div>
+        </div>
       </div>)}</div>
     </div></div>
   </section>

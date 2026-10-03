@@ -1,9 +1,14 @@
 import { chromium } from 'playwright'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 
 const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
+const journeyOnly = process.env.CHECK_JOURNEY_ONLY === '1'
+const photoPermissions = JSON.parse(readFileSync(new URL('../src/data/photo-permissions.json', import.meta.url), 'utf8'))
+const journeyPhotos = [3, 2, 0, 1, 4, 5].map(index => `/images/year-one/${photoPermissions.homeGalleryFiles[index]}`)
 const launch = process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : process.env.PLAYWRIGHT_CHANNEL ? { channel: process.env.PLAYWRIGHT_CHANNEL } : {}
-const browser = await chromium.launch({ ...launch, args: ['--enable-unsafe-swiftshader'] })
+// Focused photo/control checks do not need software-rendered WebGL elsewhere on the page.
+const browser = await chromium.launch({ ...launch, args: journeyOnly ? ['--disable-webgl'] : ['--enable-unsafe-swiftshader'] })
 const errors = []
 const failures = []
 
@@ -176,20 +181,135 @@ async function introChecks(page) {
 
 async function journeyChecks(page) {
   await page.locator('.journey-experience').scrollIntoViewIfNeeded()
+  await journeyPhotoContent(page)
   await journeyKeyboard(page)
+  await assertJourneyPhoto(page, 0)
   assert(await page.getByRole('button', { name: 'Play journey sequence' }).isVisible(), 'manual selection pauses playback')
   await page.getByRole('button', { name: 'Play journey sequence' }).click()
   await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('.journey-experience')).getPropertyValue('--journey-playback')) > .12)
-  await page.waitForFunction(() => document.getElementById('journey-tab-1')?.getAttribute('aria-selected') === 'true', null, { timeout: 9000 })
-  await assertSelected(page, 1)
+  await waitForJourneyPhoto(page, 1)
+  await assertSelected(page, 0)
+  await waitForJourneyPhoto(page, 2)
+  await assertJourneyPhoto(page, 2)
   await page.getByRole('button', { name: 'Pause journey sequence' }).click()
   const progress = await page.locator('.journey-experience').evaluate(element => getComputedStyle(element).getPropertyValue('--journey-playback'))
-  await page.waitForTimeout(250)
+  const pausedPhoto = await activeJourneyPhoto(page)
+  await page.waitForTimeout(3800)
   assert.equal(await page.locator('.journey-experience').evaluate(element => getComputedStyle(element).getPropertyValue('--journey-playback')), progress, 'paused stage progress stays still')
+  assert.equal(await activeJourneyPhoto(page), pausedPhoto, 'pause holds the displayed photo beyond a photo interval')
+  await journeyManualPhotos(page)
+  await page.getByRole('button', { name: 'Play journey sequence' }).click()
+  await page.waitForFunction(() => document.querySelector('.journey-experience')?.classList.contains('is-playing'))
+  await scrollInstant(page, 0)
+  await page.waitForFunction(() => !document.querySelector('.journey-experience')?.classList.contains('is-playing'))
+  const offscreenPhoto = await activeJourneyPhoto(page)
+  const offscreenProgress = await page.locator('.journey-experience').evaluate(element => element.style.getPropertyValue('--journey-playback'))
+  await page.waitForTimeout(3800)
+  assert.equal(await activeJourneyPhoto(page), offscreenPhoto, 'offscreen gallery never advances')
+  assert.equal(await page.locator('.journey-experience').evaluate(element => element.style.getPropertyValue('--journey-playback')), offscreenProgress, 'offscreen gallery progress freezes')
+  await page.locator('.journey-experience').scrollIntoViewIfNeeded()
+  await page.waitForFunction(source => document.querySelector('.journey-experience__stage.is-active .journey-gallery__photo.is-active img')?.getAttribute('src') !== source, offscreenPhoto, { timeout: 6500 })
+  await page.getByRole('button', { name: 'Pause journey sequence' }).click()
   const visibleLink = page.getByRole('tabpanel').getByRole('link', { name: /How to compete/ })
   await visibleLink.focus()
   assert(await visibleLink.evaluate(element => element === document.activeElement), 'active scene CTA is keyboard accessible')
-  console.log('PASS automatic stage playback, direct keyboard controls, pause and inert inactive panels')
+  console.log('PASS journey: six event photos, timed photos/stages, manual wraparound, keyboard controls, pause, offscreen suspension and inert inactive panels')
+}
+
+async function activeJourneyPhoto(page) {
+  return page.locator('.journey-experience__stage.is-active .journey-gallery__photo.is-active img').getAttribute('src')
+}
+
+async function waitForJourneyPhoto(page, index) {
+  await page.waitForFunction(source => document.querySelector('.journey-experience__stage.is-active .journey-gallery__photo.is-active img')?.getAttribute('src') === source, journeyPhotos[index], { timeout: 6500 })
+}
+
+async function assertJourneyPhoto(page, index) {
+  await waitForJourneyPhoto(page, index)
+  await assertSelected(page, Math.floor(index / 2))
+  const photo = page.locator('.journey-experience__stage.is-active .journey-gallery__photo.is-active')
+  assert.equal(await photo.count(), 1, 'one photo is active inside the selected stage')
+  assert.notEqual(await photo.getAttribute('aria-hidden'), 'true', 'the current photograph remains available to assistive technology')
+  const dimensions = await photo.locator('img').evaluate(image => ({ width: image.naturalWidth, height: image.naturalHeight }))
+  assert(dimensions.width > 100 && dimensions.height > 100, 'the active event photograph is decoded')
+}
+
+async function journeyPhotoContent(page) {
+  const section = page.locator('.journey-experience')
+  assert.equal(await section.locator('.brand-scene, canvas').count(), 0, 'the journey uses real event photography without the old animation')
+  const images = section.locator('.journey-gallery__photo img')
+  await images.evaluateAll(items => items.forEach(image => { image.loading = 'eager' }))
+  await images.evaluateAll(items => Promise.all(items.map(image => image.decode())))
+  const photos = await images.evaluateAll(items => items.map(image => ({ source: image.getAttribute('src'), alt: image.alt, width: image.naturalWidth, height: image.naturalHeight })))
+  assert.deepEqual(photos.map(photo => photo.source), journeyPhotos, 'each stage uses its two approved event photographs in order')
+  assert(photos.every(photo => photo.alt.length > 20 && photo.width > 100 && photo.height > 100), 'all six photos load with descriptive alternatives')
+  const competeMetric = await page.locator('#journey-panel-2 .journey-metric').textContent()
+  assert.match(competeMetric, /Up to\s*3\s*teams at Nationals\./, 'the Nationals metric remains up to three teams')
+}
+
+async function journeyManualPhotos(page) {
+  const section = page.locator('.journey-experience')
+  await page.locator('#journey-tab-0').click()
+  await assertJourneyPhoto(page, 0)
+  await section.getByRole('button', { name: 'Previous journey photo', exact: true }).click()
+  await assertJourneyPhoto(page, 5)
+  await section.getByRole('button', { name: 'Next journey photo', exact: true }).click()
+  await assertJourneyPhoto(page, 0)
+  for (let index = 1; index <= journeyPhotos.length; index++) {
+    const next = section.getByRole('button', { name: 'Next journey photo', exact: true })
+    await next.focus()
+    await page.keyboard.press('Enter')
+    await assertJourneyPhoto(page, index % journeyPhotos.length)
+    await page.waitForFunction(() => document.activeElement?.matches('button[aria-label="Next journey photo"]') && !document.activeElement.closest('[inert]'), null, { timeout: 1500 })
+    assert(await page.evaluate(() => document.activeElement?.matches('button[aria-label="Next journey photo"]') && !document.activeElement.closest('[inert]')), 'next-photo keyboard focus survives stage changes')
+  }
+  await section.getByRole('button', { name: 'Next journey photo', exact: true }).click()
+  await assertJourneyPhoto(page, 1)
+  await page.locator('#journey-tab-0').click()
+  await assertJourneyPhoto(page, 0)
+  assert.equal(await section.evaluate(element => element.classList.contains('is-playing')), false, 'manual browsing pauses the shared photo/stage timer')
+}
+
+async function journeyReducedChecks(page) {
+  await page.locator('.journey-experience').scrollIntoViewIfNeeded()
+  await journeyPhotoContent(page)
+  await page.waitForFunction(() => !document.querySelector('.journey-experience')?.classList.contains('is-playing'))
+  assert.equal(await page.locator('.journey-play').count(), 0, 'reduced motion makes the journey a manual gallery')
+  const before = await activeJourneyPhoto(page)
+  await page.waitForTimeout(3800)
+  assert.equal(await activeJourneyPhoto(page), before, 'reduced motion does not advance photographs')
+  const animation = await page.locator('.journey-experience__stage.is-active .journey-gallery__photo.is-active img').evaluate(image => getComputedStyle(image).animationName)
+  assert.equal(animation, 'none', 'reduced motion keeps the photograph still')
+  await journeyManualPhotos(page)
+  await journeyKeyboard(page)
+  console.log('PASS reduced-motion journey: no autoplay or image motion, all six photos available through controls and keyboard')
+}
+
+async function focusedJourneyChecks() {
+  const page = await newPage({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'no-preference' })
+  await page.goto(base)
+  await page.evaluate(() => document.fonts.ready)
+  await journeyChecks(page)
+  await page.getByRole('button', { name: 'Play journey sequence' }).click()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await journeyReducedChecks(page)
+  await page.close()
+  for (const width of [320, 390]) {
+    const mobile = await newPage({ viewport: { width, height: 850 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' })
+    await mobile.goto(base)
+    await mobile.evaluate(() => document.fonts.ready)
+    await journeyReducedChecks(mobile)
+    assert(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${width}px: no journey overflow`)
+    for (const name of ['Previous journey photo', 'Next journey photo']) {
+      const button = mobile.locator('.journey-experience').getByRole('button', { name, exact: true })
+      const rect = await button.boundingBox()
+      assert(rect.width >= 44 && rect.height >= 44, `${width}px: ${name} retains a touch-sized target`)
+    }
+    await mobile.close()
+    console.log(`PASS ${width}px journey gallery: loaded photos, manual/reduced-motion controls and responsive layout`)
+  }
+  assert.deepEqual(errors, [], 'no browser runtime errors')
+  console.log('Focused journey gallery checks passed.')
 }
 
 async function smoothHistoryChecks(page) {
@@ -222,6 +342,9 @@ async function smoothHistoryChecks(page) {
 }
 
 try {
+  if (journeyOnly) {
+    await focusedJourneyChecks()
+  } else {
   for (const width of [390, 1440]) {
     try { await drawerChecks(width) }
     catch (error) { failures.push(`${width}px drawer: ${error.message}`); console.log(`FAIL ${width}px drawer: ${error.message}`) }
@@ -243,7 +366,7 @@ try {
   assert(await intro.locator('.floating-card').evaluateAll(cards => cards.every(card => getComputedStyle(card).opacity === '1' && getComputedStyle(card).transform === 'none')), 'all five static cards remain visible')
   assert.equal(await page.locator('.home-hero .scene-control').count(), 0, 'hero has no pause control')
   assert.equal(await page.locator('html').evaluate(element => element.classList.contains('lenis')), false, 'live reduced-motion preference disables smooth-scroll engine')
-  await journeyKeyboard(page)
+  await journeyReducedChecks(page)
   assert.equal(await page.locator('.journey-play').count(), 0, 'reduced-motion journey is manual')
   assert.equal(await page.locator('.journey-experience__sticky').evaluate(element => getComputedStyle(element).position), 'relative')
   assert(await page.getByText('Free entry. Free workshops.', { exact: true }).evaluate(element => !element.closest('[aria-hidden="true"]')), 'card copy remains available to assistive technology')
@@ -253,6 +376,8 @@ try {
   const mobile = await newPage({ viewport: { width: 390, height: 850 }, reducedMotion: 'no-preference' })
   await mobile.goto(base)
   await introChecks(mobile)
+  await journeyPhotoContent(mobile)
+  await journeyManualPhotos(mobile)
   await journeyKeyboard(mobile)
   assert.equal(await mobile.locator('.journey-experience__sticky').evaluate(element => getComputedStyle(element).position), 'relative', 'mobile journey stays in normal document flow')
   for (const width of [320, 390, 760]) {
@@ -264,4 +389,5 @@ try {
   assert.deepEqual(errors, [], 'no browser runtime errors')
   assert.deepEqual(failures, [], 'behavior failures')
   console.log('Site motion checks passed: drawers, gallery, history, focus, scroll choreography, timed/manual journey, reduced motion and mobile layout.')
+  }
 } finally { await browser.close() }
