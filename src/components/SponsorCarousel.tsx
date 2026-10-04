@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import './SponsorCarousel.css'
 
 export type SponsorLogo = {
@@ -14,8 +13,6 @@ type SponsorCarouselProps = {
 }
 
 export default function SponsorCarousel({ logos, heading = 'Our sponsors' }: SponsorCarouselProps) {
-  const [paused, setPaused] = useState(false)
-
   if (!logos.length) return null
 
   // Each group fills the strip even with a small set of placeholder logos.
@@ -26,21 +23,8 @@ export default function SponsorCarousel({ logos, heading = 'Our sponsors' }: Spo
   return (
     <section className="sponsor-strip" aria-label={heading}>
       <div className="container">
-        <div className="sponsor-strip__controls">
-          <button
-            className="sponsor-strip__toggle"
-            type="button"
-            aria-label={paused ? 'Play sponsor logo carousel' : 'Pause sponsor logo carousel'}
-            onClick={() => setPaused((value) => !value)}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-              {paused ? <path d="M3 1.5 10 6l-7 4.5z" /> : <path d="M2.5 1.5h2v9h-2zm5 0h2v9h-2z" />}
-            </svg>
-            <span>{paused ? 'Play' : 'Pause'}</span>
-          </button>
-        </div>
         <div className="sponsor-strip__viewport">
-          <div className="sponsor-strip__track" data-paused={paused}>
+          <div className="sponsor-strip__track">
             {[0, 1].map((group) => (
               <ul
                 className={`sponsor-strip__group${group ? ' sponsor-strip__group--duplicate' : ''}`}

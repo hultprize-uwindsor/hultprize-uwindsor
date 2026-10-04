@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import { Link, NavLink } from './PageLink'
 import { RegisterButton } from './PageParts'
 import { RollingLabel } from './MotionText'
 import { SITE } from '../data/site'
@@ -163,7 +164,7 @@ export default function Header() {
   return <>
     <header ref={header} className="site-header" onClick={onNavigate}>
       <div className="site-header__inner">
-        <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-white.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link>
+        <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link>
         <div className="site-header__actions"><Link className="site-header__updates" to="/compete#signup"><RollingLabel>Get updates</RollingLabel></Link><RegisterButton>Register</RegisterButton></div>
       </div>
       <nav id="site-navigation" className="site-header__nav" aria-label="Main navigation">
@@ -186,7 +187,7 @@ export default function Header() {
       <div className="mobile-navigation__background" aria-hidden="true" />
       <div className="mobile-navigation__mask"><div className="mobile-navigation__content">
       <div className="mobile-navigation__bar">
-        <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-white.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link><RegisterButton>Register</RegisterButton>
+        <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link><RegisterButton>Register</RegisterButton>
       </div>
       <nav className="mobile-navigation__links" aria-label="Main navigation">
         <div className="mobile-navigation__group"><NavLink to="/" end><Thumbnail /><span>Home</span></NavLink></div>

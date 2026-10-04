@@ -1,8 +1,9 @@
 import { RevealText, RollingLabel } from '../components/MotionText'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
+import { Link } from '../components/PageLink'
 import { publishedPosts, formatPostDate, postStatus, type Post } from '../data/posts'
-import { Copy, PageHeader, RegisterButton, Section } from '../components/PageParts'
+import { Copy, PageLayout, RegisterButton, Section } from '../components/PageParts'
 
 function PostCover({ post }: { post: Post }) {
   const visual = post.cover ?? post.flyer
@@ -18,19 +19,19 @@ export default function EventsPage() {
   const posts = publishedPosts()
   const shown = posts.filter(p => filter === 'All' || postStatus(p) === (filter === 'Stories' ? 'Story' : 'Upcoming'))
   const featured = shown.find(p => p.featured) ?? shown[0]
-  return <div className="events-page"><PageHeader title="Events" subtitle="Workshops, campus events and competition deadlines." /><Section>
+  return <PageLayout className="events-page" title="Events" subtitle="Workshops, campus events and competition deadlines."><Section>
     {posts.length >= 6 && <div className="event-filters" role="group" aria-label="Filter posts">{['All', 'Upcoming', 'Stories'].map(label => <button key={label} aria-pressed={filter === label} onClick={() => setFilter(label)}>{label}</button>)}</div>}
     {featured && <PostCard post={featured} featured />}
     <div className="post-grid">{shown.filter(p => p !== featured).map(p => <PostCard key={p.slug} post={p} />)}</div>
     {!shown.length && <p>No posts in this category yet.</p>}
     <div className="page-next"><div><h2 data-text-reveal><RevealText>The season at a glance</RevealText></h2><p>From the October launch to Nationals in April.</p></div><Link className="btn btn--secondary" to="/this-year#calendar"><RollingLabel>View the full calendar</RollingLabel><span aria-hidden="true">→</span></Link></div>
-  </Section></div>
+  </Section></PageLayout>
 }
 export function EventPostPage() {
   const { slug } = useParams()
   const post = publishedPosts().find(p => p.slug === slug)
   if (!post) return <NotFoundPage />
-  return <div className="event-page"><PageHeader title={post.title} subtitle={post.excerpt} /><Section>
+  return <PageLayout className="event-page" title={post.title} subtitle={post.excerpt}><Section>
     <Link className="text-link event-back" to="/events">← All events and stories</Link>
     <div className="event-article-layout">
       <article className="event-article" aria-label={post.title}>
@@ -44,8 +45,8 @@ export function EventPostPage() {
         <Link className="text-link" to="/compete">How to enter the competition <span aria-hidden="true">→</span></Link>
       </aside>
     </div>
-  </Section></div>
+  </Section></PageLayout>
 }
 export function NotFoundPage() {
-  return <div className="not-found-page"><PageHeader title="Page not found" subtitle="This link may have changed. Find your next step below." /><Section><div className="recovery-links">{[['/', 'Home', 'Start with the competition overview.'], ['/compete', 'Compete', 'Eligibility, registration and team matching.'], ['/this-year#calendar', 'The calendar', 'See the dates for this season.'], ['/contact', 'Contact the team', 'Ask a question or plan a visit.']].map(([to, title, text]) => <Link key={to} to={to}><h2 data-text-reveal><RevealText>{title}</RevealText> <span aria-hidden="true">→</span></h2><p>{text}</p></Link>)}</div></Section></div>
+  return <PageLayout className="not-found-page" title="Page not found" subtitle="This link may have changed. Find your next step below."><Section><div className="recovery-links">{[['/', 'Home', 'Start with the competition overview.'], ['/compete', 'Compete', 'Eligibility, registration and team matching.'], ['/this-year#calendar', 'The calendar', 'See the dates for this season.'], ['/contact', 'Contact the team', 'Ask a question or plan a visit.']].map(([to, title, text]) => <Link key={to} to={to}><h2 data-text-reveal><RevealText>{title}</RevealText> <span aria-hidden="true">→</span></h2><p>{text}</p></Link>)}</div></Section></PageLayout>
 }

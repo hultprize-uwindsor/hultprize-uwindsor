@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import { createBrandRenderer } from './brandSceneRenderer'
 import './BrandScene.css'
 
 /** A continuous, dimensional wave. Original geometry; no borrowed footage. */
-export default function BrandScene({ variant = 'pink', controls = false, active = true }: { variant?: 'pink' | 'blue'; controls?: boolean; active?: boolean }) {
+export default function BrandScene({ variant = 'pink', active = true }: { variant?: 'pink' | 'blue'; active?: boolean }) {
   const root = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
-  const pausedRef = useRef(false)
   const activeRef = useRef(active)
-  const [paused, setPaused] = useState(false)
 
   useEffect(() => {
     const element = root.current
@@ -34,10 +32,10 @@ export default function BrandScene({ variant = 'pink', controls = false, active 
     const animate = (now: number) => {
       frame = 0
       if (!visible || !activeRef.current || document.hidden || lost) { previous = 0; return }
-      if (previous && !pausedRef.current && !reduce.matches) seconds += Math.min((now - previous) / 1000, .05)
+      if (previous && !reduce.matches) seconds += Math.min((now - previous) / 1000, .05)
       previous = now
       draw()
-      if (!pausedRef.current && !reduce.matches) frame = requestAnimationFrame(animate)
+      if (!reduce.matches) frame = requestAnimationFrame(animate)
       else previous = 0
     }
     const resume = () => {
@@ -87,18 +85,11 @@ export default function BrandScene({ variant = 'pink', controls = false, active 
     root.current?.dispatchEvent(new Event('brand-motion-toggle'))
   }, [active])
 
-  const toggle = () => {
-    pausedRef.current = !pausedRef.current
-    setPaused(pausedRef.current)
-    root.current?.dispatchEvent(new Event('brand-motion-toggle'))
-  }
-
-  return <div ref={root} className={`brand-scene brand-scene--${variant}${paused ? ' brand-scene--paused' : ''}`}>
+  return <div ref={root} className={`brand-scene brand-scene--${variant}`}>
     <div className="brand-scene__art" aria-hidden="true">
       <div className="brand-scene__fallback">{Array.from({ length: 15 }, (_, index) => <span key={index} className="brand-scene__disc" style={{ '--disc': index } as CSSProperties} />)}</div>
       <canvas ref={canvas} className="brand-scene__canvas" />
       <span className="brand-scene__light" />
     </div>
-    {controls && <button className="scene-control" onClick={toggle} aria-pressed={paused} aria-label={paused ? 'Play background animation' : 'Pause background animation'}>{paused ? 'Play motion' : 'Pause motion'} <span aria-hidden="true">{paused ? '▷' : 'Ⅱ'}</span></button>}
   </div>
 }

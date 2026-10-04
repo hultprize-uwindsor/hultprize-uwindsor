@@ -20,35 +20,34 @@ async function newPage(options) {
 }
 
 async function assertSelected(page, index) {
-  await page.waitForFunction(value => document.getElementById(`journey-tab-${value}`)?.getAttribute('aria-selected') === 'true', index)
-  const selected = page.locator('[role="tab"][aria-selected="true"]')
-  assert.equal(await selected.count(), 1, 'one journey stage is selected')
-  assert.equal(await selected.getAttribute('tabindex'), '0')
-  const controls = await selected.getAttribute('aria-controls')
-  await page.locator(`[id="${controls}"]`).waitFor({ state: 'visible' })
-  assert(await page.locator(`[id="${controls}"]`).isVisible(), 'selected tab controls a visible panel')
-  assert.equal(await page.getByRole('tabpanel').getAttribute('aria-labelledby'), `journey-tab-${index}`)
+  await page.waitForFunction(value => document.getElementById(`journey-panel-${value}`)?.classList.contains('is-active'), index)
+  const panel = page.locator(`#journey-panel-${index}`)
+  assert(await panel.isVisible(), 'current stage is visible')
+  assert.equal(await panel.getAttribute('aria-labelledby'), `journey-title-${index}`)
+  assert.equal(await page.locator('.journey-tabs, .journey-controls, .journey-experience [role="tab"]').count(), 0, 'numbered stage tabs are removed')
   assert.equal(await page.locator('.journey-experience__stage.is-active').count(), 1, 'one panel has the active scene')
   assert.equal(await page.locator('.journey-experience__stage').count(), 3, 'all three panels remain mounted for transitions')
   assert.equal(await page.locator('.journey-experience__stage[aria-hidden="true"][inert]').count(), 2, 'inactive panels are inert and hidden from assistive technology')
 }
 
+async function resetJourney(page) {
+  const next = page.getByRole('button', { name: 'Next journey photo', exact: true })
+  await next.focus()
+  for (let count = 0; count < journeyPhotos.length; count++) {
+    if (await activeJourneyPhoto(page) === journeyPhotos[0]) return
+    await next.click()
+  }
+  assert.equal(await activeJourneyPhoto(page), journeyPhotos[0])
+}
+
 async function journeyKeyboard(page) {
-  await page.locator('#journey-tab-0').click()
+  await resetJourney(page)
+  for (let index = 1; index <= journeyPhotos.length; index++) {
+    await page.getByRole('button', { name: 'Next journey photo', exact: true }).focus()
+    await page.keyboard.press('Enter')
+    await assertJourneyPhoto(page, index % journeyPhotos.length)
+  }
   await assertSelected(page, 0)
-  await page.keyboard.press('ArrowRight')
-  await assertSelected(page, 1)
-  await page.keyboard.press('End')
-  await assertSelected(page, 2)
-  await page.keyboard.press('ArrowRight')
-  await assertSelected(page, 0)
-  await page.keyboard.press('ArrowLeft')
-  await assertSelected(page, 2)
-  await page.keyboard.press('Home')
-  await assertSelected(page, 0)
-  assert.equal(await page.evaluate(() => document.activeElement?.id), 'journey-tab-0', 'focus follows tab activation')
-  const missing = await page.getByRole('tab').evaluateAll(tabs => tabs.filter(tab => !document.getElementById(tab.getAttribute('aria-controls'))).map(tab => tab.id))
-  assert.deepEqual(missing, [], 'all tab controls resolve')
 }
 
 async function drawerChecks(width) {
@@ -182,24 +181,12 @@ async function introChecks(page) {
 async function journeyChecks(page) {
   await page.locator('.journey-experience').scrollIntoViewIfNeeded()
   await journeyPhotoContent(page)
-  await journeyKeyboard(page)
-  await assertJourneyPhoto(page, 0)
-  assert(await page.getByRole('button', { name: 'Play journey sequence' }).isVisible(), 'manual selection pauses playback')
-  await page.getByRole('button', { name: 'Play journey sequence' }).click()
+  assert.equal(await page.getByRole('button', { name: /(?:Pause|Play) journey sequence/ }).count(), 0, 'journey has no playback toggle')
   await page.waitForFunction(() => Number(getComputedStyle(document.querySelector('.journey-experience')).getPropertyValue('--journey-playback')) > .12)
   await waitForJourneyPhoto(page, 1)
   await assertSelected(page, 0)
   await waitForJourneyPhoto(page, 2)
   await assertJourneyPhoto(page, 2)
-  await page.getByRole('button', { name: 'Pause journey sequence' }).click()
-  const progress = await page.locator('.journey-experience').evaluate(element => getComputedStyle(element).getPropertyValue('--journey-playback'))
-  const pausedPhoto = await activeJourneyPhoto(page)
-  await page.waitForTimeout(3800)
-  assert.equal(await page.locator('.journey-experience').evaluate(element => getComputedStyle(element).getPropertyValue('--journey-playback')), progress, 'paused stage progress stays still')
-  assert.equal(await activeJourneyPhoto(page), pausedPhoto, 'pause holds the displayed photo beyond a photo interval')
-  await journeyManualPhotos(page)
-  await page.getByRole('button', { name: 'Play journey sequence' }).click()
-  await page.waitForFunction(() => document.querySelector('.journey-experience')?.classList.contains('is-playing'))
   await scrollInstant(page, 0)
   await page.waitForFunction(() => !document.querySelector('.journey-experience')?.classList.contains('is-playing'))
   const offscreenPhoto = await activeJourneyPhoto(page)
@@ -209,11 +196,18 @@ async function journeyChecks(page) {
   assert.equal(await page.locator('.journey-experience').evaluate(element => element.style.getPropertyValue('--journey-playback')), offscreenProgress, 'offscreen gallery progress freezes')
   await page.locator('.journey-experience').scrollIntoViewIfNeeded()
   await page.waitForFunction(source => document.querySelector('.journey-experience__stage.is-active .journey-gallery__photo.is-active img')?.getAttribute('src') !== source, offscreenPhoto, { timeout: 6500 })
-  await page.getByRole('button', { name: 'Pause journey sequence' }).click()
-  const visibleLink = page.getByRole('tabpanel').getByRole('link', { name: /How to compete/ })
+  await journeyKeyboard(page)
+  await assertJourneyPhoto(page, 0)
+  const progress = await page.locator('.journey-experience').evaluate(element => element.style.getPropertyValue('--journey-playback'))
+  const pausedPhoto = await activeJourneyPhoto(page)
+  await page.waitForTimeout(3800)
+  assert.equal(await page.locator('.journey-experience').evaluate(element => element.style.getPropertyValue('--journey-playback')), progress, 'manual browsing holds stage progress')
+  assert.equal(await activeJourneyPhoto(page), pausedPhoto, 'manual browsing holds the displayed photo')
+  await journeyManualPhotos(page)
+  const visibleLink = page.locator('.journey-experience__stage.is-active').getByRole('link', { name: /How to compete/ })
   await visibleLink.focus()
   assert(await visibleLink.evaluate(element => element === document.activeElement), 'active scene CTA is keyboard accessible')
-  console.log('PASS journey: six event photos, timed photos/stages, manual wraparound, keyboard controls, pause, offscreen suspension and inert inactive panels')
+  console.log('PASS journey: six event photos, timed photos/stages, manual wraparound, keyboard controls, manual browsing, offscreen suspension and inert inactive panels')
 }
 
 async function activeJourneyPhoto(page) {
@@ -249,7 +243,7 @@ async function journeyPhotoContent(page) {
 
 async function journeyManualPhotos(page) {
   const section = page.locator('.journey-experience')
-  await page.locator('#journey-tab-0').click()
+  await resetJourney(page)
   await assertJourneyPhoto(page, 0)
   await section.getByRole('button', { name: 'Previous journey photo', exact: true }).click()
   await assertJourneyPhoto(page, 5)
@@ -265,7 +259,7 @@ async function journeyManualPhotos(page) {
   }
   await section.getByRole('button', { name: 'Next journey photo', exact: true }).click()
   await assertJourneyPhoto(page, 1)
-  await page.locator('#journey-tab-0').click()
+  await resetJourney(page)
   await assertJourneyPhoto(page, 0)
   assert.equal(await section.evaluate(element => element.classList.contains('is-playing')), false, 'manual browsing pauses the shared photo/stage timer')
 }
@@ -290,7 +284,6 @@ async function focusedJourneyChecks() {
   await page.goto(base)
   await page.evaluate(() => document.fonts.ready)
   await journeyChecks(page)
-  await page.getByRole('button', { name: 'Play journey sequence' }).click()
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await journeyReducedChecks(page)
   await page.close()

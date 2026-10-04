@@ -1,6 +1,6 @@
 import { RevealText } from './MotionText'
 import { useEffect, useRef, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from './PageLink'
 import { SITE } from '../data/site'
 import { COMMUNITY_PARTNERS } from '../data/communityPartners'
 import { RegisterButton } from './PageParts'

@@ -1,11 +1,11 @@
-/* Contact shares the pink editorial hero, then opens into a rounded white sheet. */
-.contact-page { background: var(--pink); }
+/* Contact shares the navy editorial hero, then opens into a rounded white sheet. */
+.contact-page { background: var(--uw-blue-dark); padding-bottom: clamp(24px, 4vw, 64px); }
 .contact-hero.page-heading { min-height: 660px; padding-bottom: 112px; }
 .contact-hero.page-heading > .container { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 80px; }
 .contact-hero .contact-hero__intro { max-width: 480px; }
 .contact-hero__intro > p { margin: 0 0 32px; max-width: 28ch; font-size: clamp(1.2rem, 1.8vw, 1.65rem); line-height: 1.45; letter-spacing: -.025em; }
 .contact-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.contact-content { position: relative; margin-inline: 10px; border-radius: 36px 36px 0 0; background: #fff; }
+.contact-content { position: relative; margin-inline: 10px; padding-bottom: clamp(48px, 6vw, 96px); border-radius: 36px; background: #fff; }
 .contact-hero.page-heading::after { display: none; }
 .contact-section-nav { display: flex; flex-wrap: wrap; gap: 12px 40px; padding-block: 32px; }
 .contact-section-nav a { display: inline-flex; align-items: center; gap: 18px; min-height: 44px; font-size: .9rem; text-decoration: none; }
@@ -100,7 +100,7 @@
   .contact-hero.page-heading > .container { grid-template-columns: minmax(0, 1fr); gap: 32px; }
   .contact-hero .contact-hero__intro { max-width: none; }
   .contact-hero__intro > p { margin-bottom: 24px; max-width: 34ch; }
-  .contact-content { margin-inline: 8px; border-radius: 24px 24px 0 0; }
+  .contact-content { margin-inline: 8px; border-radius: 24px; }
   .contact-section-nav { gap: 0 24px; padding-block: 24px; }
   .contact-section-nav a { font-size: .8125rem; gap: 10px; }
   .contact-place { padding-block: 48px 72px; }

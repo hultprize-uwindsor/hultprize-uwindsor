@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from './PageLink'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { CAMPUS_PHOTOS, HOME_EVENT_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/assets'
 
@@ -73,7 +73,7 @@ export function FloatingIntroduction() {
   </div></section>
 }
 
-/** Six event photos play through the three stages with shared playback controls. */
+/** Six event photos play through the three stages with manual photo and stage navigation. */
 export function JourneyExperience() {
   const ref = useRef<HTMLElement>(null)
   const [active, setActive] = useState(0)
@@ -144,17 +144,12 @@ export function JourneyExperience() {
       galleryFocus.current = requestAnimationFrame(focusControl)
     }
   }
-  return <section ref={ref} className={`journey-experience journey-experience--simple${playing ? ' is-playing' : ''}`} aria-labelledby="journey-heading" onFocusCapture={event => { if (!(event.target instanceof Element) || !event.target.closest('.journey-play')) setPaused(true) }}>
+  return <section ref={ref} className={`journey-experience journey-experience--simple${playing ? ' is-playing' : ''}`} aria-labelledby="journey-heading" onFocusCapture={() => setPaused(true)}>
     <div className="journey-experience__sticky"><div className="container">
-      <div className="journey-experience__top"><span className="tag">From idea to impact</span><div className="journey-controls"><div className="journey-tabs" role="tablist" aria-label="Competition journey">{steps.map((step, index) => <button key={step.title} role="tab" aria-selected={active === index} aria-controls={`journey-panel-${index}`} id={`journey-tab-${index}`} onClick={() => choose(index)} onKeyDown={event => {
-        if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return
-        event.preventDefault()
-        const next = event.key === 'Home' ? 0 : event.key === 'End' ? 2 : (index + (event.key === 'ArrowRight' ? 1 : 2)) % 3
-        choose(next); document.getElementById(`journey-tab-${next}`)?.focus()
-      }} tabIndex={active === index ? 0 : -1}><span>0{index + 1}</span>{step.title.replace('.', '')}<i aria-hidden="true" /></button>)}</div>{!reduced && <button className="journey-play" aria-label={paused ? 'Play journey sequence' : 'Pause journey sequence'} aria-pressed={paused} onClick={() => setPaused(value => !value)}>{paused ? '▷' : 'Ⅱ'}</button>}</div></div>
+      <div className="journey-experience__top"><span className="tag">From idea to impact</span></div>
       <h2 id="journey-heading" className="visually-hidden">Build, pitch and compete</h2>
-      <div className="journey-stages">{steps.map((step, index) => <div className={`journey-experience__stage${active === index ? ' is-active' : ''}`} key={step.title} role="tabpanel" aria-labelledby={`journey-tab-${index}`} id={`journey-panel-${index}`} aria-hidden={active !== index} inert={active !== index}>
-        <div className="journey-copy"><p className="eyebrow">{step.label}</p><p className="journey-word">{step.title}</p><p className="journey-description">{step.text}</p><Link to="/compete" className="text-link" onFocus={() => setPaused(true)}>How to compete <span aria-hidden="true">↗</span></Link></div>
+      <div className="journey-stages">{steps.map((step, index) => <div className={`journey-experience__stage${active === index ? ' is-active' : ''}`} key={step.title} role="group" aria-labelledby={`journey-title-${index}`} id={`journey-panel-${index}`} aria-hidden={active !== index} inert={active !== index}>
+        <div className="journey-copy"><p className="eyebrow">{step.label}</p><p className="journey-word" id={`journey-title-${index}`}>{step.title}</p><p className="journey-description">{step.text}</p><Link to="/compete" className="text-link" onFocus={() => setPaused(true)}>How to compete <span aria-hidden="true">↗</span></Link></div>
         <div className="journey-visual" role="region" aria-roledescription="carousel" aria-label={`${step.title.replace('.', '')}: past events`}>
           {step.photos.map((image, photoIndex) => <figure key={image.src} className={`journey-gallery__photo${photoIndex === photo ? ' is-active' : ''}`} aria-hidden={photoIndex !== photo} role="group" aria-roledescription="slide" aria-label={`${index * 2 + photoIndex + 1} of ${HOME_EVENT_PHOTOS.length}`}><img src={image.src} alt={image.alt} loading="lazy" draggable="false" /></figure>)}
           <div className="journey-gallery__toolbar"><span className="journey-gallery__count" aria-hidden="true">{String(index * 2 + photo + 1).padStart(2, '0')} / {String(HOME_EVENT_PHOTOS.length).padStart(2, '0')}</span><div><button className="journey-gallery__previous" type="button" aria-label="Previous journey photo" onClick={() => choosePhoto(-1)}><ArrowLeft size={18} /></button><button className="journey-gallery__next" type="button" aria-label="Next journey photo" onClick={() => choosePhoto(1)}><ArrowRight size={18} /></button></div></div>

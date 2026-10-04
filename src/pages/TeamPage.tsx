@@ -1,3 +1,4 @@
+import { RevealText } from '../components/MotionText'
 import { TEAM } from '../data/team'
 import TeamPortrait from '../components/TeamPortrait'
 import Reveal from '../components/Reveal'
@@ -64,7 +65,7 @@ export default function TeamPage() {
         </section>
 
         <section className="team-invitation" aria-labelledby="team-invitation-heading">
-          <h2 id="team-invitation-heading">Big ideas need<br />people like you.</h2>
+          <h2 id="team-invitation-heading" data-text-reveal><RevealText>Big ideas need<br />people like you.</RevealText></h2>
           <div className="team-invitation__action">
             <p>
               Bring your perspective. Find your team. Take the first step

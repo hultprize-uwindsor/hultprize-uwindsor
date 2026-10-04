@@ -1,5 +1,5 @@
 import { RevealText } from './MotionText'
-import { Link } from 'react-router-dom'
+import { Link } from './PageLink'
 import { committee } from '../data/committee'
 import { YEAR_ONE_PHOTOS } from '../data/assets'
 import { COMMUNITY_PARTNERS } from '../data/communityPartners'

@@ -1,6 +1,6 @@
 import { HeroTitle, RevealText, RollingLabel } from '../components/MotionText'
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from '../components/PageLink'
 import copy from '../data/copy.json'
 import { SITE } from '../data/site'
 import { findCommunityPartner } from '../data/communityPartners'

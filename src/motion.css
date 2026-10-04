@@ -25,3 +25,17 @@
  .rolling-label__row--next { visibility:hidden; }
  .btn:hover,.btn:active { scale:1; }
 }
+/* Keep the captured outgoing viewport still while the incoming page covers it. */
+/* Navigation stays in place above both page snapshots. */
+.site-header { view-transition-name:site-header; }
+::view-transition-group(site-header) { animation:none; z-index:3; }
+::view-transition-old(site-header) { display:none; }
+::view-transition-new(site-header) { animation:none; mix-blend-mode:normal; }
+::view-transition-group(root) { animation:none; }
+::view-transition-old(root), ::view-transition-new(root) { mix-blend-mode:normal; animation:none; }
+::view-transition-old(root) { z-index:1; }
+::view-transition-new(root) { z-index:2; animation:page-slide-over 950ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes page-slide-over { from { transform:translateY(100%); } to { transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) {
+ ::view-transition-group(root), ::view-transition-old(root), ::view-transition-new(root) { animation:none!important; }
+}

@@ -1,3 +1,4 @@
+import { RevealText } from './MotionText'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ThreeDImagePageflip, type PageFlipLeaf, type ThreeDImagePageflipHandle } from '../lightswind/ThreeDImagePageflip'
 import { CAMPUS_PHOTOS, YEAR_ONE_PHOTOS } from '../data/assets'
@@ -80,7 +81,7 @@ export default function YearOnePictureBook() {
     <div className="container picture-book-layout">
       <div className="picture-book-copy">
         <p className="eyebrow">2025 to 2026</p>
-        <h2 id="pictures-title">Year one in pictures</h2>
+        <h2 id="pictures-title" data-text-reveal><RevealText>Year one in pictures</RevealText></h2>
         <p>Photos from Windsor’s first campus round: teams, pitches and judges.</p>
         <p className="picture-book-hint">Click a page, or use the buttons, to turn it.</p>
       </div>

@@ -1,6 +1,7 @@
 /* Shared page and scene layouts. Hult colours, editorial scale, one responsive system. */
-.page-heading { min-height:620px; padding:210px 0 112px; position:relative; background:var(--pink); color:var(--uw-blue-dark); display:flex; align-items:flex-end; }
+.page-heading { min-height:620px; padding:210px 0 112px; position:relative; background:linear-gradient(120deg,var(--uw-blue-dark) 35%,#123f64 100%); color:white; display:flex; align-items:flex-end; }
 .page-heading > .container { display:grid; grid-template-columns:minmax(0,2fr) minmax(230px,1fr); align-items:end; gap:64px; }
+.page-heading :focus-visible { outline-color:white; }
 .page-heading h1 { max-width:15ch; }
 .page-heading .eyebrow { margin-bottom:28px; }
 .page-heading__intro { max-width:27ch; margin:0 0 8px; font-size:clamp(1.2rem,1.8vw,1.65rem); line-height:1.45; letter-spacing:-.03em; }
@@ -79,6 +80,16 @@
 .partner-card p { margin:0; color:var(--uw-grey); }
 .related-links { display:flex; flex-wrap:wrap; gap:32px; padding-top:32px; margin-top:40px; border-top:1px solid var(--grey); }
 .related-links a { min-height:44px; display:inline-flex; align-items:center; font-size:.9rem; }
+/* Continuous white frames contain coloured sections on interior pages. */
+:is(.compete-page, .interior-page) { background:var(--uw-blue-dark); padding-bottom:clamp(24px,4vw,64px); }
+:is(.compete-page, .interior-page) .page-heading::after { display:none; }
+:is(.compete-content, .interior-content) { margin-inline:10px; padding-block:32px; border-radius:36px; background:white; }
+:is(.compete-content, .interior-content) > section { margin-inline:16px; border-radius:28px; overflow:clip; }
+:is(.compete-content, .interior-content) > section + section { margin-top:24px; }
+@media(max-width:800px) {
+ :is(.compete-content, .interior-content) { margin-inline:8px; padding-block:24px; border-radius:24px; }
+ :is(.compete-content, .interior-content) > section { margin-inline:8px; border-radius:20px; }
+}
 .compete-actions { display:flex; flex-wrap:wrap; gap:16px; padding-block:8px 56px; }
 .compete-split { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); background:var(--uw-blue-dark); color:white; min-height:620px; }
 .compete-split > .campus-photo { height:100%; min-height:0; }
@@ -161,7 +172,7 @@
 .post-flyer figcaption { padding-top:20px; }
 .event-filters { display:flex; gap:12px; margin-bottom:40px; }
 .event-filters button { border:1px solid var(--grey); border-radius:99px; background:white; color:var(--ink); padding:12px 24px; }
-.event-filters [aria-pressed=true] { background:var(--pink); }
+.event-filters [aria-pressed=true] { background:var(--pink); color:white; }
 .recovery-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; }
 .recovery-links a { text-decoration:none; padding:40px; border-radius:24px; background:var(--paper-pink); }
 .recovery-links h2 { display:flex; justify-content:space-between; gap:20px; font-size:2rem; margin-bottom:20px; }
@@ -195,17 +206,12 @@
 .journey-experience__sticky { position:sticky; top:0; min-height:100svh; display:flex; align-items:center; padding:64px 0 100px; overflow:hidden; }
 .journey-experience__top { display:flex; justify-content:space-between; align-items:center; gap:24px; margin-bottom:48px; }
 .journey-experience__top .tag { margin:0; }
-.journey-tabs { display:flex; gap:8px; }
-.journey-tabs button { background:transparent; border:0; color:var(--uw-grey); display:flex; align-items:center; gap:8px; min-height:44px; padding:8px 12px; font-size:.8rem; }
-.journey-tabs button span { display:grid; place-items:center; width:28px; height:28px; border:1px solid currentColor; border-radius:50%; font-size:.7rem; }
-.journey-tabs [aria-selected=true] { color:var(--ink); }
-.journey-tabs [aria-selected=true] span { background:var(--pink); border-color:var(--pink); }
 .journey-experience__stage { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:7%; align-items:center; animation:scene-enter .65s var(--ease-move); }
 .journey-word { font-size:clamp(5rem,10vw,10rem); line-height:1.05; font-weight:500; letter-spacing:-.075em; margin:0 0 32px; }
 .journey-description { max-width:37ch; font-size:1.2rem; }
 .journey-visual { position:relative; min-height:460px; border-radius:30px; overflow:hidden; }
 .journey-visual > img { width:100%; height:460px; object-fit:cover; }
-.journey-metric { position:absolute; left:24px; bottom:24px; padding:24px; background:#ffffffed; border-radius:20px; display:flex; align-items:center; gap:24px; }
+.journey-metric { position:absolute; left:24px; bottom:24px; padding:24px; background:#ffffffed; color:var(--ink); border-radius:20px; display:flex; align-items:center; gap:24px; }
 .journey-metric__number { display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
 .journey-metric strong { font-size:3.5rem; line-height:1; font-weight:500; letter-spacing:-.06em; }
 .journey-metric span { max-width:13ch; font-size:.85rem; }
@@ -298,7 +304,6 @@
  .floating-card--four { bottom:25px; left:-25px; }
  .journey-experience__sticky { padding:64px 0 80px; min-height:0; }
  .journey-experience__top { flex-direction:column; align-items:flex-start; margin-bottom:40px; gap:24px; }
- .journey-tabs button { padding-inline:8px; }
  .journey-experience__stage { grid-template-columns:1fr; gap:36px; }
  .journey-word { font-size:clamp(4rem,18vw,7rem); margin-bottom:24px; }
  .journey-description { font-size:1rem; }

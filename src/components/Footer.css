@@ -3,7 +3,7 @@
 .site-footer__eyebrow { display: inline-flex; border: 1px solid rgb(0 43 81 / 25%); border-radius: 30px; padding: 5px 12px; margin-bottom: 30px; font-size: 12px; line-height: 1.4; }
 .site-footer__invitation h2 { margin: 0; font-size: clamp(45px, 5.6vw, 90px); line-height: 1.02; letter-spacing: -.06em; font-weight: 400; }
 .site-footer__invitation-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; max-width: 275px; padding-bottom: 5px; }
-.site-footer__invitation-actions > .btn { background: var(--pink); color: #00213d; border-color: var(--pink); border-radius: 15px; font-size: 16px; min-height: 55px; padding: 15px 24px; gap: 24px; }
+.site-footer__invitation-actions > .btn { background: var(--pink); color: #fff; border-color: var(--pink); border-radius: 15px; font-size: 16px; min-height: 55px; padding: 15px 24px; gap: 24px; }
 .site-footer__invitation-actions > .btn:hover { background: var(--uw-blue-dark); color: #fff; border-color: var(--uw-blue-dark); text-decoration: none; }
 .site-footer__invitation-actions p { font-size: 13px; line-height: 1.7; opacity: .8; }
 .site-footer__inner { display: grid; grid-template-columns: .75fr 1fr 1.2fr 1.3fr; gap: 24px; padding-top: 40px; border-top: 1px solid rgb(0 43 81 / 16%); }

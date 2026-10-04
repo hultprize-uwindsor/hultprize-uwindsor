@@ -1,6 +1,7 @@
 import { RevealText, RollingLabel } from '../components/MotionText'
-import { Link, useParams } from 'react-router-dom'
-import { Copy, PageHeader, Section } from '../components/PageParts'
+import { useParams } from 'react-router-dom'
+import { Link } from '../components/PageLink'
+import { Copy, PageLayout, Section } from '../components/PageParts'
 import { COMMUNITY_PARTNERS, findCommunityPartner } from '../data/communityPartners'
 import { NotFoundPage } from './EventsPage'
 
@@ -14,8 +15,7 @@ export default function PartnerPage() {
   const partner = findCommunityPartner(useParams().slug)
   if (!partner) return <NotFoundPage />
   const next = nextSteps[partner.slug]
-  return <div className="partner-page">
-    <PageHeader title={partner.name} subtitle={partner.subtitle} />
+  return <PageLayout className="partner-page" title={partner.name} subtitle={partner.subtitle}>
     <Section tint="partner-overview">
       <div className="partner-profile">
         <div><p className="eyebrow">With Hult Prize UWindsor</p><h2 data-text-reveal><RevealText>Supporting student founders</RevealText></h2><Copy paragraphs={partner.withUs} /></div>
@@ -31,5 +31,5 @@ export default function PartnerPage() {
       <div className="page-next"><div><p className="eyebrow">For students</p><h2 data-text-reveal><RevealText>{next.title}</RevealText></h2><p>{next.text}</p></div><Link className="btn btn--secondary" to={next.to}><RollingLabel>{next.label}</RollingLabel><span aria-hidden="true">→</span></Link></div>
       <nav className="related-links" aria-label="More partners"><Link to="/partners">Partnership overview <span aria-hidden="true">→</span></Link>{COMMUNITY_PARTNERS.filter(p => p.slug !== partner.slug).map(p => <Link key={p.slug} to={`/partners/${p.slug}`}>{p.name} <span aria-hidden="true">→</span></Link>)}</nav>
     </Section>
-  </div>
+  </PageLayout>
 }

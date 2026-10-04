@@ -11,6 +11,11 @@ export function PageHeader({ title, subtitle }: { title: string; subtitle: strin
   return <header className="page-heading"><div className="container"><div><p className="eyebrow">Hult Prize · UWindsor</p><HeroTitle>{title}</HeroTitle></div><p className="page-heading__intro">{subtitle}</p></div></header>
 }
 
+/** Shared frame keeps interior page sections inside a complete white sheet. */
+export function PageLayout({ title, subtitle, className = '', children }: { title: string; subtitle: string; className?: string; children: ReactNode }) {
+  return <div className={`interior-page ${className}`}><PageHeader title={title} subtitle={subtitle} /><div className="interior-content">{children}</div></div>
+}
+
 export function Section({ eyebrow, title, children, tint = '', id }: { eyebrow?: string; title?: string; children: ReactNode; tint?: string; id?: string }) {
   return <section className={`section chapter-section ${tint}`} id={id}><div className="container">{eyebrow && <p className="eyebrow">{eyebrow}</p>}{title && <h2 data-text-reveal><RevealText>{title}</RevealText></h2>}{children}</div></section>
 }
