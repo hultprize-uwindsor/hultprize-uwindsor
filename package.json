@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/build-meta.mjs",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:attendance": "node scripts/sync-attendance-seed.mjs --check && node scripts/check-attendance.mjs",
+    "test:attendance:ui": "node scripts/check-attendance-ui.mjs && node scripts/check-attendance-admin-ui.mjs && node scripts/check-event-timeline.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

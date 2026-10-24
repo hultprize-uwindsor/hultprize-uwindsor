@@ -14,7 +14,7 @@ export interface Post {
 }
 
 // Publish completed stories only after their event date and editorial review.
-// Upcoming session posts remain drafts until their time and location are confirmed.
+// Bookable events live in the attendance catalogue, not in editorial posts.
 export const POSTS: Post[] = [
   {
     slug: 'registration-closes-november-20',
@@ -31,16 +31,6 @@ export const POSTS: Post[] = [
     ],
     featured: true,
     published: true,
-  },
-  {
-    slug: 'workshop-series', title: 'Workshop series opens', date: '2026-11-07', category: 'Upcoming',
-    excerpt: 'Five workshop sessions from November 7, 2026, through January 9, 2027.',
-    body: [], published: false,
-  },
-  {
-    slug: 'grand-finale-2027', title: 'The Grand Finale', date: '2027-02-05', category: 'Upcoming',
-    excerpt: 'Pitch to Windsor business judges: 4 minutes to present, 4 minutes for questions.',
-    body: [], published: false,
   },
   {
     // Written from the owner's notes and the launch flyer (times, place, booth).

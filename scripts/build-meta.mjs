@@ -30,6 +30,6 @@ for (const meta of PAGE_METADATA) {
   await writeFile(file, render(meta))
 }
 await writeFile(join(out, '404.html'), render(metadataForPath('/404')))
-await writeFile(join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PAGE_METADATA.map(meta => `  <url><loc>${escape(canonicalUrl(meta))}</loc></url>`).join('\n')}\n</urlset>\n`)
+await writeFile(join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PAGE_METADATA.filter(meta => !meta.noindex).map(meta => `  <url><loc>${escape(canonicalUrl(meta))}</loc></url>`).join('\n')}\n</urlset>\n`)
 await writeFile(join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${CANONICAL_ORIGIN}/sitemap.xml\n`)
 console.log(`Generated metadata HTML for ${PAGE_METADATA.length} pages, a noindex 404, sitemap.xml and robots.txt. Page bodies render in React.`)

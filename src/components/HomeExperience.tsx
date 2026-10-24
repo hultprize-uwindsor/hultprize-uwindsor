@@ -7,7 +7,7 @@ const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const steps = [
   { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2–4', metric: 'students. One team.', photos: [HOME_EVENT_PHOTOS[3], HOME_EVENT_PHOTOS[2]], icon: '✳' },
   { title: 'Pitch.', label: 'Make your case', text: 'Five workshops to shape your business and sharpen your pitch. Four minutes to make it count.', number: '4', metric: 'minutes to pitch.', photos: [HOME_EVENT_PHOTOS[0], HOME_EVENT_PHOTOS[1]], icon: '↗' },
-  { title: 'Compete.', label: 'Take it further', text: 'Pitch at Windsor on February 5. Up to three teams can represent UWindsor at Nationals in Calgary on April 10–11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photos: [HOME_EVENT_PHOTOS[4], HOME_EVENT_PHOTOS[5]], icon: '◎' },
+  { title: 'Compete.', label: 'Take it further', text: 'Pitch at the Windsor Campus Grand Finale. Up to three teams can represent UWindsor at Nationals in Calgary on April 10–11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photos: [HOME_EVENT_PHOTOS[4], HOME_EVENT_PHOTOS[5]], icon: '◎' },
 ]
 const PHOTO_DURATION = 3500
 const STAGE_DURATION = PHOTO_DURATION * 2

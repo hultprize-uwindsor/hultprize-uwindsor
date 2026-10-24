@@ -13,6 +13,10 @@ import HomePage from './pages/HomePage'
 import { AboutPage, YearOnePage, ThisYearPage, CompetePage, PartnersPage } from './pages/ChapterPages'
 import ContactPage from './pages/ContactPage'
 import EventsPage, { EventPostPage, NotFoundPage } from './pages/EventsPage'
+import AttendPage from './pages/AttendPage'
+import ManageAttendancePage from './pages/ManageAttendancePage'
+import AttendanceAdminPage from './pages/AttendanceAdminPage'
+import RegistrationPrivacyPage from './pages/RegistrationPrivacyPage'
 import GoRedirect from './pages/GoRedirect'
 import PartnerPage from './pages/PartnerPage'
 import './chapter.css'
@@ -53,6 +57,7 @@ export default function App() {
     <Route path="/" element={hash === '#signup' ? <Navigate to="/compete#signup" replace /> : <HomePage />} />
     <Route path="/about" element={<AboutPage />} /><Route path="/year-one" element={<YearOnePage />} /><Route path="/this-year" element={<ThisYearPage />} />
     <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/partners/:slug" element={<PartnerPage />} /><Route path="/contact" element={<ContactPage />} />
+    <Route path="/attend" element={<AttendPage />} /><Route path="/attend/manage" element={<ManageAttendancePage />} /><Route path="/organiser/events" element={<AttendanceAdminPage />} /><Route path="/privacy" element={<RegistrationPrivacyPage />} />
     <Route path="/team" element={<Navigate to="/about#team" replace />} /><Route path="/go" element={<GoRedirect />} /><Route path="*" element={<NotFoundPage />} />
   </Routes></main>{SHOW_PARTNER_STRIP && <PartnerStrip />}<Footer /><ScrollToTop /><SiteDrawers /></>
 }

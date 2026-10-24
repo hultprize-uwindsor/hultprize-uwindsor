@@ -8,7 +8,7 @@ export function ProgrammeFeature() {
     <div className="container programme-feature__copy">
       <h2 id="programme-feature-title" data-text-reveal><RevealText>Your idea.<br />Room to grow.</RevealText></h2>
       <p>Workshops, mentors and a team beside you. From your first pitch to the next stage.</p>
-      <div className="programme-feature__actions"><RegisterButton /><Link to="/this-year" className="text-link"><RollingLabel>Explore the programme</RollingLabel><span aria-hidden="true">↗</span></Link></div>
+      <div className="programme-feature__actions"><Link to="/attend" className="btn btn--primary"><RollingLabel>Attend our events</RollingLabel><span aria-hidden="true">→</span></Link><RegisterButton /><Link to="/this-year" className="text-link"><RollingLabel>Explore the programme</RollingLabel><span aria-hidden="true">↗</span></Link></div>
     </div>
   </section>
 }

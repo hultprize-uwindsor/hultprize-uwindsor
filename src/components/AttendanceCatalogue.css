@@ -1,0 +1,10 @@
+.attendance-catalogue > p { max-width:70ch; }
+.attendance-catalogue__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin-top:32px; }
+.attendance-catalogue__grid article { border:1px solid var(--grey); border-radius:16px; padding:28px; }
+.attendance-catalogue__grid h3 { font-size:1.5rem; line-height:1.25; margin-bottom:20px; }
+.attendance-catalogue__grid h3 a { text-decoration:none; }
+.attendance-catalogue__grid .tag { margin-bottom:16px; }
+.attendance-catalogue__grid p { font-size:.95rem; }
+.schedule-note { padding:12px 16px; border-left:3px solid var(--uw-blue); background:var(--paper-blue); margin-top:24px; font-size:.9rem; }
+.event-timeline__detail { margin-top:12px; font-size:.9rem; }
+@media(max-width:720px) { .attendance-catalogue__grid { grid-template-columns:1fr; } .attendance-catalogue__grid article { padding:22px; } }

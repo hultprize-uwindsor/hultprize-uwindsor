@@ -5,6 +5,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
 const allPaths = [
   '/', '/about', '/year-one', '/this-year', '/compete', '/partners', '/contact', '/events',
+  '/attend', '/attend/manage', '/organiser/events', '/privacy', '/events/workshop-1',
   '/events/fusion-launch', '/events/registration-closes-november-20',
   '/partners/fusion', '/partners/sterling', '/partners/wetech', '/not-a-real-page',
 ]

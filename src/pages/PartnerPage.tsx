@@ -7,7 +7,7 @@ import { NotFoundPage } from './EventsPage'
 
 const nextSteps: Record<string, { title: string; text: string; to: string; label: string }> = {
   fusion: { title: 'Visit Fusion', text: 'Find our campus headquarters, opening hours and directions.', to: '/contact#come-and-find-us', label: 'Plan your visit' },
-  sterling: { title: 'Prepare your pitch', text: 'Five workshop sessions run from November 7 through January 9.', to: '/this-year#calendar', label: 'See the workshop schedule' },
+  sterling: { title: 'Prepare your pitch', text: 'Choose from five free workshop sessions in the live event calendar.', to: '/this-year#calendar', label: 'See the workshop schedule' },
   wetech: { title: 'See what the support made possible', text: 'Fourteen student startups entered Windsor’s first season.', to: '/year-one', label: 'Explore year one' },
 }
 

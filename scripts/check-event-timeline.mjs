@@ -1,11 +1,16 @@
 import { chromium } from 'playwright'
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 
+const events = JSON.parse(await readFile(new URL('../shared/attendance-events.json', import.meta.url), 'utf8'))
 const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
 const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {})
 try {
   for (const width of [320, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' })
+    await page.clock.setFixedTime(new Date('2026-10-22T16:00:00Z'))
+    // No calls reach live registration services, even if the dev server is configured.
+    await page.route('**/api/attendance*', route => route.fulfill({ json: { ok: true, events } }))
     await page.goto(base, { waitUntil: 'domcontentloaded' })
     await page.locator('h1').waitFor()
     assert.equal(await page.locator('.event-timeline__card').count(), 5)
@@ -14,25 +19,28 @@ try {
     await page.waitForURL('**/this-year#calendar')
     await page.locator('.timeline--full li').first().waitFor()
     const rows = await page.locator('.timeline--full li').allTextContents()
-    assert.equal(rows.length, 7)
-    const expected = [
-      ['October 1, 2026', 'launch'],
-      ['November 7, 2026', 'five sessions through January 9, 2027'],
-      ['November 20, 2026', 'Registration closes'],
-      ['January 2, 2027', 'Touch base'],
-      ['February 5, 2027', 'Grand Finale'],
-      ['March 13, 2027', 'Uwill Discover Conference'],
-      ['April 10–11, 2027', 'Calgary'],
-    ]
-    rows.forEach((row, i) => expected[i].forEach(text => assert(row.includes(text), `calendar row ${i}: ${text}`)))
-    assert.match(await page.locator('main').innerText(), /nine weeks/)
-    assert.match(await page.locator('main').innerText(), /ends April 11, 2027/)
-    assert(await page.locator('#calendar').evaluate(el => el.getBoundingClientRect().top < innerHeight))
-    await page.goto(`${base}/about`, { waitUntil: 'domcontentloaded' })
-    await page.locator('h1').waitFor()
-    assert.match(await page.locator('main').innerText(), /\$1,000, \$500 and \$250/)
+    assert.equal(rows.length, 10)
+    events.forEach((event, i) => {
+      assert(rows[i].includes(event.title))
+      assert(rows[i].includes(event.venue))
+    })
+    assert.match(rows[9], /Feb 4, 2027/)
+    assert(!rows.some(row => /UWill|Nationals|Touch base/.test(row)))
+    assert.equal(await page.locator('.timeline--full a[href^="/attend?events="]').count(), 10)
+    assert.match(await page.locator('#calendar').innerText(), /Competition registration closes November 20, 2026/)
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    await page.goto(`${base}/events`, { waitUntil: 'domcontentloaded' })
+    assert.equal(await page.locator('.attendance-catalogue__grid article').count(), 10)
+    await page.locator('.attendance-catalogue__grid a[href="/events/workshop-1"]').click()
+    assert.match(await page.locator('main').innerText(), /FRCT/)
+    assert.equal(await page.locator('main a[href="/attend?events=workshop-1"]').count(), 1)
+    // An administrator edit is reflected by every consumer on the next read.
+    await page.unroute('**/api/attendance*')
+    await page.route('**/api/attendance*', route => route.fulfill({ json: { ok: true, events: events.map(event => event.id === 'workshop-1' ? { ...event, venue: 'Updated test venue', startsAt: '2026-11-07T16:00:00Z' } : event) } }))
+    await page.goto(`${base}/this-year#calendar`)
+    await page.getByText(/Updated test venue/).waitFor()
+    assert.match(await page.locator('.timeline--full li').nth(1).innerText(), /11:00 a\.m\.|11:00 AM/i)
     await page.close()
   }
-  console.log('Passed: five compact milestones, all seven calendar dates, season end, nine-week preparation and campus prizes at 320/1440px.')
+  console.log('Passed: shared live catalogue, event-specific links, ten chronological events, administrator schedule edits and mobile layout at 320/1440px.')
 } finally { await browser.close() }

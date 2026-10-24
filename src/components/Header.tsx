@@ -165,11 +165,12 @@ export default function Header() {
     <header ref={header} className="site-header" onClick={onNavigate}>
       <div className="site-header__inner">
         <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link>
-        <div className="site-header__actions"><Link className="site-header__updates" to="/compete#signup"><RollingLabel>Get updates</RollingLabel></Link><RegisterButton>Register</RegisterButton></div>
+        <div className="site-header__actions"><Link className="site-header__updates" to="/compete#signup"><RollingLabel>Get updates</RollingLabel></Link><RegisterButton>Compete</RegisterButton></div>
       </div>
       <nav id="site-navigation" className="site-header__nav" aria-label="Main navigation">
         <NavLink to="/" end className="site-header__home" aria-label="Home"><span className="nav-hover-fill" aria-hidden="true" /><HomeIcon /></NavLink>
         <NavMenu label="Programme" active={/^\/(about|year-one|this-year|events)(\/|$)/.test(location.pathname)}>{programLinks.map(link => <NavLink key={link.to} to={link.to}><Thumbnail image={link.image} /><span className="nav-item-copy"><span>{link.label}</span><small>{link.description}</small></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>)}</NavMenu>
+        <NavLink to="/attend"><span className="nav-hover-fill" aria-hidden="true" /><span>Attend our events</span></NavLink>
         <NavLink to="/compete"><span className="nav-hover-fill" aria-hidden="true" /><span>Compete</span></NavLink>
         <NavMenu label="Partners" active={/^\/partners(\/|$)/.test(location.pathname)}><NavLink to="/partners" end><Thumbnail motif="steps" /><span className="nav-item-copy"><span>Our partners</span><small>Backing student founders</small></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>{COMMUNITY_PARTNERS.map(partner => <NavLink key={partner.slug} to={`/partners/${partner.slug}`}><Thumbnail image={partner.logo} logo /><span className="nav-item-copy"><span>{partner.name}</span></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>)}</NavMenu>
         <NavLink to="/contact"><span className="nav-hover-fill" aria-hidden="true" /><span>Contact</span></NavLink>
@@ -187,10 +188,10 @@ export default function Header() {
       <div className="mobile-navigation__background" aria-hidden="true" />
       <div className="mobile-navigation__mask"><div className="mobile-navigation__content">
       <div className="mobile-navigation__bar">
-        <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link><RegisterButton>Register</RegisterButton>
+        <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link><RegisterButton>Compete</RegisterButton>
       </div>
       <nav className="mobile-navigation__links" aria-label="Main navigation">
-        <div className="mobile-navigation__group"><NavLink to="/" end><Thumbnail /><span>Home</span></NavLink></div>
+        <div className="mobile-navigation__group"><NavLink to="/" end><Thumbnail /><span>Home</span></NavLink><NavLink to="/attend"><Thumbnail motif="steps" /><span>Attend our events</span></NavLink></div>
         <div className="mobile-navigation__group"><h2>Programme</h2>{programLinks.map(link => <NavLink key={link.to} to={link.to}><Thumbnail image={link.image} /><span>{link.label}</span></NavLink>)}</div>
         <div className="mobile-navigation__group"><NavLink to="/compete"><Thumbnail motif="steps" /><span>Compete</span></NavLink><NavLink to="/contact"><Thumbnail motif="chat" /><span>Contact</span></NavLink></div>
         <div className="mobile-navigation__group"><h2>Partners</h2><NavLink to="/partners" end><Thumbnail motif="steps" /><span>Our partners</span></NavLink>{COMMUNITY_PARTNERS.map(partner => <NavLink key={partner.slug} to={`/partners/${partner.slug}`}><Thumbnail image={partner.logo} logo /><span>{partner.name}</span></NavLink>)}</div>

@@ -41,7 +41,7 @@ export const COMMUNITY_PARTNERS: CommunityPartner[] = [
       'Through WEsecure, Sterling also offers a free six-month cybersecurity program for Windsor-Essex startups with WEtech Alliance and UWindsor’s School of Computer Science.',
     ],
     withUs: [
-      'Sterling Cybersecurity and Advisory Group supports brand and pitch training. This year’s workshop series runs from November 7, 2026, through January 9, 2027, with five sessions.',
+      'Sterling Cybersecurity and Advisory Group supports brand and pitch training. Find this year’s five sessions in the live event calendar.',
     ],
   },
   {

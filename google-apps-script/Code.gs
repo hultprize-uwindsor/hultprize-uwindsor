@@ -99,7 +99,7 @@ function notify_(params) {
     body: [
       'Thanks for signing up. We will keep you posted on deadlines, workshops and team matching.',
       'This is a mailing-list sign-up, not your competition entry. Register officially at https://www.hultprize.org/register. This is the only registration that counts toward the competition.',
-      'Registration closes November 20. The Grand Finale is February 5, 2027.',
+      'Competition registration closes November 20. See the live event calendar and register to attend at https://hultprizeuwindsor.ca/attend.',
       'Join the registered teams chat: https://signal.group/#CjQKIKs4d_yjcI_b8-HQDZOUCTPgrwHLO9afYy86-aIccZO2EhA2jvXrmEDUZ5fvaccFQciT',
       'Looking for a team? Join the mixer chat: https://signal.group/#CjQKIDgWmVxurnfxm-CnNUj-p6FY82u5bDTTlh0RSWC1Ag9xEhAqSS4Wby7U4Nd4wnjzEtLP',
       'Find us at https://hultprizeuwindsor.ca',

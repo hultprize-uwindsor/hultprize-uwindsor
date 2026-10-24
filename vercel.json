@@ -59,6 +59,90 @@
     {
       "source": "/events/fusion-launch",
       "destination": "/events/fusion-launch/index.html"
+    },
+    {
+      "source": "/attend",
+      "destination": "/attend/index.html"
+    },
+    {
+      "source": "/attend/manage",
+      "destination": "/attend/manage/index.html"
+    },
+    {
+      "source": "/organiser/events",
+      "destination": "/organiser/events/index.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy/index.html"
+    },
+    {
+      "source": "/events/info-session-1",
+      "destination": "/events/info-session-1/index.html"
+    },
+    {
+      "source": "/events/workshop-1",
+      "destination": "/events/workshop-1/index.html"
+    },
+    {
+      "source": "/events/founders-panel",
+      "destination": "/events/founders-panel/index.html"
+    },
+    {
+      "source": "/events/workshop-2",
+      "destination": "/events/workshop-2/index.html"
+    },
+    {
+      "source": "/events/info-session-2",
+      "destination": "/events/info-session-2/index.html"
+    },
+    {
+      "source": "/events/team-mixer",
+      "destination": "/events/team-mixer/index.html"
+    },
+    {
+      "source": "/events/workshop-3",
+      "destination": "/events/workshop-3/index.html"
+    },
+    {
+      "source": "/events/workshop-4",
+      "destination": "/events/workshop-4/index.html"
+    },
+    {
+      "source": "/events/workshop-5",
+      "destination": "/events/workshop-5/index.html"
+    },
+    {
+      "source": "/events/campus-grand-finale",
+      "destination": "/events/campus-grand-finale/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
+      ]
+    },
+    {
+      "source": "/api/attendance",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
     }
   ]
 }

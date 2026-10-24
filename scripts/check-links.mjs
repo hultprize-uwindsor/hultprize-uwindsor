@@ -4,7 +4,7 @@ import { writeFileSync } from 'node:fs'
 
 const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
 const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {})
-const routeTitles = { '/': 'Home', '/about': 'About', '/year-one': 'Year one', '/this-year': 'This year', '/events': 'Events', '/compete': 'Compete', '/partners': 'Partners', '/contact': 'Find us', '/partners/fusion': 'Fusion', '/partners/sterling': 'Sterling Cybersecurity and Advisory Group', '/partners/wetech': 'WEtech Alliance' }
+const routeTitles = { '/': 'Home', '/about': 'About', '/year-one': 'Year one', '/this-year': 'This year', '/events': 'Events', '/attend': 'Attend our events', '/attend/manage': 'Manage attendance', '/organiser/events': 'Organiser dashboard', '/privacy': 'Event registration privacy', '/compete': 'Compete', '/partners': 'Partners', '/contact': 'Find us', '/partners/fusion': 'Fusion', '/partners/sterling': 'Sterling Cybersecurity and Advisory Group', '/partners/wetech': 'WEtech Alliance' }
 const visit = async (page, url) => {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
   await page.locator('.site-header').waitFor()

@@ -4,13 +4,19 @@ import { cpSync } from 'node:fs'
 import { resolve, relative, sep } from 'node:path'
 import { defineConfig, loadEnv, type Connect } from 'vite'
 import { handleForms } from './server/forms.js'
+import { handleAttendance } from './server/attendance.js'
 import photoPermissions from './src/data/photo-permissions.json' with { type: 'json' }
 
 // Keep full-resolution source photography out of deployment artifacts.
 // Approved, web-sized exports belong in a separate public/images directory.
 export default defineConfig(({ mode }) => {
   const formEnv = loadEnv(mode, process.cwd(), 'FORM_')
+  const attendanceEnv = loadEnv(mode, process.cwd(), 'ATTENDANCE_')
   const formsMiddleware: Connect.NextHandleFunction = (req, res, next) => {
+    if (req.url?.split('?')[0] === '/api/attendance') {
+      void handleAttendance(req, res, { env: { ...process.env, ...attendanceEnv } })
+      return
+    }
     if (req.url?.split('?')[0] !== '/api/forms') return next()
     void handleForms(req, res, { env: { ...process.env, ...formEnv } })
   }

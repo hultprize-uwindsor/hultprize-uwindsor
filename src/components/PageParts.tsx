@@ -2,6 +2,8 @@ import EventTimeline from './EventTimeline'
 import { HeroTitle, RevealText, RollingLabel } from './MotionText'
 import type { ReactNode } from 'react'
 import { SITE } from '../data/site'
+import { Link } from './PageLink'
+import { eventDate, eventTime, useAttendanceEvents } from '../lib/attendance'
 
 export function RegisterButton({ children = 'Register your team' }: { children?: ReactNode }) {
   return <a className="btn btn--primary" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer">{typeof children === 'string' ? <RollingLabel>{children}</RollingLabel> : children}<span aria-hidden="true">↗</span></a>
@@ -30,19 +32,13 @@ export function Stats({ items = homeStats, className = '' }: { items?: string[][
   return <div className={`stat-band ${className}`} style={{ '--stat-count': items.length } as React.CSSProperties}>{items.map(([value, label]) => <div key={label}><strong className={value.length > 10 ? 'stat-long' : ''}>{value}</strong><span>{label}</span></div>)}</div>
 }
 
-const calendar = [
-  ['October 1, 2026', 'Fusion x Hult HQ launch'],
-  ['November 7, 2026', 'Workshop series opens: five sessions through January 9, 2027'],
-  ['November 20, 2026', 'Registration closes'],
-  ['January 2, 2027', 'Touch base'],
-  ['February 5, 2027', 'Grand Finale'],
-  ['March 13, 2027', 'Uwill Discover Conference'],
-  ['April 10–11, 2027', 'National Championships in Calgary'],
-]
 export function Timeline({ compact = false }: { compact?: boolean }) {
-  const items = compact ? [calendar[0], ['November 7, 2026', 'Workshop series opens'], calendar[2], calendar[4], calendar[6]] : calendar
-  if (compact) return <EventTimeline items={items} />
-  return <ol className={`timeline ${compact ? '' : 'timeline--full'}`}>{items.map(([date, description]) => <li key={date}><strong>{date}</strong><p>{description}</p></li>)}</ol>
+  const { events, error } = useAttendanceEvents()
+  const upcoming = events.filter(event => new Date(event.endsAt).getTime() > Date.now())
+  const shown = compact ? upcoming.slice(0, 5) : events
+  const items = shown.map(event => [eventDate(event, true), event.title, `/attend?events=${encodeURIComponent(event.id)}`, `${eventTime(event)} · ${event.venue}`])
+  if (compact) return <div>{error && <p className="schedule-note">Schedule for reference; live registration is temporarily unavailable.</p>}<EventTimeline items={items} /><Link className="text-link" to="/attend">Attend our events →</Link></div>
+  return <>{error && <p className="schedule-note">Schedule for reference; live registration is temporarily unavailable.</p>}<p>All times are local Windsor time (America/Toronto).</p><ol className="timeline timeline--full">{items.map(([date, description, to, detail]) => <li key={description}><strong>{date}</strong><div><p>{description}</p><span>{detail}</span><br /><Link className="text-link" to={to}>Event details and registration →</Link></div></li>)}</ol><p><strong>Competition registration closes November 20, 2026.</strong> <a href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer">Register your team separately</a>.</p><p>UWill Discover, Nationals, mentoring and prototype sessions have separate schedules and booking processes.</p></>
 }
 
 export function CTABand({ text = 'Registration closes November 20.', lede, className = '', children = <RegisterButton /> }: { text?: string; lede?: string; className?: string; children?: ReactNode }) {

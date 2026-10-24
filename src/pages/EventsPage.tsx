@@ -1,3 +1,5 @@
+import AttendanceCatalogue from '../components/AttendanceCatalogue'
+import { canSelectEvent, eventDate, eventTime, eventStatusLabel, useAttendanceEvents } from '../lib/attendance'
 import { RevealText, RollingLabel } from '../components/MotionText'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -19,7 +21,7 @@ export default function EventsPage() {
   const posts = publishedPosts()
   const shown = posts.filter(p => filter === 'All' || postStatus(p) === (filter === 'Stories' ? 'Story' : 'Upcoming'))
   const featured = shown.find(p => p.featured) ?? shown[0]
-  return <PageLayout className="events-page" title="Events" subtitle="Workshops, campus events and competition deadlines."><Section>
+  return <PageLayout className="events-page" title="Events" subtitle="Workshops, campus events and competition deadlines."><Section title="Come learn, connect and build"><AttendanceCatalogue /></Section><Section title="Stories and competition news">
     {posts.length >= 6 && <div className="event-filters" role="group" aria-label="Filter posts">{['All', 'Upcoming', 'Stories'].map(label => <button key={label} aria-pressed={filter === label} onClick={() => setFilter(label)}>{label}</button>)}</div>}
     {featured && <PostCard post={featured} featured />}
     <div className="post-grid">{shown.filter(p => p !== featured).map(p => <PostCard key={p.slug} post={p} />)}</div>
@@ -29,6 +31,15 @@ export default function EventsPage() {
 }
 export function EventPostPage() {
   const { slug } = useParams()
+  const { events } = useAttendanceEvents()
+  const event = events.find(item => item.id === slug)
+  if (event) return <PageLayout className="event-page" title={event.title} subtitle={event.description}><Section>
+    <Link className="text-link" to="/events">← All events and stories</Link>
+    <div className="event-details"><p>{eventDate(event)} · {eventTime(event)} (Windsor time)</p><p>{event.venue}</p><p>{eventStatusLabel(event)}</p><p>Free · Drinks and snacks provided.</p>{event.preparation && <p>{event.preparation}</p>}
+      <Link className="btn btn--primary" to={`/attend?events=${encodeURIComponent(event.id)}`}>{canSelectEvent(event) ? 'Register to attend' : 'View attendance options'}</Link>
+      <p>Event attendance does not register your team for the competition. <Link to="/compete">Learn how to compete</Link>.</p>
+    </div>
+  </Section></PageLayout>
   const post = publishedPosts().find(p => p.slug === slug)
   if (!post) return <NotFoundPage />
   return <PageLayout className="event-page" title={post.title} subtitle={post.excerpt}><Section>
