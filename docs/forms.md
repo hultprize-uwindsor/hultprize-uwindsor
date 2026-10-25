@@ -18,7 +18,7 @@ Without configuration, the forms display an honest unavailable message and a dir
 
 ## Storage and notifications
 
-Signups retain their name, email, program, year, phone, and team status. The existing confirmation email retains official Hult registration and both Signal chat links. Enquiries save name, email, topic, and message in the `Enquiries` tab and notify `hultprizeatuwindsor@gmail.com`, with the visitor’s email as Reply-To.
+Signups retain their name, email, program, year, phone, and team status. The existing confirmation email retains official Hult registration and the Discord invite. Enquiries save name, email, topic, and message in the `Enquiries` tab and notify `hultprizeatuwindsor@gmail.com`, with the visitor’s email as Reply-To.
 
 Saving the row is authoritative. A mail-service error does not discard a saved response. The `Notification Sent` column stays blank if notification fails, so the team can find and follow up on those rows. A retry using the same request ID attempts a pending notification without adding another row. A rare interruption between sending mail and marking the column can repeat an email, but does not duplicate the response.
 

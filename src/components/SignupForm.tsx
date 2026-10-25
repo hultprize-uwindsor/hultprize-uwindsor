@@ -120,7 +120,7 @@ export default function SignupForm() {
           </a>
           .
         </p>
-        <p className="signup-disclaimer"><a href={SITE.signalRegisteredUrl} target="_blank" rel="noopener noreferrer">Join the registered teams chat ↗</a></p>
+        <p className="signup-disclaimer"><a href={SITE.discordUrl} target="_blank" rel="noopener noreferrer">Join our Discord ↗</a></p>
         <button type="button" className="btn btn--dark" onClick={() => setStatus('idle')}>
           Submit another response
         </button>

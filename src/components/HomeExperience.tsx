@@ -5,9 +5,9 @@ import { CAMPUS_PHOTOS, HOME_EVENT_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/ass
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const steps = [
-  { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2–4', metric: 'students. One team.', photos: [HOME_EVENT_PHOTOS[3], HOME_EVENT_PHOTOS[2]], icon: '✳' },
+  { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2-4', metric: 'students. One team.', photos: [HOME_EVENT_PHOTOS[3], HOME_EVENT_PHOTOS[2]], icon: '✳' },
   { title: 'Pitch.', label: 'Make your case', text: 'Five workshops to shape your business and sharpen your pitch. Four minutes to make it count.', number: '4', metric: 'minutes to pitch.', photos: [HOME_EVENT_PHOTOS[0], HOME_EVENT_PHOTOS[1]], icon: '↗' },
-  { title: 'Compete.', label: 'Take it further', text: 'Pitch at the Windsor Campus Grand Finale. Up to three teams can represent UWindsor at Nationals in Calgary on April 10–11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photos: [HOME_EVENT_PHOTOS[4], HOME_EVENT_PHOTOS[5]], icon: '◎' },
+  { title: 'Compete.', label: 'Take it further', text: 'Pitch at the Windsor Campus Grand Finale. Up to three teams can represent UWindsor at Nationals in Calgary on April 10-11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photos: [HOME_EVENT_PHOTOS[4], HOME_EVENT_PHOTOS[5]], icon: '◎' },
 ]
 const PHOTO_DURATION = 3500
 const STAGE_DURATION = PHOTO_DURATION * 2
@@ -63,7 +63,7 @@ export function FloatingIntroduction() {
   return <section ref={ref} className="floating-intro" aria-labelledby="intro-heading"><div className="floating-intro__sticky">
     <div className="floating-intro__centre"><h2 id="intro-heading">Big ideas.<br />Start here.</h2></div>
     <div className="floating-intro__cards">
-      <div className="floating-card floating-card--one"><span>The team</span><strong>2–4</strong><p>Different skills. Shared ambition.</p></div>
+      <div className="floating-card floating-card--one"><span>The team</span><strong>2-4</strong><p>Different skills. Shared ambition.</p></div>
       <div className="floating-card floating-card--two">{SHOW_EVENT_PHOTOS ? <img src={CAMPUS_PHOTOS.applause.src} alt="" loading="lazy" /> : <span className="floating-symbol" aria-hidden="true">✳</span>}<span>Made of student ideas.</span></div>
       <div className="floating-card floating-card--three"><span>Your starting point</span><strong>$0</strong><p>Free entry. Free workshops.</p></div>
       <div className="floating-card floating-card--four">{SHOW_EVENT_PHOTOS ? <img src={CAMPUS_PHOTOS.pitch.src} alt="" loading="lazy" /> : <span className="floating-symbol" aria-hidden="true">↗</span>}<span>Four minutes. Make them count.</span></div>

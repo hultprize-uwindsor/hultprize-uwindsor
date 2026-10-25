@@ -56,7 +56,7 @@ export const COMMUNITY_PARTNERS: CommunityPartner[] = [
       'It is one of seventeen Regional Innovation Centres in Ontario.',
     ],
     withUs: [
-      'WEtech Alliance helped fund our first season in 2025–2026 as the technology and innovation partner. Its support was part of the ten-partner effort that brought the campus competition to Windsor.',
+      'WEtech Alliance helped fund our first season in 2025-2026 as the technology and innovation partner. Its support was part of the ten-partner effort that brought the campus competition to Windsor.',
     ],
   },
 ]

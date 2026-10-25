@@ -297,7 +297,7 @@ function attCalendar_(event) {
 }
 function attEventText_(event, registration) {
   var start = Utilities.formatDate(new Date(event.startsAt), 'America/Toronto', 'EEEE, MMMM d, yyyy'), from = Utilities.formatDate(new Date(event.startsAt), 'America/Toronto', 'h:mm a'), to = Utilities.formatDate(new Date(event.endsAt), 'America/Toronto', 'h:mm a z');
-  return [event.title, 'Status: ' + registration.status, start + ', ' + from + '–' + to + ' (Windsor local time)', event.venue, event.preparation ? 'Prepare: ' + event.preparation : '', 'Free · Drinks and snacks provided.', registration.status === 'confirmed' ? 'Add to calendar: ' + attCalendar_(event) : ''].filter(Boolean).join('\n');
+  return [event.title, 'Status: ' + registration.status, start + ', ' + from + '-' + to + ' (Windsor local time)', event.venue, event.preparation ? 'Prepare: ' + event.preparation : '', 'Free · Drinks and snacks provided.', registration.status === 'confirmed' ? 'Add to calendar: ' + attCalendar_(event) : ''].filter(Boolean).join('\n');
 }
 function attEmail_(db, delivery, now) {
   var person = db.attendees.find(function(item) { return item.id === delivery.attendeeId; });

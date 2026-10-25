@@ -18,7 +18,7 @@ export default function HomePage() {
     <ProgrammeFeature />
     <section className="section home-results"><div className="container"><div className="home-results__heading"><span className="tag">Where we started</span><h2 data-text-reveal><RevealText>Windsor showed up.</RevealText></h2><p>Fourteen startups. Two teams at Nationals.<br />Named Best Program in North America.</p><Link className="text-link" to="/year-one">Our first season <span aria-hidden="true">↗</span></Link></div><Stats /></div></section>
     <GlobalPrize />
-    <section className="section home-calendar" id="key-dates"><div className="container"><div><span className="tag">2026–2027</span><h2 data-text-reveal><RevealText>Mark Your<br />Calendars</RevealText></h2><p>From the first workshop to Calgary.</p><Link className="text-link" to="/this-year#calendar">The full calendar <span aria-hidden="true">↗</span></Link></div><Timeline compact /></div></section>
+    <section className="section home-calendar" id="key-dates"><div className="container"><div><span className="tag">2026-2027</span><h2 data-text-reveal><RevealText>Mark Your<br />Calendars</RevealText></h2><p>From the first workshop to Calgary.</p><Link className="text-link" to="/this-year#calendar">The full calendar <span aria-hidden="true">↗</span></Link></div><Timeline compact /></div></section>
     {upcoming&&<section className="home-next-event"><div className="container"><span className="tag">Up next</span><Link to={`/attend?events=${encodeURIComponent(upcoming.id)}`}><time dateTime={upcoming.startsAt}>{eventDate(upcoming)}</time><h2 data-text-reveal><RevealText>{upcoming.title}</RevealText></h2><span className="home-next-event__arrow" aria-hidden="true">↗</span></Link></div></section>}
   </div>
 }

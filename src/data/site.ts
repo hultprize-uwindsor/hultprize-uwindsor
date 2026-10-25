@@ -10,8 +10,6 @@ export const SITE = {
   websiteUrl: 'https://hultprizeuwindsor.ca',
   instagramHandle: '@hultprizeatuwindsor',
   instagramUrl: 'https://www.instagram.com/hultprizeatuwindsor/',
-  signalRegisteredUrl: 'https://signal.group/#CjQKIKs4d_yjcI_b8-HQDZOUCTPgrwHLO9afYy86-aIccZO2EhA2jvXrmEDUZ5fvaccFQciT',
-  signalLookingUrl: 'https://signal.group/#CjQKIDgWmVxurnfxm-CnNUj-p6FY82u5bDTTlh0RSWC1Ag9xEhAqSS4Wby7U4Nd4wnjzEtLP',
   registrationUrl: 'https://www.hultprize.org/register',
   // The national site. Linked from the header text link and the footer marks only.
   globalUrl: 'https://www.hultprize.org/',
@@ -19,7 +17,7 @@ export const SITE = {
   // Not currently shown on the site (pulled per request). Kept here so it's
   // a one-line change to bring back, or swap for the next milestone.
   launchDay: 'October 1, 2026',
-  launchDayDetail: '2:00–4:00 PM, Joyce Entrepreneurship Centre (2nd floor). Join the Fusion launch, where Hult Prize at UWindsor gets an HQ of its own.',
+  launchDayDetail: '2:00-4:00 PM, Joyce Entrepreneurship Centre (2nd floor). Join the Fusion launch, where Hult Prize at UWindsor gets an HQ of its own.',
   registrationCloses: 'November 20',
 }
 

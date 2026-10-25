@@ -71,7 +71,7 @@ export const GROUP_LABELS = {
 export const REGISTRATION_STATUS_LABELS = {
   confirmed: 'Confirmed',
   waitlisted: 'Waitlisted',
-  offered: 'Seat offered — check your email',
+  offered: 'Seat offered - check your email',
   cancelled: 'Cancelled',
 }
 export const attendanceSeedEvents = seedEvents as AttendanceEvent[]
@@ -152,7 +152,7 @@ export function eventDate(event: AttendanceEvent, short = false) {
 
 export function eventTime(event: AttendanceEvent) {
   const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: event.timeZone, hour: 'numeric', minute: '2-digit', hour12: true })
-  return `${formatter.format(new Date(event.startsAt))}–${formatter.format(new Date(event.endsAt))}`
+  return `${formatter.format(new Date(event.startsAt))}-${formatter.format(new Date(event.endsAt))}`
 }
 
 export function eventStatus(event: AttendanceEvent, now = Date.now()): AttendanceEvent['status'] {

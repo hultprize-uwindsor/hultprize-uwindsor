@@ -49,10 +49,7 @@
 .contact-card__icon { grid-area: icon; display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #002b511a; border-radius: 50%; }
 .contact-card__icon svg { width: 18px; height: 18px; }
 .contact-card__label { grid-area: label; align-self: center; font-size: .875rem; font-weight: 400; }
-.contact-card__value, .contact-card__links a { font-size: clamp(1.05rem, 1.5vw, 1.4rem); line-height: 1.4; font-weight: 400; letter-spacing: -.035em; overflow-wrap: anywhere; }
-.contact-card__value { grid-area: value; align-self: end; }
-.contact-card__links { grid-area: value; display: grid; align-self: end; justify-items: start; margin-top: -8px; }
-.contact-card__links a { display: inline-flex; align-items: center; min-height: 44px; font-size: 1rem; }
+.contact-card__value { grid-area: value; align-self: end; font-size: clamp(1.05rem, 1.5vw, 1.4rem); line-height: 1.4; font-weight: 400; letter-spacing: -.035em; overflow-wrap: anywhere; }
 .contact-reach a.contact-card:hover .contact-card__value { text-decoration: underline; text-underline-offset: 5px; }
 
 /* People are grouped by their actual committee responsibilities. */

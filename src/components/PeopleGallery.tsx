@@ -15,7 +15,7 @@ export function TeamGallery() {
   </div>
 }
 export function SeasonGallery() {
-  return <section className="section season-gallery" id="pictures"><div className="container"><div className="section-heading"><span className="tag">2025–2026</span><h2 data-text-reveal><RevealText>Year one.<br />In pictures.</RevealText></h2></div><div className="season-gallery__grid">{YEAR_ONE_PHOTOS.map((photo,i)=><Link to={`?photo=${i}`} state={{drawer:true}} key={photo.src}><figure><img src={photo.src} alt={photo.alt} loading="lazy"/><figcaption>{photo.caption}<span aria-hidden="true">↗</span></figcaption></figure></Link>)}</div></div></section>
+  return <section className="section season-gallery" id="pictures"><div className="container"><div className="section-heading"><span className="tag">2025-2026</span><h2 data-text-reveal><RevealText>Year one.<br />In pictures.</RevealText></h2></div><div className="season-gallery__grid">{YEAR_ONE_PHOTOS.map((photo,i)=><Link to={`?photo=${i}`} state={{drawer:true}} key={photo.src}><figure><img src={photo.src} alt={photo.alt} loading="lazy"/><figcaption>{photo.caption}<span aria-hidden="true">↗</span></figcaption></figure></Link>)}</div></div></section>
 }
 export function PartnerGallery() {
   return <div className="partner-gallery">{COMMUNITY_PARTNERS.map((p,i)=><Link key={p.slug} className={`partner-tile partner-tile--${i}`} to={`?partner=${p.slug}`} state={{drawer:true}}><div className="partner-tile__visual">{p.logo&&<img src={p.logo} alt="" loading="lazy"/>}<span aria-hidden="true">↗</span></div><h3>{p.name}</h3><p>{p.subtitle}</p></Link>)}</div>

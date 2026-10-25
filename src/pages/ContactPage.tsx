@@ -47,10 +47,8 @@ const channels: { label: string; text: ReactNode; href: string; icon: IconName; 
   { label: 'Phone', text: PHONE.text, href: PHONE.href, icon: 'phone' },
   { label: 'Instagram', text: SITE.instagramHandle, href: SITE.instagramUrl, icon: 'instagram', external: true },
   { label: 'LinkedIn', text: 'Hult Prize at the University of Windsor', href: SITE.linkedinUrl, icon: 'linkedin', external: true },
+  { label: 'Discord', text: 'Join our Discord', href: SITE.discordUrl, icon: 'chat', external: true },
 ]
-// The footer's two Signal groups share the last card, named as the footer names them.
-const chats = [['Registered teams', SITE.signalRegisteredUrl], ['Looking for a team', SITE.signalLookingUrl]]
-
 // Who handles what, read off each committee role so a renamed or reordered committee keeps its rows right.
 // Partners are the likeliest visitors who are not students, so they come first; the director is the catch-all, so last.
 // Leads come before coordinators, and a topic with nobody in it is left out.
@@ -123,11 +121,6 @@ export default function ContactPage() {
             <span className="contact-card__value">{text}{external && <NewTab />}</span>
           </a>
         </li>)}
-        <li><div className="contact-card">
-          <span className="contact-card__icon"><Icon name="chat" /></span>
-          <span className="contact-card__label">Signal chats</span>
-          <span className="contact-card__links">{chats.map(([text, href]) => <a key={href} href={href} target="_blank" rel="noopener noreferrer">{text}<NewTab /></a>)}</span>
-        </div></li>
       </ul>
     </div></section>
 

@@ -23,7 +23,7 @@ The owner’s headings remain: “Where we started”, “Our goals”, “Mark 
 ## Forms and deployment
 
 1. Configure server-only `FORM_ENDPOINT` and `FORM_SHARED_SECRET` in Vercel; remove the retired `VITE_FORM_ENDPOINT` setting. See [form delivery setup](forms.md).
-2. Redeploy `google-apps-script/Code.gs`, set its matching secret and authorize the script’s mail permissions. Signups retain confirmation emails and Signal links. Contact enquiries save separately and notify the team.
+2. Redeploy `google-apps-script/Code.gs`, set its matching secret and authorize the script’s mail permissions. Signups retain confirmation emails and the Discord invite. Contact enquiries save separately and notify the team.
 3. Build with `npm run build`. The metadata postbuild step creates route-specific HTML heads, branded social cards references, sitemap and robots files. This supports social unfurling; page content is still rendered by React, not server-rendered. Vercel routes known paths to their generated HTML and preserves `/api/forms`.
 4. Verify the configured sheet and email delivery with an intentional live submission after deployment. Local checks use mocks and send no real email. Forms display success only after a verified saved receipt. Without configuration, they show an unavailable state and direct email link.
 5. Connect the confirmed domain `hultprizeuwindsor.ca` and verify DNS in the domain account. Repository changes do not deploy the website or alter DNS.
@@ -33,7 +33,7 @@ The owner’s headings remain: “Where we started”, “Our goals”, “Mark 
 - The owner requested past-event photos for the homepage journey gallery. The six selected exports are listed in `homeGalleryFiles` in `src/data/photo-permissions.json` and included in production. Selected image captions omit the unconfirmed event date. The wider `approvedForPublication` flag remains false: the other photo sections still appear only in local development, and production excludes the full-resolution original folder and the remaining exports. The original export mapping is in `docs/photo-selections.json`; older local captions provisionally use February 5, 2026 from camera metadata. Production uses the original brand artwork in other photo placements and omits the unpublished Year One gallery. Fusion-space, Nationals and award photos are still missing.
 - Bobola Obi’s portrait and approved individual LinkedIn URLs are still missing. The seven available portraits appear as complete, uncropped cards in a three-column desktop, two-column tablet and one-column mobile grid. Accessible text and profile drawers retain the current roles where the artwork abbreviates them. The Startups Coordinator vacancy remains unpublished.
 - The Supported by strip remains disabled via `SHOW_PARTNER_STRIP`. The three community partner pages use confirmed local assets and official site facts; partner review remains an editorial launch item.
-- The Contact page retains the supplied 9am–4pm hours. Fusion publicly lists 8:30am–4:30pm; confirm whether the website’s hours refer to Hult staffing before public launch.
+- The Contact page retains the supplied 9am-4pm hours. Fusion publicly lists 8:30am-4:30pm; confirm whether the website’s hours refer to Hult staffing before public launch.
 - Approved overview/proposal PDFs should be placed under `public/downloads/` and configured in `src/data/assets.ts`; unavailable downloads stay hidden.
 - Winner quotes and consent from 100% Fish and Mycovolt are still needed for a testimonials section. No placeholder quotes are published.
 - The combined UWindsor/EF Hult Prize logo remains as requested by the owner; institutional brand approval remains an existing launch item.
@@ -42,7 +42,7 @@ The owner’s headings remain: “Where we started”, “Our goals”, “Mark 
 
 Run `npm run build` and `npm run lint`. The browser scripts use a running local server and accept `CHECK_BASE_URL` and `PLAYWRIGHT_EXECUTABLE_PATH`:
 
-- `node scripts/check-site.mjs`: all published pages and 404 at seven phone, tablet, landscape and desktop sizes from 320–1920px; images, headings, clipped text, reduced-motion visibility, overflow and browser errors. Use CHECK_VIEWPORTS and CHECK_PATHS for focused reruns.
+- `node scripts/check-site.mjs`: all published pages and 404 at seven phone, tablet, landscape and desktop sizes from 320-1920px; images, headings, clipped text, reduced-motion visibility, overflow and browser errors. Use CHECK_VIEWPORTS and CHECK_PATHS for focused reruns.
 - `node scripts/check-site-motion.mjs`: pinned scene visibility and card paths, smooth scrolling, drawers, history, gallery, timed journey controls and reduced motion. Set `CHECK_JOURNEY_ONLY=1` for focused journey-gallery playback, navigation, focus and mobile checks.
 - `node scripts/check-brand-motion.mjs` and `node scripts/check-ui-motion.mjs`: WebGL animation, offscreen suspension and fallback states, menu and drawer transitions, focus, scroll locking and reduced motion.
 - `node scripts/check-navigation.mjs` and `node scripts/check-links.mjs`: navigation behavior and real link activation, anchors, downloads, redirects and external tabs.

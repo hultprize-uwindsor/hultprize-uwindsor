@@ -39,7 +39,7 @@ Playwright on this workstation used its installed Chromium executable through `P
 
 Additional tests cover recovery after partial multi-table persistence, hashed rate limits including repeated failed organiser login, FIFO expiring seat offers and reserved capacity, fresh management links after single-use consumption, email failure/retry without duplicate registration, role-restricted support details, blocked email visibility, support-detail expiry and anonymised reports after retention.
 
-The Discord launch input is resolved: the user supplied the approved invite https://discord.gg/ybeQYQxcqZ. It is the default in `SITE.discordUrl` and attendance emails. `ATTENDANCE_DISCORD_URL` remains an optional email override; no Discord configuration is required to use the approved default. Existing Signal destinations remain intact.
+The Discord launch input is resolved: the user supplied the approved invite https://discord.gg/ybeQYQxcqZ. It is the default in `SITE.discordUrl` and attendance emails. `ATTENDANCE_DISCORD_URL` remains an optional email override; no Discord configuration is required to use the approved default. It has since replaced the Signal chat links across the site and the interest-form email.
 
 ## Remaining launch inputs and external checks
 
