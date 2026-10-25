@@ -4,9 +4,7 @@
 .editorial-section > .container { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 16px 64px; align-items: start; }
 .editorial-section > .container:has(> .eyebrow) { grid-template-rows: min-content 1fr; }
 .editorial-section > .container > .eyebrow, .editorial-section > .container > h2 { grid-column: 1; margin-bottom: 0; }
-.editorial-section > .container > :is(.prose, .photo-copy-grid) { grid-column: 2; grid-row: 1 / span 2; }
-.editorial-section .photo-copy-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-.editorial-section .photo-copy-grid .campus-photo img { aspect-ratio: 16 / 9; }
+.editorial-section > .container > .prose { grid-column: 2; grid-row: 1 / span 2; }
 .editorial-section > .container > .stat-band { grid-column: 1 / -1; width: 100%; }
 .editorial-section > .container > .text-link { grid-column: 2; }
 .section-intro { max-width: 65ch; margin: -12px 0 40px; font-size: 1.1875rem; color: var(--uw-grey); }

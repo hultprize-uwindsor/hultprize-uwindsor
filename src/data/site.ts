@@ -19,6 +19,8 @@ export const SITE = {
   launchDay: 'October 1, 2026',
   launchDayDetail: '2:00-4:00 PM, Joyce Entrepreneurship Centre (2nd floor). Join the Fusion launch, where Hult Prize at UWindsor gets an HQ of its own.',
   registrationCloses: 'November 20',
+  // The same deadline as a date, for the homepage calendar.
+  registrationClosesOn: '2026-11-20',
 }
 
 // One switch for arrivals site-wide: card groups below the first screen and photos still loading. UI feedback is unaffected.

@@ -39,7 +39,7 @@ export const HOME_EVENT_PHOTOS: PhotoSlide[] = permissions.homeGalleryFiles.flat
 // 360/720px WebP copies in /images/board, in pin order; narrow screens pin only the first few.
 // All 36 are approved for the public board (`heroBoardApproved`); without that approval,
 // production would pin only the photos cleared in `homeGalleryFiles`, which keep their export names.
-export type BoardPhoto = { src: string; srcSet: string; portrait?: boolean }
+export type BoardPhoto = { name: string; src: string; srcSet: string; portrait?: boolean }
 const BOARD_ORDER: [name: string, portrait?: true][] = [
   ['team-pitch'], ['launch-1810'], ['student-applause'], ['launch-1860'], ['year-one-0653'], ['launch-1888'],
   ['year-one-0086', true], ['launch-1822'], ['teams-onstage'], ['launch-1849'], ['pitch-feedback'], ['launch-1658'],
@@ -50,7 +50,7 @@ const BOARD_ORDER: [name: string, portrait?: true][] = [
 ]
 export const HOME_BOARD_PHOTOS: BoardPhoto[] = BOARD_ORDER
   .filter(([name]) => SHOW_EVENT_PHOTOS || permissions.heroBoardApproved || permissions.homeGalleryFiles.includes(`${name}.jpg`))
-  .map(([name, portrait]) => ({ src: `/images/board/${name}-360.webp`, srcSet: `/images/board/${name}-360.webp 360w, /images/board/${name}-720.webp 720w`, portrait }))
+  .map(([name, portrait]) => ({ name, src: `/images/board/${name}-360.webp`, srcSet: `/images/board/${name}-360.webp 360w, /images/board/${name}-720.webp 720w`, portrait }))
 
 // Set to local /downloads/... PDF paths once the approved files arrive.
 export const DOWNLOADS: { overview?: string; partnershipProposal?: string } = {}

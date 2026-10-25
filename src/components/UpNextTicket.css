@@ -1,0 +1,46 @@
+/* "Up next": the next event as an admission ticket on a navy band, with a pink stub torn along a perforated, notched edge. */
+.home-next-event { padding-block:clamp(56px,7vw,96px); background:radial-gradient(rgb(255 255 255 / 9%) 1.3px,transparent 1.5px) 0 0 / 30px 30px,var(--uw-blue-dark); }
+.up-next-ticket { --stub:156px; --notch:20px; display:block; max-width:1000px; margin-inline:auto; color:var(--ink); text-decoration:none; filter:drop-shadow(0 20px 30px rgb(0 0 0 / 32%)); transition:translate .35s var(--ease-ui); }
+.up-next-ticket:hover { translate:0 -4px; }
+.up-next-ticket:focus-visible { outline:3px solid var(--pink); outline-offset:6px; border-radius:18px; }
+/* The notches are cut from the paper at the perforation, top and bottom. */
+.up-next-ticket__paper {
+  --cut:radial-gradient(circle at var(--stub) 0,#0000 var(--notch),#000 calc(var(--notch) + .5px));
+  display:grid; grid-template-columns:var(--stub) minmax(0,1fr) auto; align-items:stretch; border-radius:18px; background:linear-gradient(90deg,var(--pink) 0 var(--stub),#fffdf8 var(--stub));
+  -webkit-mask:var(--cut) 0 0 / 100% 51% no-repeat,radial-gradient(circle at var(--stub) 100%,#0000 var(--notch),#000 calc(var(--notch) + .5px)) 0 100% / 100% 51% no-repeat;
+  mask:var(--cut) 0 0 / 100% 51% no-repeat,radial-gradient(circle at var(--stub) 100%,#0000 var(--notch),#000 calc(var(--notch) + .5px)) 0 100% / 100% 51% no-repeat;
+}
+
+.up-next-ticket__stub { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:26px 12px; color:#fff; text-align:center; }
+.up-next-ticket__month { font-size:.8rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+.up-next-ticket__day { font-size:clamp(3rem,5vw,4rem); font-weight:700; line-height:.95; letter-spacing:-.05em; font-variant-numeric:tabular-nums; }
+.up-next-ticket__weekday { font-size:.85rem; opacity:.9; }
+.up-next-ticket__admit { margin-top:12px; padding-top:8px; border-top:1px dashed rgb(255 255 255 / 55%); font-size:.62rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; opacity:.85; }
+
+.up-next-ticket__body { display:flex; flex-direction:column; justify-content:center; gap:8px; min-width:0; padding:30px 20px 30px 36px; border-left:2px dashed rgb(0 43 81 / 22%); }
+.up-next-ticket__meta { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.up-next-ticket__label { font-size:.75rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--pink-text); }
+.up-next-ticket__countdown { padding:3px 10px; border-radius:99px; background:var(--paper-pink); color:var(--pink-text); font-size:.78rem; font-weight:600; }
+.up-next-ticket h2 { margin:0; font-size:clamp(1.7rem,3.2vw,2.8rem); line-height:1.08; letter-spacing:-.045em; color:var(--uw-blue-dark); }
+.up-next-ticket__details { font-size:.95rem; line-height:1.5; color:var(--uw-grey); }
+
+.up-next-ticket__action { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:24px 34px 24px 12px; }
+/* A rubber "Free" stamp: every attendance event is free. */
+.up-next-ticket__stamp { padding:4px 12px; border:2.5px solid var(--pink); border-radius:8px; color:var(--pink); font-size:1rem; font-weight:800; letter-spacing:.18em; text-transform:uppercase; rotate:-12deg; opacity:.85; }
+.up-next-ticket__cta { display:inline-flex; align-items:center; gap:8px; min-height:48px; padding:0 22px; border-radius:99px; background:var(--pink); color:#fff; font-weight:600; white-space:nowrap; transition:background-color .2s; }
+.up-next-ticket__cta span { transition:translate .25s var(--ease-ui); }
+.up-next-ticket:hover .up-next-ticket__cta { background:var(--pink-text); }
+.up-next-ticket:hover .up-next-ticket__cta span,.up-next-ticket:focus-visible .up-next-ticket__cta span { translate:4px 0; }
+
+/* Phones: a narrower stub, with the stamp in the corner and the button under the event. */
+@media(max-width:700px) {
+  .up-next-ticket { --stub:92px; --notch:15px; }
+  .up-next-ticket__paper { grid-template-columns:var(--stub) minmax(0,1fr); position:relative; }
+  .up-next-ticket__stub { grid-row:1 / span 2; padding:20px 8px; }
+  .up-next-ticket__admit { display:none; }
+  .up-next-ticket__body { padding:22px 16px 10px 20px; }
+  .up-next-ticket__action { grid-column:2; align-items:flex-start; padding:6px 16px 22px 20px; }
+  .up-next-ticket__stamp { position:absolute; top:14px; right:12px; font-size:.75rem; padding:2px 8px; }
+  .up-next-ticket__cta { min-height:44px; padding:0 18px; font-size:.95rem; }
+}
+@media(prefers-reduced-motion:reduce) { .up-next-ticket,.up-next-ticket__cta span { transition:none; } }

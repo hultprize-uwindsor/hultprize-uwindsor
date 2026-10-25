@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from './PageLink'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Mic, Trophy, Users } from 'lucide-react'
 import { CAMPUS_PHOTOS, HOME_EVENT_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/assets'
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const steps = [
-  { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2-4', metric: 'students. One team.', photos: [HOME_EVENT_PHOTOS[3], HOME_EVENT_PHOTOS[2]], icon: '✳' },
-  { title: 'Pitch.', label: 'Make your case', text: 'Five workshops to shape your business and sharpen your pitch. Four minutes to make it count.', number: '4', metric: 'minutes to pitch.', photos: [HOME_EVENT_PHOTOS[0], HOME_EVENT_PHOTOS[1]], icon: '↗' },
-  { title: 'Compete.', label: 'Take it further', text: 'Pitch at the Windsor Campus Grand Finale. Up to three teams can represent UWindsor at Nationals in Calgary on April 10-11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photos: [HOME_EVENT_PHOTOS[4], HOME_EVENT_PHOTOS[5]], icon: '◎' },
+  { title: 'Build.', label: 'Find your team', text: 'Start with a problem worth solving. Bring two to four students together and test your idea.', number: '2-4', metric: 'students. One team.', photos: [HOME_EVENT_PHOTOS[3], HOME_EVENT_PHOTOS[2]], icon: Users },
+  { title: 'Pitch.', label: 'Make your case', text: 'Five workshops to shape your business and sharpen your pitch. Four minutes to make it count.', number: '4', metric: 'minutes to pitch.', photos: [HOME_EVENT_PHOTOS[0], HOME_EVENT_PHOTOS[1]], icon: Mic },
+  { title: 'Compete.', label: 'Take it further', text: 'Pitch at the Windsor Campus Grand Finale. Up to three teams can represent UWindsor at Nationals in Calgary on April 10-11.', prefix: 'Up to', number: '3', metric: 'teams at Nationals.', photos: [HOME_EVENT_PHOTOS[4], HOME_EVENT_PHOTOS[5]], icon: Trophy },
 ]
 const PHOTO_DURATION = 3500
 const STAGE_DURATION = PHOTO_DURATION * 2
@@ -69,7 +69,7 @@ export function FloatingIntroduction() {
       <div className="floating-card floating-card--four">{SHOW_EVENT_PHOTOS ? <img src={CAMPUS_PHOTOS.pitch.src} alt="" loading="lazy" /> : <span className="floating-symbol" aria-hidden="true">↗</span>}<span>Four minutes. Make them count.</span></div>
       <div className="floating-card floating-card--five"><span>The global prize</span><strong>$1M</strong><p>One winning startup.<br />A world of possibility.</p></div>
     </div>
-    <div className="intro-actions" aria-label="Build, pitch and compete">{steps.map(step => <div key={step.title} className="intro-action"><span aria-hidden="true">{step.icon}</span><p>{step.title}</p></div>)}</div>
+    <div className="intro-actions" aria-label="Build, pitch and compete">{steps.map(step => <div key={step.title} className="intro-action"><span aria-hidden="true"><step.icon strokeWidth={1.9} /></span><p>{step.title}</p></div>)}</div>
   </div></section>
 }
 

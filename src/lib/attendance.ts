@@ -150,6 +150,10 @@ export function eventDate(event: AttendanceEvent, short = false) {
   }).format(new Date(event.startsAt))
 }
 
+/** YYYY-MM-DD in Windsor time (or the given zone), so an evening event never lands on the next day. */
+export function localDay(date: Date | string | number, timeZone = 'America/Toronto') {
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(date))
+}
 export function eventTime(event: AttendanceEvent) {
   const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: event.timeZone, hour: 'numeric', minute: '2-digit', hour12: true })
   return `${formatter.format(new Date(event.startsAt))}-${formatter.format(new Date(event.endsAt))}`

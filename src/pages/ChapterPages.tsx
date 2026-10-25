@@ -5,15 +5,18 @@ import copy from '../data/copy.json'
 import { DOWNLOADS, YEAR_ONE_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/assets'
 import CampusPhoto from '../components/CampusPhoto'
 import { TeamGallery, SeasonGallery, PartnerGallery } from '../components/PeopleGallery'
+import { AboutIntro, AboutOffers, CompetitionRoad, GetInvolved } from '../components/AboutSections'
 import { SITE } from '../data/site'
 import SignupForm from '../components/SignupForm'
 import { Copy, PageHeader, PageLayout, RegisterButton, Section, Stats, Timeline } from '../components/PageParts'
 
 export function AboutPage() {
   return <PageLayout title="About" subtitle="The global student startup competition at UWindsor.">
-    <Section eyebrow="The competition" title="One million to change the world" tint="editorial-section"><div className={SHOW_EVENT_PHOTOS ? "photo-copy-grid" : undefined}><Copy paragraphs={copy.aboutCompetition} /><CampusPhoto photo="applause" /></div></Section>
-    <Section title="What we do at Windsor" tint="paper-blue editorial-section"><Copy paragraphs={copy.aboutWindsor} />{DOWNLOADS.overview && <a className="text-link" href={DOWNLOADS.overview} download>Download the program overview</a>}</Section>
+    <Section><AboutIntro /></Section>
+    <Section eyebrow="The competition" title="One million to change the world" tint="paper-blue"><Copy paragraphs={copy.aboutCompetition} /><CompetitionRoad /></Section>
+    <Section title="What we do at Windsor"><AboutOffers />{DOWNLOADS.overview && <a className="text-link" href={DOWNLOADS.overview} download>Download the program overview</a>}</Section>
     <Section title="The Team" id="team"><p className="prose">Meet the UWindsor students running the competition.</p><TeamGallery /></Section>
+    <Section title="Get involved" tint="paper-pink"><GetInvolved /></Section>
   </PageLayout>
 }
 export function YearOnePage() {

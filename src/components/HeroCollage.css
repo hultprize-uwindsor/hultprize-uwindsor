@@ -10,9 +10,7 @@
   box-shadow:inset 0 2px 14px rgb(70 35 5 / 50%),inset 0 0 0 1px rgb(70 35 5 / 35%);
 }
 
-/* Pushpin heads: photos carry a .pin element; the card and note draw theirs as pseudo-elements. */
-.pin,.board-card::before,.board-card::after,.board-note::before { --pin-size:clamp(13px,1.2vw,19px); position:absolute; z-index:2; width:var(--pin-size); aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 34% 30%,rgb(255 255 255 / 85%) 0 13%,transparent 16%),radial-gradient(circle at 45% 42%,var(--pin) 0 50%,color-mix(in srgb,var(--pin) 60%,#000) 100%); box-shadow:1px 3px 3px rgb(40 20 5 / 45%),inset -1px -2px 2px rgb(0 0 0 / 18%); }
-.pin { left:var(--pin-x); top:0; translate:-50% -40%; }
+/* Photos carry a .pin element (see pushpin.css); the card and note draw theirs as pseudo-elements. */
 .board-card::before,.board-card::after,.board-note::before { content:''; top:0; translate:-50% -40%; }
 
 .board-card { --pin:#ff329b; position:relative; z-index:60; grid-column:1 / span 5; grid-row:1 / span 3; align-self:center; padding:clamp(22px,2.4vw,40px); background:#fffdf7; rotate:-1.2deg; box-shadow:0 1px 2px rgb(40 20 5 / 20%),0 18px 34px -10px rgb(40 20 5 / 50%); }
@@ -21,11 +19,11 @@
 .board-note { --pin:#2fbf97; position:relative; z-index:61; grid-column:2 / span 4; grid-row:4 / span 2; align-self:end; max-width:30rem; margin-bottom:1%; padding:clamp(20px,2vw,30px) clamp(20px,2vw,30px) clamp(18px,1.8vw,26px); background:linear-gradient(180deg,#fff7c2,#ffef93); rotate:1.6deg; box-shadow:0 1px 2px rgb(40 20 5 / 18%),0 16px 24px -10px rgb(40 20 5 / 55%); }
 .board-note::before { left:50%; }
 
-.pinned { position:relative; z-index:var(--z); justify-self:center; align-self:center; width:calc(100% * var(--scale)); margin:0; translate:var(--dx) var(--dy); rotate:var(--rot); animation:pin-drop .9s cubic-bezier(.23,1,.32,1) both; animation-delay:calc(150ms + var(--i) * 45ms); }
+.pinned { position:relative; z-index:var(--z); justify-self:center; align-self:center; width:calc(100% * var(--scale)); margin:0; translate:var(--dx) var(--dy); rotate:var(--rot); animation:pin-drop .9s cubic-bezier(.23,1,.32,1) both; animation-delay:calc(150ms + var(--order) * 40ms); }
 .pinned--portrait { width:calc(80% * var(--scale)); }
 .pinned__sway { position:relative; transform-origin:var(--pin-x) 0; animation:pin-sway var(--sway) ease-in-out infinite alternate; animation-delay:calc(var(--i) * -.9s); }
 .is-offscreen .pinned__sway { animation-play-state:paused; }
-.pinned__photo { background:#fff; padding:5% 5% 14%; border-radius:2px; box-shadow:0 1px 1px rgb(40 20 5 / 22%),0 10px 18px -6px rgb(40 20 5 / 50%); transition:transform 450ms var(--ease-ui),box-shadow 450ms var(--ease-ui); }
+.pinned__photo { transform-origin:var(--pin-x) 0; background:#fff; padding:5% 5% 14%; border-radius:2px; box-shadow:0 1px 1px rgb(40 20 5 / 22%),0 10px 18px -6px rgb(40 20 5 / 50%); transition:transform 450ms var(--ease-ui),box-shadow 450ms var(--ease-ui); }
 .pinned__photo img { display:block; width:100%; height:auto; aspect-ratio:4 / 3; object-fit:cover; background:#e9dccb; }
 .pinned--portrait .pinned__photo img { aspect-ratio:3 / 4; object-position:50% 25%; }
 .pinned:hover { z-index:70; }

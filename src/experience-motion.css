@@ -13,7 +13,8 @@
 .floating-card--five strong { color:#ffb5da; }
 .intro-actions { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px; padding-bottom:70px; pointer-events:none; }
 .intro-action { display:flex; align-items:center; gap:32px; transform:translateY(110vh); opacity:0; will-change:transform; }
-.intro-action > span { display:grid; place-items:center; width:76px; height:76px; font-size:56px; background:var(--pink); color:white; border-radius:23px; line-height:1; }
+.intro-action > span { display:grid; place-items:center; width:76px; height:76px; background:var(--pink); color:white; border-radius:23px; }
+.intro-action > span svg { width:55%; height:55%; }
 .intro-action p { color:var(--pink-text); font-size:clamp(4.5rem,8.5vw,8.5rem); letter-spacing:-.055em; line-height:1; margin:0; }
 .intro-action:nth-child(2) > span { background:var(--uw-blue-dark); }
 .intro-action:nth-child(2) p { color:var(--uw-blue-dark); }
@@ -52,7 +53,7 @@
 .journey-gallery__toolbar button:focus-visible { outline:3px solid white; outline-offset:3px; }
 @keyframes journey-photo-pan { from { transform:scale(1.055); } to { transform:scale(1); } }
 .home-hero { min-height:100svh; }
-@media(max-width:1100px) { .floating-intro .floating-card { width:195px; padding:20px; } .intro-action { gap:24px; } .intro-action > span { width:64px; height:64px; border-radius:18px; font-size:48px; } }
+@media(max-width:1100px) { .floating-intro .floating-card { width:195px; padding:20px; } .intro-action { gap:24px; } .intro-action > span { width:64px; height:64px; border-radius:18px; } }
 @media(max-width:760px) {
  .floating-intro { height:290svh; }
  .floating-intro h2 { font-size:clamp(3rem,12.5vw,5.5rem); }
@@ -62,7 +63,7 @@
  .intro-actions { gap:14px; padding-bottom:60px; }
  .intro-action { gap:18px; }
  .intro-action p { font-size:clamp(3rem,12vw,5.5rem); }
- .intro-action > span { width:44px; height:44px; border-radius:14px; font-size:32px; }
+ .intro-action > span { width:44px; height:44px; border-radius:14px; }
  .journey-experience__sticky { padding:64px 0 88px; min-height:0; }
  .journey-experience__top { margin-bottom:40px; }
  .journey-experience__stage { grid-template-columns:1fr; }

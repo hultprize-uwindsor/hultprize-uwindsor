@@ -6,5 +6,4 @@
 .attendance-catalogue__grid .tag { margin-bottom:16px; }
 .attendance-catalogue__grid p { font-size:.95rem; }
 .schedule-note { padding:12px 16px; border-left:3px solid var(--uw-blue); background:var(--paper-blue); margin-top:24px; font-size:.9rem; }
-.event-timeline__detail { margin-top:12px; font-size:.9rem; }
 @media(max-width:720px) { .attendance-catalogue__grid { grid-template-columns:1fr; } .attendance-catalogue__grid article { padding:22px; } }

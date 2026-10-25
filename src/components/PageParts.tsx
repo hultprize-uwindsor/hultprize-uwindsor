@@ -1,4 +1,3 @@
-import EventTimeline from './EventTimeline'
 import { HeroTitle, RevealText, RollingLabel } from './MotionText'
 import type { ReactNode } from 'react'
 import { SITE } from '../data/site'
@@ -32,12 +31,9 @@ export function Stats({ items = homeStats, className = '' }: { items?: string[][
   return <div className={`stat-band ${className}`} style={{ '--stat-count': items.length } as React.CSSProperties}>{items.map(([value, label]) => <div key={label}><strong className={value.length > 10 ? 'stat-long' : ''}>{value}</strong><span>{label}</span></div>)}</div>
 }
 
-export function Timeline({ compact = false }: { compact?: boolean }) {
+export function Timeline() {
   const { events, error } = useAttendanceEvents()
-  const upcoming = events.filter(event => new Date(event.endsAt).getTime() > Date.now())
-  const shown = compact ? upcoming.slice(0, 5) : events
-  const items = shown.map(event => [eventDate(event, true), event.title, `/attend?events=${encodeURIComponent(event.id)}`, `${eventTime(event)} · ${event.venue}`])
-  if (compact) return <div>{error && <p className="schedule-note">Schedule for reference; live registration is temporarily unavailable.</p>}<EventTimeline items={items} /><Link className="text-link" to="/attend">Attend our events →</Link></div>
+  const items = events.map(event => [eventDate(event, true), event.title, `/attend?events=${encodeURIComponent(event.id)}`, `${eventTime(event)} · ${event.venue}`])
   return <>{error && <p className="schedule-note">Schedule for reference; live registration is temporarily unavailable.</p>}<p>All times are local Windsor time (America/Toronto).</p><ol className="timeline timeline--full">{items.map(([date, description, to, detail]) => <li key={description}><strong>{date}</strong><div><p>{description}</p><span>{detail}</span><br /><Link className="text-link" to={to}>Event details and registration →</Link></div></li>)}</ol><p><strong>Competition registration closes November 20, 2026.</strong> <a href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer">Register your team separately</a>.</p><p>UWill Discover, Nationals, mentoring and prototype sessions have separate schedules and booking processes.</p></>
 }
 
