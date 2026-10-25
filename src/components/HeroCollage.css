@@ -1,0 +1,70 @@
+/* A framed cork board: a pinned title card, a sticky note and event photos hung from coloured pushpins. */
+.cork-board { position:relative; padding:clamp(10px,1vw,16px); border-radius:18px; background:repeating-linear-gradient(92deg,rgb(255 255 255 / 5%) 0 2px,transparent 2px 11px),linear-gradient(160deg,#b97f47,#8f5b2d 42%,#a76e3a 68%,#7b4c25); box-shadow:0 1px 2px rgb(60 30 5 / 30%),0 26px 60px rgb(0 43 81 / 18%); }
+.cork-board__surface {
+  --row:minmax(0,1fr);
+  position:relative; height:clamp(500px,calc(100svh - 204px),820px); padding:clamp(18px,2vw,30px); display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); grid-template-rows:repeat(5,var(--row)); grid-auto-flow:row dense; border-radius:8px; overflow:hidden;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .16 0 0 0 0 .05 2.4 0 0 0 -1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.3' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .95 0 0 0 0 .8 0 0 0 0 .58 1.9 0 0 0 -.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(120% 95% at 50% 40%,#d29c62 0%,#c38a52 60%,#a8723f 100%);
+  box-shadow:inset 0 2px 14px rgb(70 35 5 / 50%),inset 0 0 0 1px rgb(70 35 5 / 35%);
+}
+
+/* Pushpin heads: photos carry a .pin element; the card and note draw theirs as pseudo-elements. */
+.pin,.board-card::before,.board-card::after,.board-note::before { --pin-size:clamp(13px,1.2vw,19px); position:absolute; z-index:2; width:var(--pin-size); aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 34% 30%,rgb(255 255 255 / 85%) 0 13%,transparent 16%),radial-gradient(circle at 45% 42%,var(--pin) 0 50%,color-mix(in srgb,var(--pin) 60%,#000) 100%); box-shadow:1px 3px 3px rgb(40 20 5 / 45%),inset -1px -2px 2px rgb(0 0 0 / 18%); }
+.pin { left:var(--pin-x); top:0; translate:-50% -40%; }
+.board-card::before,.board-card::after,.board-note::before { content:''; top:0; translate:-50% -40%; }
+
+.board-card { --pin:#ff329b; position:relative; z-index:60; grid-column:1 / span 5; grid-row:1 / span 3; align-self:center; padding:clamp(22px,2.4vw,40px); background:#fffdf7; rotate:-1.2deg; box-shadow:0 1px 2px rgb(40 20 5 / 20%),0 18px 34px -10px rgb(40 20 5 / 50%); }
+.board-card::before { left:9%; }
+.board-card::after { left:91%; --pin:#2f80d1; }
+.board-note { --pin:#2fbf97; position:relative; z-index:61; grid-column:2 / span 4; grid-row:4 / span 2; align-self:end; max-width:30rem; margin-bottom:1%; padding:clamp(20px,2vw,30px) clamp(20px,2vw,30px) clamp(18px,1.8vw,26px); background:linear-gradient(180deg,#fff7c2,#ffef93); rotate:1.6deg; box-shadow:0 1px 2px rgb(40 20 5 / 18%),0 16px 24px -10px rgb(40 20 5 / 55%); }
+.board-note::before { left:50%; }
+
+.pinned { position:relative; z-index:var(--z); justify-self:center; align-self:center; width:calc(100% * var(--scale)); margin:0; translate:var(--dx) var(--dy); rotate:var(--rot); animation:pin-drop .9s cubic-bezier(.23,1,.32,1) both; animation-delay:calc(150ms + var(--i) * 45ms); }
+.pinned--portrait { width:calc(80% * var(--scale)); }
+.pinned__sway { position:relative; transform-origin:var(--pin-x) 0; animation:pin-sway var(--sway) ease-in-out infinite alternate; animation-delay:calc(var(--i) * -.9s); }
+.is-offscreen .pinned__sway { animation-play-state:paused; }
+.pinned__photo { background:#fff; padding:5% 5% 14%; border-radius:2px; box-shadow:0 1px 1px rgb(40 20 5 / 22%),0 10px 18px -6px rgb(40 20 5 / 50%); transition:transform 450ms var(--ease-ui),box-shadow 450ms var(--ease-ui); }
+.pinned__photo img { display:block; width:100%; height:auto; aspect-ratio:4 / 3; object-fit:cover; background:#e9dccb; }
+.pinned--portrait .pinned__photo img { aspect-ratio:3 / 4; object-position:50% 25%; }
+.pinned:hover { z-index:70; }
+.pinned:hover .pinned__photo { transform:scale(1.08); box-shadow:0 2px 3px rgb(40 20 5 / 22%),0 22px 34px -8px rgb(40 20 5 / 55%); }
+
+.board-sticker { position:absolute; z-index:65; left:var(--x); top:var(--y); rotate:var(--rot); pointer-events:none; animation:pin-drop .9s cubic-bezier(.23,1,.32,1) both; animation-delay:calc(1.4s + var(--i) * 140ms); }
+.board-sticker--award { width:clamp(92px,8.6vw,140px); aspect-ratio:1; display:grid; place-items:center; padding:1.1em; border-radius:50%; background:var(--pink); color:#fff; outline:2px dashed #ffffffb3; outline-offset:-7px; text-align:center; font-size:clamp(10px,.9vw,14px); line-height:1.15; font-weight:500; letter-spacing:-.01em; box-shadow:0 10px 24px rgb(120 20 60 / 35%); }
+.board-sticker--count { padding:.55em 1em; border-radius:99px; background:var(--uw-blue-dark); color:#fff; font-size:clamp(11px,.9vw,14px); line-height:1.2; white-space:nowrap; box-shadow:0 8px 20px rgb(0 43 81 / 30%); }
+
+@keyframes pin-drop { from { opacity:0; transform:translateY(-34px) rotate(7deg) scale(1.05); } to { opacity:1; transform:none; } }
+@keyframes pin-sway { from { transform:rotate(-1.1deg); } to { transform:rotate(1.1deg); } }
+
+/* Short laptop screens: the note widens so its headline fits one line and it stays below the card. */
+@media(min-width:1001px) and (max-height:820px) {
+  .board-note { grid-column:1 / span 5; max-width:none; padding:16px 22px; }
+  .pinned:nth-of-type(n+36) { display:none; }
+}
+/* Tablets: the card spans the top, two rows of photos, then the note beside two more photos. */
+@media(max-width:1000px) {
+  .cork-board__surface { --row:clamp(108px,18vw,170px); height:auto; grid-template-columns:repeat(6,minmax(0,1fr)); grid-template-rows:auto repeat(2,var(--row)) auto; }
+  .board-card { grid-column:1 / -1; grid-row:1; justify-self:start; max-width:min(100%,38rem); margin-bottom:10px; }
+  .board-note { grid-column:1 / span 4; grid-row:4; margin-top:14px; }
+  .pinned:nth-of-type(n+15) { display:none; }
+  .board-note { align-self:start; }
+  .board-sticker { position:relative; left:auto; top:auto; grid-column:1 / -1; grid-row:1; }
+  .board-sticker--award { justify-self:end; align-self:center; margin-right:5%; }
+  .board-sticker--count { justify-self:end; align-self:end; margin:0 3% 8% 0; }
+}
+/* Phones: three photos per row above the note and one row below it. */
+@media(max-width:600px) {
+  .cork-board { border-radius:14px; }
+  .cork-board__surface { --row:clamp(92px,30vw,150px); padding:16px 12px; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:auto repeat(2,var(--row)) auto var(--row); }
+  .board-card { margin-bottom:14px; }
+  .board-note { grid-column:1 / -1; margin-top:16px; margin-bottom:6px; }
+  .pinned:nth-of-type(n+10) { display:none; }
+  .board-sticker--award { width:78px; font-size:10px; align-self:end; margin:0 -4px -30px 0; }
+  .board-sticker--count { display:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .pinned,.pinned__sway,.board-sticker { animation:none; }
+  .pinned:hover .pinned__photo { transform:none; }
+}

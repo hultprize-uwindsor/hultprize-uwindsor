@@ -47,8 +47,14 @@ export default defineConfig(({ mode }) => {
           filter(source) {
             const path = relative(publicDir, source)
             const eventFolder = ['images', 'year-one'].join(sep)
+            const boardFolder = ['images', 'board'].join(sep)
             if (!photoPermissions.approvedForPublication && path.startsWith(`${eventFolder}${sep}`)) {
               return photoPermissions.homeGalleryFiles.some(file => path === `${eventFolder}${sep}${file}`)
+            }
+            // Hero board copies (name-360.webp, name-720.webp) ship once the board is approved; until then they
+            // follow the clearance of the export with the same name.
+            if (!photoPermissions.approvedForPublication && !photoPermissions.heroBoardApproved && path.startsWith(`${boardFolder}${sep}`)) {
+              return photoPermissions.homeGalleryFiles.includes(path.slice(boardFolder.length + 1).replace(/-\d+\.webp$/, '.jpg'))
             }
             return !excluded.some(folder => path === folder || path.startsWith(`${folder}${sep}`))
           },

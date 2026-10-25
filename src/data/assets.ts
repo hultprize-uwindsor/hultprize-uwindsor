@@ -35,5 +35,22 @@ export const HOME_EVENT_PHOTOS: PhotoSlide[] = permissions.homeGalleryFiles.flat
   return image ? [{ ...image, caption: image.caption.split(' · ')[0] }] : []
 })
 
+// Homepage cork board: year-one (February 5, 2026) and Fusion launch (October 1, 2026) photos as
+// 360/720px WebP copies in /images/board, in pin order; narrow screens pin only the first few.
+// All 36 are approved for the public board (`heroBoardApproved`); without that approval,
+// production would pin only the photos cleared in `homeGalleryFiles`, which keep their export names.
+export type BoardPhoto = { src: string; srcSet: string; portrait?: boolean }
+const BOARD_ORDER: [name: string, portrait?: true][] = [
+  ['team-pitch'], ['launch-1810'], ['student-applause'], ['launch-1860'], ['year-one-0653'], ['launch-1888'],
+  ['year-one-0086', true], ['launch-1822'], ['teams-onstage'], ['launch-1849'], ['pitch-feedback'], ['launch-1658'],
+  ['year-one-0083', true], ['launch-1829'], ['year-one-0094', true], ['launch-1763'], ['campus-presentation'], ['launch-1724'],
+  ['year-one-0080'], ['launch-1661'], ['year-one-0293', true], ['launch-1866'], ['community-onstage'], ['launch-1839'],
+  ['year-one-0125'], ['launch-1738'], ['year-one-0474'], ['launch-1819'], ['year-one-0493'], ['launch-1873'],
+  ['year-one-0138'], ['launch-1900'], ['year-one-0686'], ['launch-1786'], ['year-one-0073', true], ['launch-1771'],
+]
+export const HOME_BOARD_PHOTOS: BoardPhoto[] = BOARD_ORDER
+  .filter(([name]) => SHOW_EVENT_PHOTOS || permissions.heroBoardApproved || permissions.homeGalleryFiles.includes(`${name}.jpg`))
+  .map(([name, portrait]) => ({ src: `/images/board/${name}-360.webp`, srcSet: `/images/board/${name}-360.webp 360w, /images/board/${name}-720.webp 720w`, portrait }))
+
 // Set to local /downloads/... PDF paths once the approved files arrive.
 export const DOWNLOADS: { overview?: string; partnershipProposal?: string } = {}

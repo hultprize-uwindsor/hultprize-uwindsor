@@ -1,5 +1,5 @@
 import { Link } from '../components/PageLink'
-import BrandScene from '../components/BrandScene'
+import HeroCollage from '../components/HeroCollage'
 import { HeroTitle, RevealText, RollingLabel } from '../components/MotionText'
 import { FloatingIntroduction, JourneyExperience } from '../components/HomeExperience'
 import { ProgrammeFeature } from '../components/ProgrammeFeature'
@@ -12,7 +12,7 @@ export default function HomePage() {
   const { events } = useAttendanceEvents()
   const upcoming=events.find(event => new Date(event.endsAt).getTime() > Date.now() && !['cancelled', 'completed'].includes(event.status))
   return <div className="home-page">
-    <section className="home-hero" aria-labelledby="home-title"><BrandScene variant="blue"/><div className="container home-hero__inner"><div><p className="eyebrow">Hult Prize at the University of Windsor</p><HeroTitle id="home-title">One idea.<br />4 minutes.<br />$1,000,000.</HeroTitle></div><div className="home-hero__aside"><p>Build a business that changes something.</p><p className="home-hero__detail">Start at Windsor. Compete for US$1 million in seed funding at the global final.</p><a className="btn btn--white" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer"><RollingLabel>Register your team</RollingLabel><span aria-hidden="true">↗</span></a></div></div><a className="home-scroll" href="#discover" aria-label="Scroll to explore">↓ <span>Scroll to explore</span></a></section>
+    <section className="home-hero" aria-labelledby="home-title"><div className="container"><HeroCollage><div className="board-card home-hero__copy"><p className="eyebrow">Hult Prize at the University of Windsor</p><HeroTitle id="home-title">One idea.<br />Four minutes.<br />$1,000,000.</HeroTitle></div><div className="board-note home-hero__aside"><p>Build a business that changes something.</p><p className="home-hero__detail">Start at Windsor. Compete for US$1 million in seed funding at the global final.</p><a className="btn btn--primary" href={SITE.registrationUrl} target="_blank" rel="noopener noreferrer"><RollingLabel>Register your team</RollingLabel><span aria-hidden="true">↗</span></a></div></HeroCollage></div><a className="home-scroll" href="#discover" aria-label="Scroll to explore">↓ <span>Scroll to explore</span></a></section>
     <div id="discover"><FloatingIntroduction /></div>
     <JourneyExperience />
     <ProgrammeFeature />
