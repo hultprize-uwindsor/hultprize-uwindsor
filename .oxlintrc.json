@@ -15,6 +15,7 @@
     ]
   },
   "ignorePatterns": [
-    "src/lightswind/**"
+    "src/lightswind/**",
+    ".claude/**"
   ]
 }

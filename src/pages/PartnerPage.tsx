@@ -18,7 +18,7 @@ export default function PartnerPage() {
   return <PageLayout className="partner-page" title={partner.name} subtitle={partner.subtitle}>
     <Section tint="partner-overview">
       <div className="partner-profile">
-        <div><p className="eyebrow">With Hult Prize UWindsor</p><h2 data-text-reveal><RevealText>Supporting student founders</RevealText></h2><Copy paragraphs={partner.withUs} /></div>
+        <div><h2 data-text-reveal><RevealText>Supporting student founders</RevealText></h2><Copy paragraphs={partner.withUs} /></div>
         <aside className="partner-card" aria-label={partner.name}>
           {partner.logo && <span className="partner-card__logo"><img src={partner.logo} alt={`${partner.name} logo`} /></span>}
           <p>{partner.subtitle}</p>
@@ -28,7 +28,7 @@ export default function PartnerPage() {
     </Section>
     {partner.about.length > 0 && <Section title="About the organisation" tint="paper-blue editorial-section"><Copy paragraphs={partner.about} /></Section>}
     <Section tint="partner-next">
-      <div className="page-next"><div><p className="eyebrow">For students</p><h2 data-text-reveal><RevealText>{next.title}</RevealText></h2><p>{next.text}</p></div><Link className="btn btn--secondary" to={next.to}><RollingLabel>{next.label}</RollingLabel><span aria-hidden="true">→</span></Link></div>
+      <div className="page-next"><div><h2 data-text-reveal><RevealText>{next.title}</RevealText></h2><p>{next.text}</p></div><Link className="btn btn--secondary" to={next.to}><RollingLabel>{next.label}</RollingLabel><span aria-hidden="true">→</span></Link></div>
       <nav className="related-links" aria-label="More partners"><Link to="/partners">Partnership overview <span aria-hidden="true">→</span></Link>{COMMUNITY_PARTNERS.filter(p => p.slug !== partner.slug).map(p => <Link key={p.slug} to={`/partners/${p.slug}`}>{p.name} <span aria-hidden="true">→</span></Link>)}</nav>
     </Section>
   </PageLayout>

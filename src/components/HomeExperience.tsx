@@ -61,7 +61,7 @@ export function FloatingIntroduction() {
     return () => { cancelAnimationFrame(frame); removeEventListener('scroll', update); removeEventListener('resize', update); reduce.removeEventListener('change', update) }
   }, [])
   return <section ref={ref} className="floating-intro" aria-labelledby="intro-heading"><div className="floating-intro__sticky">
-    <div className="floating-intro__centre"><h2 id="intro-heading">Big ideas.<br />Start here.</h2></div>
+    <div className="floating-intro__centre"><h2 id="intro-heading">Big ideas<br />Start here</h2></div>
     <div className="floating-intro__cards">
       <div className="floating-card floating-card--one"><span>The team</span><strong>2-4</strong><p>Different skills. Shared ambition.</p></div>
       <div className="floating-card floating-card--two">{SHOW_EVENT_PHOTOS ? <img src={CAMPUS_PHOTOS.applause.src} alt="" loading="lazy" /> : <span className="floating-symbol" aria-hidden="true">✳</span>}<span>Made of student ideas.</span></div>
@@ -146,13 +146,12 @@ export function JourneyExperience() {
   }
   return <section ref={ref} className={`journey-experience journey-experience--simple${playing ? ' is-playing' : ''}`} aria-labelledby="journey-heading" onFocusCapture={() => setPaused(true)}>
     <div className="journey-experience__sticky"><div className="container">
-      <div className="journey-experience__top"><span className="tag">From idea to impact</span></div>
       <h2 id="journey-heading" className="visually-hidden">Build, pitch and compete</h2>
       <div className="journey-stages">{steps.map((step, index) => <div className={`journey-experience__stage${active === index ? ' is-active' : ''}`} key={step.title} role="group" aria-labelledby={`journey-title-${index}`} id={`journey-panel-${index}`} aria-hidden={active !== index} inert={active !== index}>
-        <div className="journey-copy"><p className="eyebrow">{step.label}</p><p className="journey-word" id={`journey-title-${index}`}>{step.title}</p><p className="journey-description">{step.text}</p><Link to="/compete" className="text-link" onFocus={() => setPaused(true)}>How to compete <span aria-hidden="true">↗</span></Link></div>
+        <div className="journey-copy"><p className="journey-note">{step.label}</p><p className="journey-word" id={`journey-title-${index}`}>{step.title}</p><p className="journey-description">{step.text}</p><Link to="/compete" className="text-link" onFocus={() => setPaused(true)}>How to compete <span aria-hidden="true">↗</span></Link></div>
         <div className="journey-visual" role="region" aria-roledescription="carousel" aria-label={`${step.title.replace('.', '')}: past events`}>
           {step.photos.map((image, photoIndex) => <figure key={image.src} className={`journey-gallery__photo${photoIndex === photo ? ' is-active' : ''}`} aria-hidden={photoIndex !== photo} role="group" aria-roledescription="slide" aria-label={`${index * 2 + photoIndex + 1} of ${HOME_EVENT_PHOTOS.length}`}><img src={image.src} alt={image.alt} loading="lazy" draggable="false" /></figure>)}
-          <div className="journey-gallery__toolbar"><span className="journey-gallery__count" aria-hidden="true">{String(index * 2 + photo + 1).padStart(2, '0')} / {String(HOME_EVENT_PHOTOS.length).padStart(2, '0')}</span><div><button className="journey-gallery__previous" type="button" aria-label="Previous journey photo" onClick={() => choosePhoto(-1)}><ArrowLeft size={18} /></button><button className="journey-gallery__next" type="button" aria-label="Next journey photo" onClick={() => choosePhoto(1)}><ArrowRight size={18} /></button></div></div>
+          <div className="journey-gallery__toolbar"><div><button className="journey-gallery__previous" type="button" aria-label="Previous journey photo" onClick={() => choosePhoto(-1)}><ArrowLeft size={18} /></button><button className="journey-gallery__next" type="button" aria-label="Next journey photo" onClick={() => choosePhoto(1)}><ArrowRight size={18} /></button></div></div>
           <div className="journey-metric"><div className="journey-metric__number">{step.prefix && <span>{step.prefix}</span>}<strong>{step.number}</strong></div><span>{step.metric}</span></div>
         </div>
       </div>)}</div>

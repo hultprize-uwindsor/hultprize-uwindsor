@@ -1,9 +1,8 @@
 .site-footer { padding: clamp(72px, 8vw, 128px) 0 calc(105px + env(safe-area-inset-bottom)); background: var(--paper-pink); color: var(--uw-blue-dark); font-size: 14px; line-height: 1.6; }
 .site-footer__invitation { display: flex; align-items: flex-end; justify-content: space-between; gap: 48px; padding-bottom: clamp(56px, 7vw, 100px); }
-.site-footer__eyebrow { display: inline-flex; border: 1px solid rgb(0 43 81 / 25%); border-radius: 30px; padding: 5px 12px; margin-bottom: 30px; font-size: 12px; line-height: 1.4; }
 .site-footer__invitation h2 { margin: 0; font-size: clamp(45px, 5.6vw, 90px); line-height: 1.02; letter-spacing: -.06em; font-weight: 400; }
 .site-footer__invitation-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; max-width: 275px; padding-bottom: 5px; }
-.site-footer__invitation-actions > .btn { background: var(--pink); color: #fff; border-color: var(--pink); border-radius: 15px; font-size: 16px; min-height: 55px; padding: 15px 24px; gap: 24px; }
+.site-footer__invitation-actions > .btn { background: var(--pink-fill); color: #fff; border-color: var(--pink-fill); border-radius: 15px; font-size: 16px; min-height: 55px; padding: 15px 24px; gap: 24px; }
 .site-footer__invitation-actions > .btn:hover { background: var(--uw-blue-dark); color: #fff; border-color: var(--uw-blue-dark); text-decoration: none; }
 .site-footer__invitation-actions p { font-size: 13px; line-height: 1.7; opacity: .8; }
 .site-footer__inner { display: grid; grid-template-columns: .75fr 1fr 1.2fr 1.3fr; gap: 24px; padding-top: 40px; border-top: 1px solid rgb(0 43 81 / 16%); }
@@ -27,6 +26,8 @@
 .site-footer__brand { display: block; width: min(100%, 1100px); margin: clamp(64px, 8vw, 128px) auto 44px; }
 .site-footer__brand img { display: block; width: 100%; height: auto; object-fit: contain; }
 .site-footer__bottom { display: flex; justify-content: space-between; gap: 24px; padding-top: 24px; border-top: 1px solid rgb(0 43 81 / 16%); font-size: 12px; color: #586579; }
+.site-footer__sponsor a { color: var(--pink-text); font-weight: 600; text-decoration: none; }
+.site-footer__sponsor a:hover, .site-footer__sponsor a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 1000px) {
   .site-footer__invitation { gap: 24px; }
   .site-footer__inner { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
@@ -34,7 +35,6 @@
 @media (max-width: 700px) {
   .site-footer { padding-block:64px calc(112px + env(safe-area-inset-bottom)); }
   .site-footer__invitation { display: block; padding-bottom: 44px; }
-  .site-footer__eyebrow { margin-bottom: 24px; }
   .site-footer__invitation h2 { font-size: clamp(44px, 8.9vw, 62px); letter-spacing: -.065em; }
   .site-footer__invitation-actions { margin-top: 32px; gap: 16px; }
   .site-footer__inner { display: block; padding-top: 0; }

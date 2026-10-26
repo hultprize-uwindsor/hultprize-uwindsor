@@ -3,8 +3,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from './PageLink'
 import { HOME_BOARD_PHOTOS } from '../data/assets'
 import { SITE } from '../data/site'
+import { DEVFEST } from '../data/posts'
 import { eventTime, localDay, useAttendanceEvents, type AttendanceEvent } from '../lib/attendance'
-import './pushpin.css'
+import './eventMarks.css'
 import './WallCalendar.css'
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -24,7 +25,7 @@ const addMonths = (month: string, step: number) => {
 }
 
 /**
- * A paper wall calendar hung from a pushpin, with event days circled in marker, and a notepad of what's coming up.
+ * A paper wall calendar taped up at its corners, with event days circled in marker, and a notepad of what's coming up.
  * Both are returned side by side so the homepage section can place them in its own grid.
  */
 export default function WallCalendar() {
@@ -39,6 +40,7 @@ export default function WallCalendar() {
       const day = localDay(event.startsAt, event.timeZone)
       return { id: event.id, title: event.title.split(':')[0], day, group: event.group, to: `/attend?events=${encodeURIComponent(event.id)}`, detail: `${format(day, { weekday: 'short' })} · ${eventTime(event)}`, past: new Date(event.endsAt).getTime() <= now }
     }),
+    { id: DEVFEST.slug, title: 'Google DevFest', day: DEVFEST.day, group: 'community' as const, to: `/events/${DEVFEST.slug}`, detail: `${format(DEVFEST.day, { weekday: 'short' })} · ${DEVFEST.time}`, past: DEVFEST.day < today },
     { id: 'team-registration', title: 'Team registration closes', day: SITE.registrationClosesOn, group: 'deadline' as const, to: SITE.registrationUrl, external: true, detail: 'Register your team at hultprize.org', past: SITE.registrationClosesOn < today },
   ].sort((a, b) => a.day.localeCompare(b.day))
   const firstMonth = marks[0].day.slice(0, 7), lastMonth = marks[marks.length - 1].day.slice(0, 7)
@@ -67,8 +69,7 @@ export default function WallCalendar() {
 
   return <>
     <div className="wall-calendar">
-      <span className="pin" aria-hidden="true" />
-      <svg className="wall-calendar__string" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path d="M50 1 9 40M50 1l41 39" vectorEffect="non-scaling-stroke" /></svg>
+      <span className="tape tape--left" aria-hidden="true" /><span className="tape tape--right" aria-hidden="true" />
       <div className="wall-calendar__rings" aria-hidden="true">{Array.from({ length: 12 }, (_, index) => <span key={index} />)}</div>
       <div key={month} className={`wall-calendar__page${flips ? ' is-flipping' : ''}`}>
         {photo ? <img className="wall-calendar__photo" src={photo.src} srcSet={photo.srcSet} sizes="(max-width: 760px) 92vw, 600px" width={photoWidth} height={photoHeight} alt="" loading="lazy" /> : <div className="wall-calendar__band" />}
@@ -81,15 +82,15 @@ export default function WallCalendar() {
           <thead><tr>{WEEKDAYS.map(name => <th key={name} scope="col"><span aria-hidden="true">{name[0]}</span><span className="visually-hidden">{name}</span></th>)}</tr></thead>
           <tbody>{weeks.map((week, index) => <tr key={index}>{week.map((date, column) => <td key={column}>{date && day(date)}</td>)}</tr>)}</tbody>
         </table>
-        <ul className="calendar-legend">{LEGEND.map(([group, label]) => <li key={group} className={`mark--${group}`}>{label}</li>)}</ul>
+        <ul className="calendar-legend">{LEGEND.map(([group, label]) => <li key={group} className={`mark-shape mark--${group}`}>{label}</li>)}</ul>
       </div>
     </div>
     <div className="calendar-notepad">
-      <span className="pin" aria-hidden="true" />
+      <span className="tape" aria-hidden="true" />
       <h3>Coming up</h3>
-      {upcoming.length ? <ol>{upcoming.map((mark, index) => {
+      {upcoming.length ? <ol>{upcoming.map(mark => {
         const content = <><span className={`date-badge mark--${mark.group}`} aria-hidden="true"><span>{format(mark.day, { month: 'short' })}</span><strong>{Number(mark.day.slice(8))}</strong></span><span className="notepad-item__text"><strong>{mark.title}</strong><span>{mark.detail}</span></span><span className="notepad-item__arrow" aria-hidden="true">{mark.external ? '↗' : '→'}</span></>
-        return <li key={mark.id}>{index === 0 && <span className="notepad-next" aria-hidden="true">Next up!</span>}{mark.external
+        return <li key={mark.id}>{mark.external
           ? <a className="notepad-item" href={mark.to} target="_blank" rel="noopener noreferrer" {...highlight(mark.id)}>{content}</a>
           : <Link className="notepad-item" to={mark.to} {...highlight(mark.id)}>{content}</Link>}</li>
       })}</ol> : <p>That’s a wrap on this season’s events. See you next year!</p>}

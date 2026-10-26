@@ -1,18 +1,13 @@
-/* A photo wall calendar hung from a pushpin by a string, and a pinned notepad of what's coming up. The homepage section places them. */
-.wall-calendar,.calendar-notepad { --mark-workshops:#ff329b; --mark-community:#2f80d1; --mark-finale:#e8a800; --mark-deadline:#e5484d; }
-.mark--workshops { --mark:var(--mark-workshops); }
-.mark--community { --mark:var(--mark-community); }
-.mark--finale { --mark:var(--mark-finale); }
-.mark--deadline { --mark:var(--mark-deadline); }
+/* A photo wall calendar taped to the wall at its top corners, and a taped notepad of what's coming up. The homepage section places them.
+   Event colours and the date badge live in eventMarks.css. */
 
-.wall-calendar { position:relative; z-index:1; padding-top:58px; }
-.wall-calendar > .pin { --pin:#ff329b; --pin-x:50%; --pin-size:22px; z-index:4; }
-.wall-calendar__string { position:absolute; left:6%; top:3px; width:88%; height:66px; overflow:visible; fill:none; stroke:#8a5a2b; stroke-width:1.6; }
-.wall-calendar__rings { position:absolute; z-index:3; left:7%; right:7%; top:46px; display:flex; justify-content:space-between; pointer-events:none; }
+.wall-calendar { position:relative; z-index:1; padding-top:22px; }
+.wall-calendar > .tape { top:22px; z-index:4; }
+.wall-calendar__rings { position:absolute; z-index:3; left:14%; right:14%; top:10px; display:flex; justify-content:space-between; pointer-events:none; }
 .wall-calendar__rings span { width:7px; height:26px; border-radius:6px; background:linear-gradient(90deg,#7d8794,#eef2f6 45%,#9aa4ae); box-shadow:0 2px 2px rgb(0 0 0 / 28%); }
 /* Two sheets peek out underneath, so the calendar reads as a pad of months. */
-.wall-calendar::before,.wall-calendar::after { content:''; position:absolute; inset:66px 5px -6px 5px; background:#f6efe6; border-radius:4px 4px 10px 10px; box-shadow:0 8px 20px rgb(0 43 81 / 10%); }
-.wall-calendar::after { inset:66px 10px -12px 10px; background:#efe5d9; z-index:-1; }
+.wall-calendar::before,.wall-calendar::after { content:''; position:absolute; inset:30px 5px -6px 5px; background:#f6efe6; border-radius:4px 4px 10px 10px; box-shadow:0 8px 20px rgb(0 43 81 / 10%); }
+.wall-calendar::after { inset:30px 10px -12px 10px; background:#efe5d9; z-index:-1; }
 .wall-calendar__page { position:relative; z-index:2; padding:22px 18px 16px; background:#fffdf8; border-radius:4px 4px 10px 10px; transform-origin:50% 0; box-shadow:0 1px 2px rgb(40 20 5 / 18%),0 22px 40px -14px rgb(40 20 5 / 40%); }
 .wall-calendar__page.is-flipping { animation:calendar-flip .55s cubic-bezier(.2,.8,.2,1); }
 /* The month's photo is shown whole, never cropped. */
@@ -22,7 +17,7 @@
 .wall-calendar__head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:14px 2px 6px; }
 .wall-calendar__head h3 { margin:0; font-size:clamp(1.7rem,2.6vw,2.4rem); line-height:1; letter-spacing:-.045em; color:var(--pink-text); text-align:center; }
 .wall-calendar__head h3 span { color:var(--uw-blue-dark); font-size:.5em; letter-spacing:-.01em; }
-.wall-calendar__turn { display:grid; place-items:center; flex:none; width:40px; height:40px; border:0; border-radius:50%; background:var(--paper-pink); color:var(--pink-text); cursor:pointer; transition:background-color .2s,transform .2s; }
+.wall-calendar__turn { display:grid; place-items:center; flex:none; width:44px; height:44px; border:0; border-radius:50%; background:var(--paper-pink); color:var(--pink-text); cursor:pointer; transition:background-color .2s,transform .2s; }
 .wall-calendar__turn svg { width:20px; height:20px; }
 .wall-calendar__turn:hover:not(:disabled) { background:#ffd3e8; transform:scale(1.06); }
 .wall-calendar__turn:focus-visible { outline:3px solid var(--pink); outline-offset:2px; }
@@ -36,12 +31,14 @@
 .calendar-grid td { height:clamp(38px,3.8vw,50px); padding:0; border-top:1px dashed #eadde3; text-align:center; vertical-align:middle; }
 .calendar-day { position:relative; display:inline-grid; place-items:center; width:2.2em; height:2.2em; border-radius:50%; font-size:clamp(.82rem,1vw,.98rem); color:var(--ink); text-decoration:none; font-variant-numeric:tabular-nums; }
 .calendar-day.is-today { background:var(--uw-blue-dark); color:#fff; font-weight:600; }
-/* Event days are circled in marker, with a coloured sticker dot (a star for the finale). Their box carries 6px of padding
-   so the ring and sticker sit inside it; a negative margin keeps the grid unchanged. */
-.calendar-day--marked { box-sizing:content-box; padding:6px; margin:-6px; background-clip:content-box; font-weight:700; color:color-mix(in srgb,var(--mark) 75%,var(--ink)); }
-.calendar-day--marked::before { content:''; position:absolute; inset:3px; border:2.5px solid var(--mark); border-radius:48% 52% 45% 55% / 55% 45% 52% 48%; rotate:-9deg; transition:scale .25s,rotate .25s; }
-.calendar-day--marked::after { content:''; position:absolute; top:2px; right:0; width:9px; height:9px; border-radius:50%; background:var(--mark); box-shadow:0 0 0 2px #fffdf8; }
-.calendar-day--marked.mark--finale::after { content:'★'; width:auto; height:auto; top:0; right:0; background:none; box-shadow:none; color:var(--mark); font-size:15px; line-height:1; }
+/* Event days are circled in marker, with a sticker in the type's shape (dot, diamond or star; key dates get a dashed ring).
+   Their box carries 8px of padding so the ring and sticker sit inside it and the link is at least 44px; a negative margin
+   keeps the grid unchanged. */
+.calendar-day--marked { box-sizing:content-box; padding:8px; margin:-8px; background-clip:content-box; font-weight:700; color:var(--mark-text); }
+.calendar-day--marked::before { content:''; position:absolute; inset:5px; border:2.5px solid var(--mark); border-radius:48% 52% 45% 55% / 55% 45% 52% 48%; rotate:-9deg; transition:scale .25s,rotate .25s; }
+.calendar-day--marked::after { content:''; position:absolute; top:4px; right:2px; width:9px; height:9px; border-radius:50%; background:var(--mark); box-shadow:0 0 0 2px #fffdf8; }
+.calendar-day--marked.mark--community::after { width:8px; height:8px; border-radius:1px; rotate:45deg; }
+.calendar-day--marked.mark--finale::after { content:'★'; width:auto; height:auto; top:2px; right:2px; background:none; box-shadow:none; color:var(--mark); font-size:15px; line-height:1; }
 .calendar-day--marked.mark--deadline::before { border-style:dashed; }
 .calendar-day--marked.is-past { opacity:.45; }
 a.calendar-day:hover::before,.calendar-day.is-active::before { scale:1.18; rotate:4deg; }
@@ -50,15 +47,13 @@ a.calendar-day:focus-visible { outline:3px solid var(--mark); outline-offset:4px
 
 .calendar-legend { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 14px; margin:12px 0 0; padding:0; list-style:none; font-size:.72rem; color:var(--uw-grey); }
 .calendar-legend li { display:flex; align-items:center; gap:6px; }
-.calendar-legend li::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--mark); }
 
 /* The notepad: ruled paper with a red margin line. */
-.calendar-notepad { --pin:#2fbf97; --pin-x:50%; position:relative; z-index:2; padding:30px 20px 18px 44px; background:#fffefa; border-radius:3px; box-shadow:0 1px 2px rgb(40 20 5 / 16%),0 20px 34px -14px rgb(40 20 5 / 40%); }
+.calendar-notepad { position:relative; z-index:2; padding:30px 20px 18px 44px; background:#fffefa; border-radius:3px; box-shadow:0 1px 2px rgb(40 20 5 / 16%),0 20px 34px -14px rgb(40 20 5 / 40%); }
 .calendar-notepad::before { content:''; position:absolute; top:0; bottom:0; left:32px; width:1.5px; background:#f2a7b2; }
-.calendar-notepad h3 { margin:0; padding-bottom:10px; border-bottom:1px solid #cfe0ef; font-size:1.35rem; letter-spacing:-.03em; color:var(--pink-text); }
+.calendar-notepad h3 { margin:0; padding-bottom:6px; border-bottom:1px solid #cfe0ef; font-family:var(--font-hand); font-size:2rem; font-weight:700; line-height:1.1; letter-spacing:0; color:var(--pink-text); }
 .calendar-notepad ol { margin:0; padding:0; list-style:none; }
 .calendar-notepad li { position:relative; border-bottom:1px solid #cfe0ef; }
-.notepad-next { position:absolute; z-index:1; top:-10px; right:3px; padding:3px 9px; border-radius:99px; background:var(--pink); color:#fff; font-size:.66rem; font-weight:700; letter-spacing:.02em; rotate:7deg; box-shadow:0 4px 10px rgb(190 18 94 / 30%); pointer-events:none; }
 .notepad-more { display:inline-flex; align-items:center; gap:6px; min-height:44px; margin-top:6px; font-size:.9rem; font-weight:600; color:var(--pink-text); text-decoration:none; }
 .notepad-more span { transition:translate .2s; }
 .notepad-more:hover span,.notepad-more:focus-visible span { translate:4px 0; }
@@ -66,9 +61,6 @@ a.calendar-day:focus-visible { outline:3px solid var(--mark); outline-offset:4px
 .calendar-notepad p { margin:0; color:var(--uw-grey); }
 .notepad-item { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; padding:9px 0; color:var(--ink); text-decoration:none; }
 .notepad-item:focus-visible { outline:3px solid var(--pink); outline-offset:3px; border-radius:6px; }
-.date-badge { width:44px; flex:none; overflow:hidden; border-radius:6px; background:#fff; text-align:center; box-shadow:0 1px 3px rgb(0 0 0 / 16%); rotate:-3deg; }
-.date-badge span { display:block; padding:2px 0 1px; background:var(--mark); color:#fff; font-size:.6rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
-.date-badge strong { display:block; font-size:1.15rem; line-height:1.55; font-variant-numeric:tabular-nums; }
 .notepad-item__text { display:flex; flex-direction:column; min-width:0; }
 .notepad-item__text strong { font-size:.98rem; font-weight:600; line-height:1.3; letter-spacing:-.01em; }
 .notepad-item__text span { font-size:.78rem; line-height:1.4; color:var(--uw-grey); }
@@ -80,6 +72,9 @@ a.calendar-day:focus-visible { outline:3px solid var(--mark); outline-offset:4px
 @keyframes mark-wiggle { from { rotate:-4deg; } to { rotate:4deg; } }
 @media(max-width:760px) {
   .wall-calendar__page { padding:18px 12px 14px; }
+  /* At full width the corner tape stays mostly on the page, clear of the screen edge. */
+  .wall-calendar > .tape--left { translate:-12% 0; }
+  .wall-calendar > .tape--right { translate:12% 0; }
   .calendar-legend { display:grid; grid-template-columns:repeat(2,max-content); justify-content:center; }
 }
 @media(prefers-reduced-motion:reduce) {

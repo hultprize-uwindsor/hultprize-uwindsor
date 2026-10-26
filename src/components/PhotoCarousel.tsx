@@ -6,7 +6,7 @@ import {
 import { Card, CardContent } from '../lightswind/card'
 import './PhotoCarousel.css'
 
-export type PhotoSlide = { src: string; alt: string; caption: string }
+export type PhotoSlide = { src: string; alt: string; caption: string; thumb?: string; srcSet?: string; width?: number; height?: number }
 
 export default function PhotoCarousel({ slides }: { slides: PhotoSlide[] }) {
   const [api, setApi] = useState<CarouselApi>()

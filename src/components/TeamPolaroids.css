@@ -1,0 +1,58 @@
+/* About page team: a grid of Polaroids, each held up by a strip of clear tape with torn, jagged ends, and the member's
+   bio written on a ruled note tucked under the photo. The link stays still; the frame inside it tilts and lifts. */
+/* Each card spans two narrow tracks, so a short last row can start one track in and sit centred: four per row
+   (eight tracks), three (six) or two (four), and one column on phones. */
+.team-board { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); align-items:start; gap:clamp(52px,5vw,72px) clamp(24px,3vw,44px); margin:48px 0 0; padding:22px 0 0; list-style:none; }
+.team-card { --tilt:-2deg; --tape-tilt:-3deg; --note-tilt:1.2deg; --note:#fffbe3; grid-column:span 2; display:flex; flex-direction:column; align-items:center; min-width:0; }
+@media(min-width:1280px) {
+  .team-card:nth-child(4n + 1):nth-last-child(3) { grid-column:2 / span 2; }
+  .team-card:nth-child(4n + 1):nth-last-child(2) { grid-column:3 / span 2; }
+  .team-card:nth-child(4n + 1):last-child { grid-column:4 / span 2; }
+}
+@media(min-width:900px) and (max-width:1279px) {
+  .team-board { grid-template-columns:repeat(6,minmax(0,1fr)); }
+  .team-card:nth-child(3n + 1):nth-last-child(2) { grid-column:2 / span 2; }
+  .team-card:nth-child(3n + 1):last-child { grid-column:3 / span 2; }
+}
+@media(min-width:600px) and (max-width:899px) {
+  .team-board { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .team-card:nth-child(2n + 1):last-child { grid-column:2 / span 2; }
+}
+.team-card:nth-child(3n + 2) { --tilt:1.6deg; --tape-tilt:4deg; --note-tilt:-1.4deg; --note:#fff0f6; }
+.team-card:nth-child(3n) { --tilt:-.8deg; --tape-tilt:-1.5deg; --note-tilt:1deg; --note:#eef6fd; }
+
+/* Side padding keeps the tilted frame inside the link's box. */
+.team-polaroid { position:relative; z-index:2; display:block; width:min(100%,316px); padding-inline:8px; color:var(--ink); text-decoration:none; }
+.team-polaroid:focus-visible { outline:none; }
+.team-polaroid__frame { position:relative; padding:12px 12px 18px; background:#fff; rotate:var(--tilt); box-shadow:0 1px 2px rgb(40 20 5 / 18%),0 18px 30px -14px rgb(40 20 5 / 45%); transition:rotate .3s var(--ease-ui),translate .3s var(--ease-ui),box-shadow .3s var(--ease-ui); }
+.team-polaroid:is(:hover,:focus-visible) .team-polaroid__frame { rotate:0deg; translate:0 -4px; box-shadow:0 2px 3px rgb(40 20 5 / 18%),0 26px 38px -14px rgb(40 20 5 / 48%); }
+.team-polaroid:focus-visible .team-polaroid__frame { outline:3px solid var(--pink); outline-offset:5px; }
+/* Clear tape (index.css), its ends torn by --tape-torn. */
+.team-polaroid__frame::before { content:''; position:absolute; z-index:1; top:-16px; left:50%; width:118px; height:34px; translate:-50% 0; rotate:var(--tape-tilt); background:var(--tape-clear); clip-path:var(--tape-torn); pointer-events:none; }
+.team-polaroid img { display:block; width:100%; height:auto; aspect-ratio:1; object-fit:cover; background:#efe9e2; }
+.team-polaroid__name { margin:12px 0 0; font-family:var(--font-hand); font-size:1.9rem; font-weight:700; line-height:1.05; letter-spacing:0; text-align:center; color:var(--uw-blue-dark); }
+.team-polaroid__role { margin:4px 0 0; font-size:.78rem; line-height:1.4; text-align:center; color:var(--uw-grey); }
+
+/* The note: ruled paper written in hand. Its top edge hides under the Polaroid; a torn strip finishes the bottom. */
+.team-note { --rule:1.6rem; --tuck:22px; position:relative; z-index:1; width:min(94%,286px); margin:calc(var(--tuck) * -1) 0 0; padding:calc(var(--tuck) + 14px) 18px 12px 20px;
+  background:repeating-linear-gradient(transparent 0 calc(var(--rule) - 1px),rgb(47 128 209 / 24%) calc(var(--rule) - 1px) var(--rule)) content-box,linear-gradient(var(--note),var(--note)) padding-box;
+  font-family:var(--font-hand); font-size:1.2rem; font-weight:500; line-height:var(--rule); color:var(--uw-blue-dark); text-wrap:pretty; rotate:var(--note-tilt); box-shadow:0 1px 2px rgb(40 20 5 / 12%),0 12px 20px -14px rgb(40 20 5 / 40%); }
+.team-note::after { content:''; position:absolute; top:100%; left:0; right:0; height:7px; background:var(--note); pointer-events:none;
+  clip-path:polygon(0 0,100% 0,100% 40%,94% 100%,88% 35%,81% 90%,75% 30%,68% 85%,61% 40%,55% 100%,48% 35%,41% 80%,35% 30%,28% 95%,21% 40%,15% 85%,8% 30%,2% 90%,0 50%); }
+
+/* Phones: one column, and the lightly overlapping papers lean by a degree or two at most. */
+@media(max-width:767px) {
+  .team-card { --tilt:-1.2deg; --note-tilt:.8deg; }
+  .team-card:nth-child(3n + 2) { --tilt:1deg; --note-tilt:-.8deg; }
+  .team-card:nth-child(3n) { --tilt:-.5deg; --note-tilt:.6deg; }
+}
+@media(max-width:599px) {
+  .team-board { grid-template-columns:minmax(0,340px); justify-content:center; }
+  .team-card { grid-column:auto; }
+  .team-polaroid { width:100%; }
+  .team-note { width:94%; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .team-polaroid__frame { transition:none; }
+  .team-polaroid:is(:hover,:focus-visible) .team-polaroid__frame { translate:none; }
+}

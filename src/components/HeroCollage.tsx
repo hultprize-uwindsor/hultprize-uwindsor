@@ -1,13 +1,7 @@
-import { useEffect, useRef, type CSSProperties, type PointerEvent, type ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type PointerEvent } from 'react'
 import { HOME_BOARD_PHOTOS } from '../data/assets'
-import './pushpin.css'
 import './HeroCollage.css'
 
-const PIN_COLORS = ['#ff329b', '#2f80d1', '#ffc23d', '#2fbf97', '#ff7a59']
-const STICKERS = [
-  { kind: 'award', text: 'Best Program in North America', x: 37, y: 2, rot: 10 },
-  { kind: 'count', text: '14 startups in year one', x: 24, y: 53, rot: -5 },
-]
 /** Same scatter on every visit: a fixed hash of the photo's position and a channel. */
 const jitter = (index: number, channel: number) => {
   const value = Math.sin((index + 1) * 12.9898 + channel * 78.233) * 43758.5453
@@ -33,10 +27,10 @@ function swing(event: PointerEvent<HTMLElement>) {
 }
 
 /**
- * The homepage hero as a cork board. Its children (the title card and sticky note) are placed by CSS;
- * event photos fill the rest of the board in pin order, each tilted, pinned and gently swaying from its pin.
+ * The homepage hero's cork board: event photos fill it in pin order, each tilted, pinned and gently swaying from its
+ * pin.
  */
-export default function HeroCollage({ children }: { children: ReactNode }) {
+export default function HeroCollage() {
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const element = ref.current
@@ -47,7 +41,6 @@ export default function HeroCollage({ children }: { children: ReactNode }) {
   }, [])
   return <div ref={ref} className="cork-board">
     <div className="cork-board__surface">
-      {children}
       {HOME_BOARD_PHOTOS.map((photo, index) => {
         const style = {
           '--i': index,
@@ -56,7 +49,6 @@ export default function HeroCollage({ children }: { children: ReactNode }) {
           '--dx': `${(jitter(index, 2) - .5) * 22}%`,
           '--dy': `${(jitter(index, 3) - .5) * 24}%`,
           '--scale': 1.18 + jitter(index, 4) * .24,
-          '--pin': PIN_COLORS[(index + Math.floor(jitter(index, 5) * 2)) % PIN_COLORS.length],
           '--pin-x': `${42 + jitter(index, 6) * 16}%`,
           '--sway': `${5 + jitter(index, 7) * 3}s`,
           '--z': 10 + Math.floor(jitter(index, 8) * 30),
@@ -68,7 +60,6 @@ export default function HeroCollage({ children }: { children: ReactNode }) {
           </div>
         </figure>
       })}
-      {STICKERS.map((sticker, index) => <span key={sticker.kind} className={`board-sticker board-sticker--${sticker.kind}`} aria-hidden="true" style={{ '--x': `${sticker.x}%`, '--y': `${sticker.y}%`, '--rot': `${sticker.rot}deg`, '--i': index } as CSSProperties}>{sticker.text}</span>)}
       {HOME_BOARD_PHOTOS.length > 0 && <p className="visually-hidden">Photos from our first season and this year’s launch at Fusion are pinned around the board.</p>}
     </div>
   </div>

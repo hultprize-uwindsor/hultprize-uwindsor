@@ -53,7 +53,7 @@ async function journeyKeyboard(page) {
 async function drawerChecks(width) {
   const page = await newPage({ viewport: { width, height: 1000 }, reducedMotion: 'reduce' })
   await page.goto(base + '/about')
-  const member = page.locator('.person-tile').first()
+  const member = page.locator('.team-polaroid').first()
   await member.scrollIntoViewIfNeeded()
   const before = await page.evaluate(() => scrollY)
   await member.click()
@@ -108,10 +108,11 @@ async function drawerChecks(width) {
 
   await page.goto(base + '/year-one')
   await page.locator('main h1').waitFor()
-  const photos = page.locator('.season-gallery__grid > a')
+  // Photos sit in masonry columns, so find the first and last by their link rather than their place in the page.
+  const photos = page.locator('.season-gallery__column > a')
   const count = await photos.count()
   if (count > 1) {
-    await photos.first().click()
+    await page.locator('.season-gallery__column > a[href$="photo=0"]').click()
     await drawer.waitFor()
     const original = await drawer.locator('.story-drawer__body > img').getAttribute('src')
     assert(await drawer.getByRole('button', { name: /Previous/ }).isDisabled())
@@ -125,7 +126,7 @@ async function drawerChecks(width) {
     await page.keyboard.press('Escape')
     await drawer.waitFor({ state: 'detached' })
     assert.equal(new URL(page.url()).search, '', 'gallery navigation does not accumulate history entries')
-    await photos.last().click()
+    await page.locator(`.season-gallery__column > a[href$="photo=${count - 1}"]`).click()
     assert(await drawer.getByRole('button', { name: /Next/ }).isDisabled())
     await page.keyboard.press('Escape')
     await drawer.waitFor({ state: 'detached' })

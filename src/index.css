@@ -1,7 +1,16 @@
 @font-face { font-family: 'Inter'; src: url('/fonts/inter-variable.woff2') format('woff2'); font-style:normal; font-weight:100 900; font-display:swap; }
+@font-face { font-family: 'Special Elite'; src: url('/fonts/special-elite.woff2') format('woff2'); font-style:normal; font-weight:400; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Caveat'; src: url('/fonts/caveat-variable.woff2') format('woff2'); font-style:normal; font-weight:400 700; font-display:swap; unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
 :root {
   color-scheme:light;
   --pink:#ff329b; --pink-text:#be125e; --paper-pink:#fff0f7; --paper-blue:#edf4f8; --paper:#f7f7f8; --grey:#e4e8ed;
+  /* Fills that carry white text: the bright pink and blue stay for pins, rings and display type. */
+  --pink-fill:#da2381; --blue-fill:#2a74c0;
+  /* Clear tape: translucent, with a band of sheen and faint long edges; --tape-torn cuts both ends jagged. */
+  --tape-clear:linear-gradient(180deg,rgb(140 128 92 / 24%) 0 1.5px,transparent 1.5px calc(100% - 1.5px),rgb(140 128 92 / 24%) calc(100% - 1.5px)),linear-gradient(180deg,rgb(255 255 255 / 55%) 0 18%,rgb(255 255 255 / 8%) 46%,rgb(255 255 255 / 30%) 100%),rgb(206 198 170 / 60%);
+  --tape-torn:polygon(4% 0,96% 0,100% 10%,95% 22%,99.5% 34%,94.5% 47%,100% 60%,95.5% 72%,99% 85%,95% 100%,5% 100%,1% 88%,5.5% 76%,0 63%,4.5% 50%,.5% 37%,5% 24%,0 12%);
+  --font-hand:'Caveat','Bradley Hand','Segoe Print',cursive;
+  --font-type:'Special Elite','American Typewriter','Courier New',serif;
   --uw-blue:#005596; --uw-blue-dark:#002b51; --uw-grey:#53616f; --ink:#002b51;
   --hp-black:#002b51; --hp-white:#fff; --hp-pink:#da2381; --hp-pink-bright:#ff329b; --hp-grey-light:#f7f7f8; --hp-grey-mid:#687789;
   --color-bg:#fff; --color-bg-alt:#fff0f7; --color-text:#002b51; --color-text-muted:#53616f; --color-inverse-bg:#002b51; --color-inverse-text:#fff; --color-uwindsor:#005596; --color-danger:#b52e25;
@@ -33,7 +42,6 @@ main :is(section,h2,h3)[id] { scroll-margin-top:28px; }
 .container { width:100%; max-width:var(--max-width); margin-inline:auto; padding-inline:clamp(24px,3.55vw,64px); }
 .section { padding-block:clamp(72px,8vw,136px); }
 .eyebrow { font-size:.8rem; line-height:1.4; font-weight:500; letter-spacing:.01em; margin:0 0 24px; }
-.tag { display:inline-flex; align-items:center; padding:5px 12px; border:1px solid currentColor; border-radius:99px; font-size:.75rem; line-height:1.3; margin-bottom:24px; }
 .prose { max-width:66ch; font-size:clamp(1rem,1.5vw,1.1875rem); line-height:1.8; }
 .prose p:last-child { margin-bottom:0; }
 .prose a { overflow-wrap:anywhere; }
@@ -41,14 +49,28 @@ main :is(section,h2,h3)[id] { scroll-margin-top:28px; }
 .btn > span { transition:transform .25s; }
 .btn:hover > span { transform:translate(3px,-2px); }
 .btn:hover { transform:translateY(-2px); }
-.btn--primary { background:var(--pink); color:white; }
+.btn--primary { background:var(--pink-fill); color:white; }
 .btn--secondary { background:var(--paper-pink); color:var(--uw-blue-dark); }
 .btn--dark { background:var(--uw-blue-dark); color:white; }
 .btn--white { background:white; color:var(--uw-blue-dark); }
 .btn--outline { border-color:currentColor; background:transparent; color:inherit; }
 .text-link { display:inline-flex; align-items:center; gap:12px; min-height:44px; font-size:.9375rem; }
+/* A text link whose words roll on hover: its letters sit in their own boxes, which a link's underline doesn't reach (only
+   the gaps between words got it). Draw one solid line under the whole label instead, which also holds still while the
+   letters roll; the arrow keeps its own underline, as on the other text links. */
+.text-link:has(> .rolling-label) { text-decoration:none; }
+.text-link > .rolling-label { background:linear-gradient(currentColor,currentColor) 0 100% / 100% 1px no-repeat; }
+.text-link:has(> .rolling-label) > span[aria-hidden] { text-decoration:underline 1px; text-underline-offset:7px; }
 .paper-pink { background:var(--paper-pink); }
 .paper-blue { background:var(--paper-blue); }
+/* A strip of clear tape holding something up: centred across its top edge by default (tune it with --tape-x, --tape-w
+   and --tape-tilt), or across a top corner with --left / --right. Decorative, so it never takes the pointer. */
+.tape { position:absolute; z-index:3; top:-15px; left:var(--tape-x,50%); width:var(--tape-w,110px); height:32px; translate:-50% 0; rotate:var(--tape-tilt,-3deg); background:var(--tape-clear); clip-path:var(--tape-torn); pointer-events:none; }
+.tape--left { top:4px; left:0; width:var(--tape-w,96px); translate:-34% 0; rotate:-38deg; }
+.tape--right { top:4px; left:auto; right:0; width:var(--tape-w,96px); translate:34% 0; rotate:38deg; }
+/* Taped by hand: neighbouring cards get their tape at slightly different angles. */
+:nth-child(even) > .tape:not(.tape--left,.tape--right) { --tape-tilt:2.5deg; }
+:nth-child(3n) > .tape:not(.tape--left,.tape--right) { --tape-tilt:-1.2deg; }
 .visually-hidden { position:absolute!important; width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
 .skip-link { position:fixed; top:12px; left:12px; transform:translateY(-200%); clip-path:inset(50%); background:white; padding:12px 20px; z-index:200; }
 .skip-link:focus { transform:none; clip-path:none; }

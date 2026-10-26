@@ -1,5 +1,5 @@
 import { HeroTitle, RevealText, RollingLabel } from '../components/MotionText'
-import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from '../components/PageLink'
 import copy from '../data/copy.json'
 import { SITE } from '../data/site'
@@ -8,7 +8,7 @@ import { committee } from '../data/committee'
 import { CTABand } from '../components/PageParts'
 import './ContactPage.css'
 
-// Keep visits, contact channels and committee responsibilities directly linkable.
+// Keep the contact details, who to ask and the visit directly linkable.
 const PHONE = { text: '519 253 3000, extension 3515', href: 'tel:+15192533000;ext=3515' }
 const ADDRESS = 'Joyce Entrepreneurship Centre, 2455 Wyandotte St. W., Windsor, ON N9B 0C1'
 const MAP_EMBED = 'https://maps.google.com/maps?q=Joyce%20Entrepreneurship%20Centre%202455%20Wyandotte%20St%20W%20Windsor&output=embed'
@@ -41,35 +41,50 @@ function Icon({ name }: { name: IconName }) {
   </svg>
 }
 
-// One card per way in; email and phone lead the row. Each of these whole cards is its link.
-const channels: { label: string; text: ReactNode; href: string; icon: IconName; external?: boolean }[] = [
-  { label: 'Email', text: <EmailText address={SITE.contactEmail} />, href: `mailto:${SITE.contactEmail}`, icon: 'email' },
-  { label: 'Phone', text: PHONE.text, href: PHONE.href, icon: 'phone' },
-  { label: 'Instagram', text: SITE.instagramHandle, href: SITE.instagramUrl, icon: 'instagram', external: true },
-  { label: 'LinkedIn', text: 'Hult Prize at the University of Windsor', href: SITE.linkedinUrl, icon: 'linkedin', external: true },
-  { label: 'Discord', text: 'Join our Discord', href: SITE.discordUrl, icon: 'chat', external: true },
+// Where to find us online.
+const online: { label: string; text: string; href: string; icon: IconName }[] = [
+  { label: 'Instagram', text: SITE.instagramHandle, href: SITE.instagramUrl, icon: 'instagram' },
+  { label: 'LinkedIn', text: 'Hult Prize at the University of Windsor', href: SITE.linkedinUrl, icon: 'linkedin' },
+  { label: 'Discord', text: 'Join our Discord', href: SITE.discordUrl, icon: 'chat' },
 ]
-// Who handles what, read off each committee role so a renamed or reordered committee keeps its rows right.
-// Partners are the likeliest visitors who are not students, so they come first; the director is the catch-all, so last.
-// Leads come before coordinators, and a topic with nobody in it is left out.
-const topics: { topic: string; role: RegExp; more?: [string, string] }[] = [
-  { topic: 'Partnerships and sponsorships', role: /Partnerships/, more: ['/partners', 'How partnership works'] },
-  { topic: 'Judges, experts and course integrations', role: /Judges/ },
-  { topic: 'Events and outreach', role: /Events/, more: ['/events', 'All events'] },
-  { topic: 'Marketing and media', role: /Marketing/ },
-  { topic: 'Campus Director', role: /Campus Director/ },
+// What people come to ask about, each with who handles it (read off the committee roles, so a renamed or reordered
+// committee keeps its rows right), the contact form's matching topic and the pages that answer the most. Competing has
+// no single owner on the committee, so it goes through the form and the Compete page. The director is the catch-all,
+// so last; leads come before coordinators.
+const needs: { topic: string; text: string; role?: RegExp; form: string; links?: [to: string, label: string, external?: boolean][] }[] = [
+  { topic: 'Entering the competition', text: 'Eligibility, teams, registration and workshops.', form: 'competing', links: [['/compete', 'How to compete'], [SITE.registrationUrl, 'Register your team', true]] },
+  { topic: 'Partnerships and sponsorships', text: 'Funding the program, sponsoring a prize or partnering on an event.', role: /Partnerships/, form: 'partnership', links: [['/partners', 'How partnership works']] },
+  { topic: 'Judges, experts and course integrations', text: 'Judging the Grand Finale, mentoring a team or bringing Hult Prize into a course.', role: /Judges/, form: 'mentoring' },
+  { topic: 'Events and outreach', text: 'Our workshops, info sessions and campus events.', role: /Events/, form: 'general', links: [['/events', 'All events']] },
+  { topic: 'Marketing and media', text: 'Press, photos and social media.', role: /Marketing/, form: 'media' },
+  { topic: 'Anything else', text: 'Not sure who to ask? Start with the Campus Director.', role: /Campus Director/, form: 'general' },
 ]
 const isCoordinator = (role: string) => Number(/Coordinator/.test(role))
-const whoToAsk = topics
-  .map(({ topic, role, more }) => ({ topic, more, members: committee.filter(([, memberRole]) => role.test(memberRole)).sort((a, b) => isCoordinator(a[1]) - isCoordinator(b[1])) }))
-  .filter(({ members }) => members.length > 0)
-// Under a topic the role's last word says enough (Lead or Coordinator); the director's topic is the role itself.
-const rankOf = (role: string, topic: string) => role === topic ? '' : role.split(' ').pop()
+const routes = needs.map(need => ({ ...need, members: need.role ? committee.filter(([, role]) => need.role!.test(role)).sort((a, b) => isCoordinator(a[1]) - isCoordinator(b[1])) : [] }))
+  .filter(need => !need.role || need.members.length > 0)
+
+/** Copies a detail to the clipboard, says so for a moment, and announces it to screen readers. Beside its detail it
+    reads just "Copy"; on its own it names what it copies. */
+function CopyButton({ text, label, named = false }: { text: string; label: string; named?: boolean }) {
+  const [copied, setCopied] = useState(false)
+  useEffect(() => {
+    if (!copied) return
+    const timer = window.setTimeout(() => setCopied(false), 2000)
+    return () => window.clearTimeout(timer)
+  }, [copied])
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(text); setCopied(true) } catch { /* Clipboard blocked: the text itself stays selectable. */ }
+  }
+  return <>
+    <button type="button" className="copy-button" onClick={copy}>{copied ? 'Copied' : named ? `Copy ${label.toLowerCase()}` : <>Copy<span className="visually-hidden"> {label.toLowerCase()}</span></>}</button>
+    <span className="visually-hidden" role="status">{copied ? `${label} copied` : ''}</span>
+  </>
+}
 
 export default function ContactPage() {
   return <div className="contact-page">
     <header className="page-heading contact-hero"><div className="container">
-      <div><p className="eyebrow">Hult Prize · UWindsor</p><HeroTitle>Find us.</HeroTitle></div>
+      <div><HeroTitle>Find us.</HeroTitle></div>
       <div className="contact-hero__intro"><p>Visit Fusion, ask about the competition or contact the team.</p><div className="contact-actions">
         <Link className="btn btn--dark" to="?enquiry=general" state={{drawer:true}}><RollingLabel>Ask the team</RollingLabel><span aria-hidden="true">↗</span></Link>
         <a className="btn btn--white" href={DIRECTIONS} target="_blank" rel="noopener noreferrer"><RollingLabel>Get directions</RollingLabel><NewTab glued={false} /></a>
@@ -77,66 +92,70 @@ export default function ContactPage() {
     </div></header>
 
     <div className="contact-content">
-    <nav className="container contact-section-nav" aria-label="On this page"><Link to="#come-and-find-us">Visit Fusion <span aria-hidden="true">↓</span></Link><Link to="#reach-us">Get in touch <span aria-hidden="true">↓</span></Link><Link to="#who-to-ask">Find the right person <span aria-hidden="true">↓</span></Link></nav>
-
-    <section className="contact-place" aria-labelledby="come-and-find-us"><div className="container contact-place__grid">
-      <div className="contact-place__head">
-        <p className="eyebrow">Come by</p>
-        <h2 id="come-and-find-us" data-text-reveal><RevealText>Visit Fusion</RevealText></h2>
-        <address>Joyce Entrepreneurship Centre<br />2nd{' '}Floor · 2455 Wyandotte St.{' '}W.<br />Windsor, ON N9B{' '}0C1</address>
-      </div>
-      <dl className="contact-place__details">
-        <div><dt>Getting there</dt><dd>Southeast corner of Wyandotte Street West and Sunset Avenue.</dd></div>
-        <div><dt>Hours</dt><dd>Monday to Friday, 9am to 4pm.</dd></div>
-        {/* The number is the target, so it gets its own 44px line above the note; its full stop stays outside the link. */}
-        <div><dt>Phone</dt><dd><span className="contact-place__line"><a href={PHONE.href}>{PHONE.text}</a></span><span className="contact-place__note">Ask for Hult Prize at Fusion.</span></dd></div>
-        <div><dt>Email</dt><dd><span className="contact-place__line"><a href={`mailto:${SITE.contactEmail}`}><EmailText address={SITE.contactEmail} /></a></span></dd></div>
-      </dl>
-      <div className="contact-place__map">
-        <iframe title="Google map of the Joyce Entrepreneurship Centre, 2455 Wyandotte St. W., Windsor, home of Fusion" src={MAP_EMBED} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
-      </div>
-    </div></section>
-
-    <section className="section contact-fusion" aria-labelledby="inside-fusion"><div className="container contact-fusion__grid">
-      <div className="contact-fusion__heading">
-        <p className="eyebrow">Fusion</p>
-        <h2 id="inside-fusion" data-text-reveal><RevealText>Open to all students.</RevealText></h2>
-      </div>
-      <div className="contact-fusion__body">
-        <div className="contact-fusion__copy">{copy.contactIntro.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
-        {fusion && <div className="contact-fusion__links">
-          <More to={`/partners/${fusion.slug}`}>About Fusion</More>
-          {fusion.url && <a href={fusion.url} target="_blank" rel="noopener noreferrer">Fusion’s website<NewTab /></a>}
-        </div>}
-      </div>
-    </div></section>
-
-    <section className="section contact-reach" aria-labelledby="reach-us"><div className="container">
-      <div className="contact-section-heading"><p className="eyebrow">A few ways to reach us</p><h2 id="reach-us" data-text-reveal><RevealText>Get in touch.</RevealText></h2></div>
-      <ul className="contact-channels">
-        {channels.map(({ label, text, href, icon, external }) => <li key={label}>
-          <a className="contact-card" href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>
-            <span className="contact-card__icon"><Icon name={icon} /></span>
-            <span className="contact-card__label">{label}</span>
-            <span className="contact-card__value">{text}{external && <NewTab />}</span>
-          </a>
-        </li>)}
+    {/* The details people come for, first: email and phone (each copyable), and where to find us online. */}
+    <section className="contact-quick" aria-labelledby="reach-us"><div className="container">
+      <h2 id="reach-us" className="visually-hidden">Contact details</h2>
+      <ul className="contact-quick__list">
+        <li className="contact-quick__item">
+          <span className="contact-quick__icon"><Icon name="email" /></span>
+          <div><h3>Email</h3><p className="contact-quick__value"><a href={`mailto:${SITE.contactEmail}`}><EmailText address={SITE.contactEmail} /></a></p></div>
+          <CopyButton text={SITE.contactEmail} label="Email address" />
+        </li>
+        <li className="contact-quick__item">
+          <span className="contact-quick__icon"><Icon name="phone" /></span>
+          <div><h3>Phone</h3><p className="contact-quick__value"><a href={PHONE.href}>{PHONE.text}</a></p><p className="contact-quick__note">Ask for Hult Prize at Fusion.</p></div>
+          <CopyButton text={PHONE.text} label="Phone number" />
+        </li>
+        <li className="contact-quick__item contact-quick__item--online">
+          <div><h3>Online</h3><ul className="contact-quick__links">{online.map(({ label, text, href, icon }) => <li key={label}><a href={href} target="_blank" rel="noopener noreferrer"><Icon name={icon} /><span><span className="visually-hidden">{label}: </span>{text}<NewTab /></span></a></li>)}</ul></div>
+        </li>
       </ul>
     </div></section>
 
-    <section className="section contact-ask" aria-labelledby="who-to-ask"><div className="container">
-      <div className="contact-ask__heading">
-        <div><p className="eyebrow">The people behind the programme</p><h2 id="who-to-ask" data-text-reveal><RevealText>Find the<br />right person.</RevealText></h2></div>
+    {/* What do you need? Each kind of question with who handles it and the quickest way to ask. */}
+    <section className="section contact-help" aria-labelledby="who-to-ask"><div className="container">
+      <div className="contact-help__heading">
+        <h2 id="who-to-ask" data-text-reveal><RevealText>How can we help?</RevealText></h2>
         <More to="/about#team">Meet the team</More>
       </div>
-      <ul className="contact-people">{whoToAsk.map(({ topic, more, members }) => <li key={topic} className={`contact-people__group${topic === 'Campus Director' ? ' contact-people__group--general' : ''}`}>
-        <div className="contact-people__heading"><h3>{topic}</h3>{topic === 'Campus Director' && <p>For anything else, start here.</p>}</div>
-        <ul className="contact-people__names">{members.map(([name, role, email, portrait]) => { const rank = rankOf(role, topic); return <li key={email}>
-          <div className="contact-people__identity"><Link className="contact-people__profile" to={`?member=${portrait}`} state={{drawer:true}}><strong>{name}</strong><span aria-hidden="true">↗</span><span className="visually-hidden">, view profile</span></Link>{rank && <span className="contact-people__rank">{rank}</span>}</div>
-          <a href={`mailto:${email}`}><Icon name="email" /><span><EmailText address={email} /></span><span className="visually-hidden">, email {name}</span></a>
-        </li> })}</ul>
-        {more && <p className="contact-people__more"><More to={more[0]}>{more[1]}</More></p>}
+      <ul className="contact-routes">{routes.map(({ topic, text, form, links, members }) => <li key={topic} className="contact-route">
+        <div className="contact-route__need"><h3>{topic}</h3><p>{text}</p></div>
+        <div className="contact-route__who">
+          {members.length > 0 ? <ul>{members.map(([name, role, email, portrait]) => <li key={email}>
+            <Link className="contact-route__person" to={`?member=${portrait}`} state={{drawer:true}}><strong>{name}</strong><span className="visually-hidden">, {role}, view profile</span></Link>
+            <a className="contact-route__email" href={`mailto:${email}`}><Icon name="email" /><span><EmailText address={email} /></span><span className="visually-hidden">, email {name}</span></a>
+          </li>)}</ul> : <p className="contact-route__anyone">Anyone on the team can help.</p>}
+        </div>
+        <div className="contact-route__actions">
+          <Link className="btn btn--secondary contact-route__ask" to={`?enquiry=${form}`} state={{drawer:true}}>Send a message<span className="visually-hidden"> about {topic.toLowerCase()}</span></Link>
+          {links?.map(([to, label, external]) => external
+            ? <a key={label} className="contact-route__link" href={to} target="_blank" rel="noopener noreferrer">{label}<NewTab /></a>
+            : <span key={label} className="contact-route__link"><More to={to}>{label}</More></span>)}
+        </div>
       </li>)}</ul>
+    </div></section>
+
+    <section className="section contact-place" aria-labelledby="come-and-find-us"><div className="container contact-place__grid">
+      <div className="contact-place__info">
+        <h2 id="come-and-find-us" data-text-reveal><RevealText>Visit Fusion</RevealText></h2>
+        <p className="contact-place__welcome">{copy.contactIntro.join(' ')}</p>
+        <dl className="contact-place__details">
+          <div><dt>Address</dt><dd><address>Joyce Entrepreneurship Centre, 2nd{' '}Floor<br />2455 Wyandotte St.{' '}W., Windsor, ON N9B{' '}0C1</address></dd></div>
+          <div><dt>Getting there</dt><dd>Southeast corner of Wyandotte Street West and Sunset Avenue.</dd></div>
+          <div><dt>Hours</dt><dd>Monday to Friday, 9am to 4pm.</dd></div>
+        </dl>
+        <div className="contact-place__actions">
+          <a className="btn btn--primary" href={DIRECTIONS} target="_blank" rel="noopener noreferrer"><RollingLabel>Get directions</RollingLabel><NewTab glued={false} /></a>
+          <CopyButton text={ADDRESS} label="Address" named />
+        </div>
+        {fusion && <p className="contact-place__more">
+          <More to={`/partners/${fusion.slug}`}>About Fusion</More>
+          {fusion.url && <a href={fusion.url} target="_blank" rel="noopener noreferrer">Fusion’s website<NewTab /></a>}
+        </p>}
+      </div>
+      <div className="contact-place__map">
+        <iframe title="Google map of the Joyce Entrepreneurship Centre, 2455 Wyandotte St. W., Windsor, home of Fusion" src={MAP_EMBED} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+      </div>
     </div></section>
 
     <CTABand text="Ready to enter?" lede="Check eligibility, find teammates and register your team."><Link className="btn btn--primary" to="/compete"><RollingLabel>How to compete</RollingLabel><span aria-hidden="true">→</span></Link></CTABand>

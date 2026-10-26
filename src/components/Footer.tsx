@@ -41,7 +41,7 @@ export default function Footer() {
   return <footer className="site-footer" id="contact">
     <div className="container">
       <div className="site-footer__invitation">
-        <div><span className="site-footer__eyebrow">Hult Prize at UWindsor</span><h2 data-text-reveal><RevealText>Your idea.<br />Next stop: the world.</RevealText></h2></div>
+        <div><h2 data-text-reveal><RevealText>Your idea.<br />Next stop: the world.</RevealText></h2></div>
         <div className="site-footer__invitation-actions"><RegisterButton>Register your team</RegisterButton><p>Registration closes {SITE.registrationCloses}.<br /><Link to="/attend">View the live event calendar</Link></p></div>
       </div>
       <nav className="site-footer__inner" aria-label="Footer navigation">
@@ -51,7 +51,7 @@ export default function Footer() {
         <FooterGroup title="Find us"><address>Fusion, Joyce Entrepreneurship Centre, 2nd Floor<br />2455 Wyandotte St. W.<br />Windsor, ON N9B 0C1</address><Link className="site-footer__directions" to="/contact">Contact & directions <span aria-hidden="true">↗</span></Link><p className="site-footer__email"><Email address={SITE.contactEmail} /></p><p className="site-footer__email"><span>Campus Director</span><Email address={SITE.campusDirectorEmail} /></p></FooterGroup>
       </nav>
       <Link to="/" className="site-footer__brand" aria-label="Hult Prize at the University of Windsor, home"><img src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" loading="lazy" /></Link>
-      <div className="site-footer__bottom"><p>&copy; {new Date().getFullYear()} Hult Prize at the University of Windsor.</p><p><Link to="/privacy">Event registration privacy</Link> · <Link to="/organiser/events">Organiser sign in</Link></p></div>
+      <div className="site-footer__bottom"><p>&copy; {new Date().getFullYear()} Hult Prize at the University of Windsor.</p><p className="site-footer__sponsor">Website build, domain and hosting sponsored by {SITE.sponsorUrl ? <a href={SITE.sponsorUrl} target="_blank" rel="noopener noreferrer">{SITE.sponsorName}<span aria-hidden="true"> ↗</span></a> : SITE.sponsorName}</p><p><Link to="/privacy">Event registration privacy</Link> · <Link to="/organiser/events">Organiser sign in</Link></p></div>
     </div>
   </footer>
 }

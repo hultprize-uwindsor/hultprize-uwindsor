@@ -1,0 +1,71 @@
+/* The events page as a news front page: top stories (a lead, two side stories and a "Coming up" rail), the upcoming
+   events catalogue, then "What happened": past events as cards and year one's news in brief. Pictures are plain,
+   cropped photos; rules between columns keep it reading like a news site. */
+.events-page { --news-rule:rgb(0 43 81 / 14%); }
+
+/* Top stories: three columns on wide screens, ruled apart. */
+.news-front { display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr) minmax(0,.95fr); align-items:start; }
+.news-front__side,.news-rail { margin-left:30px; padding-left:30px; border-left:1px solid var(--news-rule); }
+.news-front__side { display:grid; gap:24px; }
+.news-front__side .story + .story { padding-top:24px; border-top:1px solid var(--news-rule); }
+
+/* A story: picture, headline, when and where, and (for the lead and the cards) a summary. */
+.story { min-width:0; }
+.story__media { display:block; overflow:hidden; text-decoration:none; aspect-ratio:16 / 10; border-radius:8px; background:#eef2f6; }
+.story--side .story__media { aspect-ratio:16 / 9; }
+.story__picture { display:block; width:100%; height:100%; object-fit:cover; transition:scale .6s var(--ease-ui); }
+.story__picture--logo { padding:8% 12%; object-fit:contain; background:#fff; box-shadow:inset 0 0 0 1px var(--news-rule); }
+.story:hover .story__picture { scale:1.03; }
+/* A schedule event's picture is its date, on the event's colour. */
+.story__date { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; background:var(--mark-fill); color:var(--mark-on); text-align:center; }
+.story__date span { font-size:.8rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }
+.story__date strong { font-size:clamp(3rem,6vw,5.4rem); font-weight:600; line-height:1; letter-spacing:-.05em; }
+.story__title { margin:16px 0 0; font-size:1.3rem; font-weight:600; line-height:1.18; letter-spacing:-.02em; }
+/* Inline padding lifts a one-line headline's hit area to 44px without moving the lines. */
+.story__title a,.news-briefs h4 a { padding-block:11px; color:var(--uw-blue-dark); text-decoration:none; }
+.story__title a:hover,.news-briefs h4 a:hover { color:var(--pink-text); text-decoration:underline; text-decoration-thickness:1.5px; }
+.story__title a:focus-visible,.news-briefs h4 a:focus-visible,.news-rail__item:focus-visible { outline:3px solid var(--pink); outline-offset:3px; border-radius:4px; }
+.story--lead .story__title { font-size:clamp(2rem,3.3vw,3rem); line-height:1.04; letter-spacing:-.04em; }
+.story__meta { margin:8px 0 0; font-size:.88rem; line-height:1.4; color:var(--uw-grey); }
+.story__summary { max-width:62ch; margin:12px 0 0; line-height:1.55; color:var(--ink); }
+.story--lead .story__summary { font-size:1.1rem; }
+.story__action { margin-top:20px; }
+
+/* "Coming up": the next events from the schedule as a list of headlines. */
+.news-rail__title { margin:0 0 4px; padding-top:10px; border-top:3px solid var(--uw-blue-dark); font-size:1.4rem; font-weight:700; letter-spacing:-.025em; color:var(--uw-blue-dark); }
+.news-rail__list { margin:0 0 6px; padding:0; list-style:none; }
+.news-rail__item { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:2px 14px; padding:14px 0; border-bottom:1px solid var(--news-rule); color:inherit; text-decoration:none; }
+.news-rail__item .date-badge { grid-row:span 2; }
+.news-rail__headline { font-weight:600; line-height:1.25; color:var(--uw-blue-dark); }
+.news-rail__item:hover .news-rail__headline { color:var(--pink-text); text-decoration:underline; }
+.news-rail__when { font-size:.82rem; color:var(--uw-grey); }
+.news-rail__empty { margin:14px 0; color:var(--uw-grey); }
+
+/* What happened: past events and recaps as cards, then the news in brief. */
+/* A feature: the picture beside the text. */
+.story--feature { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); align-items:center; gap:24px 40px; margin-bottom:56px; }
+.story--feature .story__title { margin-top:0; font-size:clamp(1.8rem,2.8vw,2.6rem); line-height:1.06; letter-spacing:-.035em; }
+.story--feature .story__summary { font-size:1.08rem; }
+.story__more { margin-top:12px; }
+.news-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:40px 30px; margin-bottom:56px; }
+.news-briefs__title { margin:0 0 4px; padding-top:12px; border-top:3px solid var(--uw-blue-dark); font-size:1.6rem; font-weight:700; letter-spacing:-.03em; color:var(--uw-blue-dark); }
+.news-briefs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 32px; margin:0; padding:0; list-style:none; }
+.news-briefs li { padding:20px 0 22px; border-bottom:1px solid var(--news-rule); }
+.news-briefs h4 { margin:0; font-size:1.15rem; font-weight:600; line-height:1.25; letter-spacing:-.015em; }
+.news-briefs p { margin:8px 0 0; line-height:1.5; color:var(--ink); }
+.news-briefs .news-briefs__when { margin-top:10px; font-size:.82rem; color:var(--uw-grey); }
+
+/* Tablets: the lead across the top, the side stories and the rail beneath it side by side; two columns below. */
+@media(max-width:1100px) {
+  .news-front { grid-template-columns:minmax(0,1fr) minmax(0,1fr); row-gap:36px; }
+  .news-front > .story--lead { grid-column:1 / -1; }
+  .news-front__side { margin-left:0; padding-left:0; border-left:0; }
+  .news-cards,.news-briefs { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+/* Phones: one column, ruled between. */
+@media(max-width:700px) {
+  .news-front { grid-template-columns:minmax(0,1fr); }
+  .news-rail { margin-left:0; padding-left:0; border-left:0; }
+  .news-cards,.news-briefs,.story--feature { grid-template-columns:minmax(0,1fr); }
+}
+@media(prefers-reduced-motion:reduce) { .story__picture { transition:none; } }

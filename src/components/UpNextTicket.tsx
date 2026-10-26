@@ -25,12 +25,11 @@ export default function UpNextTicket({ event }: { event: AttendanceEvent }) {
           <span className="up-next-ticket__admit" aria-hidden="true">Admit one</span>
         </time>
         <span className="up-next-ticket__body">
-          <span className="up-next-ticket__meta"><span className="up-next-ticket__label">Up next</span><span className="up-next-ticket__countdown">{countdown(event, now)}</span></span>
+          <span className="up-next-ticket__meta">Up next · <span className="up-next-ticket__countdown">{countdown(event, now)}</span></span>
           <h2 id="up-next-title" data-text-reveal><RevealText>{event.title}</RevealText></h2>
-          <span className="up-next-ticket__details">{eventTime(event)} · {event.venue.split(',')[0]}</span>
+          <span className="up-next-ticket__details">Free · {eventTime(event)} · {event.venue.split(',')[0]}</span>
         </span>
         <span className="up-next-ticket__action">
-          <span className="up-next-ticket__stamp" aria-hidden="true">Free</span>
           <span className="up-next-ticket__cta">Save my spot <span aria-hidden="true">→</span></span>
         </span>
       </span>

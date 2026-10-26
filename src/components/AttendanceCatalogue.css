@@ -1,9 +1,83 @@
-.attendance-catalogue > p { max-width:70ch; }
-.attendance-catalogue__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin-top:32px; }
-.attendance-catalogue__grid article { border:1px solid var(--grey); border-radius:16px; padding:28px; }
-.attendance-catalogue__grid h3 { font-size:1.5rem; line-height:1.25; margin-bottom:20px; }
-.attendance-catalogue__grid h3 a { text-decoration:none; }
-.attendance-catalogue__grid .tag { margin-bottom:16px; }
-.attendance-catalogue__grid p { font-size:.95rem; }
-.schedule-note { padding:12px 16px; border-left:3px solid var(--uw-blue); background:var(--paper-blue); margin-top:24px; font-size:.9rem; }
-@media(max-width:720px) { .attendance-catalogue__grid { grid-template-columns:1fr; } .attendance-catalogue__grid article { padding:22px; } }
+/* Events page: upcoming events as admission tickets, a coloured stub per event type torn along a notched perforation. */
+.attendance-catalogue__intro { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px 32px; margin-bottom:28px; }
+.attendance-catalogue__intro p { max-width:62ch; margin:0; }
+
+.event-tickets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px 22px; margin:18px 0 0; padding:0; list-style:none; }
+.event-ticket { --stub:104px; --notch:13px; position:relative; min-width:0; filter:drop-shadow(0 12px 18px rgb(0 43 81 / 16%)); }
+/* The hit area stays still; only the paper lifts on hover. */
+.event-ticket__paper {
+  display:grid; grid-template-columns:var(--stub) minmax(0,1fr); height:100%; border-radius:16px; background:linear-gradient(90deg,var(--mark-fill) 0 var(--stub),#fffdf8 var(--stub)); transition:translate .3s var(--ease-ui);
+  -webkit-mask:radial-gradient(circle at var(--stub) 0,#0000 var(--notch),#000 calc(var(--notch) + .5px)) 0 0 / 100% 51% no-repeat,radial-gradient(circle at var(--stub) 100%,#0000 var(--notch),#000 calc(var(--notch) + .5px)) 0 100% / 100% 51% no-repeat;
+  mask:radial-gradient(circle at var(--stub) 0,#0000 var(--notch),#000 calc(var(--notch) + .5px)) 0 0 / 100% 51% no-repeat,radial-gradient(circle at var(--stub) 100%,#0000 var(--notch),#000 calc(var(--notch) + .5px)) 0 100% / 100% 51% no-repeat;
+}
+.event-ticket:hover .event-ticket__paper,.event-ticket:focus-within .event-ticket__paper { translate:0 -3px; }
+.event-ticket__stub { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:18px 8px; color:var(--mark-on); text-align:center; }
+.event-ticket__month { font-size:.72rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
+.event-ticket__day { font-size:2.5rem; font-weight:700; line-height:1; letter-spacing:-.05em; font-variant-numeric:tabular-nums; }
+.event-ticket__weekday { font-size:.78rem; opacity:.9; }
+.event-ticket__free { margin-top:10px; padding-top:6px; border-top:1px dashed currentColor; font-size:.6rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; opacity:.85; }
+.event-ticket__body { position:relative; display:flex; flex-direction:column; gap:6px; min-width:0; padding:20px 22px 16px 24px; border-left:2px dashed rgb(0 43 81 / 18%); }
+.event-ticket__group { font-size:.85rem; font-weight:600; color:var(--mark-text); }
+.event-ticket h3 { margin:0; font-size:1.2rem; line-height:1.3; letter-spacing:-.02em; }
+/* The title link's padding brings its hit area to 44px without moving the text. */
+.event-ticket h3 a { display:inline-block; padding-block:10px; margin-block:-10px; color:var(--uw-blue-dark); text-decoration:none; }
+.event-ticket h3 a:hover { text-decoration:underline; text-underline-offset:3px; }
+.event-ticket h3 a:focus-visible { outline:3px solid var(--pink); outline-offset:2px; border-radius:3px; }
+.event-ticket p { margin:0; }
+.event-ticket__when { font-size:.88rem; font-weight:500; color:var(--ink); }
+/* Three lines here; the full description is on the event's own page. */
+.event-ticket__description { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; font-size:.86rem; line-height:1.5; color:var(--uw-grey); }
+.event-ticket__actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; margin-top:auto; padding-top:10px; }
+.event-ticket__status { font-size:.78rem; font-weight:600; color:var(--uw-grey); }
+.event-ticket__register { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0 18px; border-radius:99px; background:var(--pink-fill); color:#fff; font-size:.86rem; font-weight:600; text-decoration:none; transition:background-color .2s; }
+.event-ticket__register:hover { background:var(--pink-text); }
+.event-ticket__register:focus-visible { outline:3px solid var(--uw-blue-dark); outline-offset:2px; }
+/* The next event: a note written in the ticket's top corner. */
+.event-ticket__next { position:absolute; top:14px; right:20px; font-family:var(--font-hand); font-size:1.35rem; font-weight:700; line-height:1; color:var(--pink-text); rotate:4deg; pointer-events:none; }
+
+
+/* Event page: a ticket-style details card beside "More events". */
+.event-detail { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); align-items:start; gap:40px; margin-top:24px; }
+.event-detail__ticket { --stub:132px; --notch:16px; display:grid; grid-template-columns:var(--stub) minmax(0,1fr); border-radius:18px; background:linear-gradient(90deg,var(--mark-fill) 0 var(--stub),#fffdf8 var(--stub)); box-shadow:0 20px 34px -18px rgb(0 43 81 / 40%); }
+.event-detail__ticket .event-ticket__stub { padding:26px 10px; align-self:start; }
+.event-detail__ticket .event-ticket__day { font-size:3.2rem; }
+.event-detail__info { display:flex; flex-direction:column; gap:16px; min-width:0; padding:28px 30px; border-left:2px dashed rgb(0 43 81 / 18%); }
+.event-detail__info dl { display:grid; gap:12px; margin:0; }
+.event-detail__info dl div { display:grid; grid-template-columns:5.5rem minmax(0,1fr); gap:12px; }
+.event-detail__info dt { font-size:.88rem; font-weight:600; color:var(--uw-grey); padding-top:2px; }
+.event-detail__info dd { margin:0; line-height:1.5; }
+.event-detail__prep { margin:0; padding:12px 14px; border-radius:10px; background:var(--paper-blue); font-size:.92rem; line-height:1.55; }
+.event-detail__actions { display:flex; flex-wrap:wrap; gap:10px; }
+.event-detail__actions .btn { min-height:46px; }
+.event-detail__actions button.btn { font:inherit; font-weight:600; cursor:pointer; }
+.event-detail__note { margin:0; font-size:.88rem; color:var(--uw-grey); }
+.event-detail__more h2 { margin:0 0 14px; font-size:1.35rem; letter-spacing:-.025em; }
+.event-detail__more ul { display:grid; gap:12px; margin:0 0 16px; padding:0; list-style:none; }
+.event-mini { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:14px; padding:12px 14px; border:1px solid rgb(0 43 81 / 10%); border-radius:14px; background:#fff; color:var(--ink); text-decoration:none; transition:border-color .2s; }
+.event-mini:hover,.event-mini:focus-visible { border-color:var(--mark); }
+.event-mini > span:last-child { display:flex; flex-direction:column; min-width:0; }
+.event-mini strong { font-size:.95rem; line-height:1.3; }
+.event-mini > span:last-child span { font-size:.8rem; color:var(--uw-grey); }
+
+@media(max-width:900px) {
+  .event-tickets { grid-template-columns:minmax(0,1fr); }
+  .event-detail { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:600px) {
+  .event-ticket { --stub:84px; --notch:11px; }
+  .event-ticket__day { font-size:2rem; }
+  .event-ticket__body { padding:16px 16px 14px 18px; }
+  /* Phones: the stub becomes a date strip across the top, and the actions take the full width. */
+  .event-detail__ticket { grid-template-columns:minmax(0,1fr); background:#fffdf8; overflow:hidden; }
+  .event-detail__ticket .event-ticket__stub { flex-direction:row; align-items:baseline; justify-content:flex-start; gap:10px; padding:14px 18px; background:var(--mark-fill); }
+  .event-detail__ticket .event-ticket__day { font-size:1.8rem; }
+  .event-detail__ticket .event-ticket__free { margin:0 0 0 auto; padding:0; border:0; }
+  .event-detail__info { padding:20px 18px; border-left:0; border-top:2px dashed rgb(0 43 81 / 18%); }
+  .event-detail__actions .btn { flex:1 1 100%; justify-content:center; }
+  .event-detail__info dl div { grid-template-columns:minmax(0,1fr); gap:2px; }
+}
+@media(prefers-reduced-motion:reduce) { .event-ticket__paper { transition:none; } }
+
+/* Story pages: a photo recap after a past event. */
+.post-recap { margin-top:72px; }
+.post-recap h2 { margin-bottom:0; }

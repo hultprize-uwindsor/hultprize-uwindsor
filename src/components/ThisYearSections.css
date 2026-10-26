@@ -1,0 +1,243 @@
+/* This Year: pinned goal cards, a taped launch-day strip, and a notebook checklist that ends in the two ways to start. */
+
+/* Goals: a slate chalkboard in a walnut frame with a chalk tray. The slate carries the haze of past erasing; the
+   heading is chalked on; each goal is a different scrap of paper taped up at its own angle,
+   with year one's figure struck through in red marker and this season's circled. */
+.chapter-section.goal-board-section { --frame:16px; --tray:34px; --chalk:#f1efe8; position:relative; isolation:isolate; border-radius:5px; padding-block:clamp(64px,7vw,112px) calc(clamp(56px,5.6vw,92px) + var(--tray)); color:var(--chalk);
+  /* Torn edges for the paper, one long strip each (paper, then the frayed fibres just beyond it). */
+  --tear-b:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='68'%3E%3Cfilter id='t' filterUnits='userSpaceOnUse' x='0' y='-80' width='1600' height='160' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0125' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='48' xChannelSelector='R' yChannelSelector='G' result='torn'/%3E%3C/filter%3E%3Crect y='-80' width='1600' height='108' filter='url(%23t)'/%3E%3C/svg%3E");
+  --tear-b-fibre:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='68'%3E%3Cfilter id='t' filterUnits='userSpaceOnUse' x='0' y='-80' width='1600' height='160' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0125' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='48' xChannelSelector='R' yChannelSelector='G' result='torn'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.24' numOctaves='3' seed='13' stitchTiles='stitch'/%3E%3CfeDisplacementMap in='torn' scale='15' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3Crect y='-80' width='1600' height='115' filter='url(%23t)'/%3E%3C/svg%3E");
+  --tear-t:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='68'%3E%3Cfilter id='t' filterUnits='userSpaceOnUse' x='0' y='-80' width='1600' height='160' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0125' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='48' xChannelSelector='R' yChannelSelector='G' result='torn'/%3E%3C/filter%3E%3Cg transform='matrix(1 0 0 -1 0 68)'%3E%3Crect y='-80' width='1600' height='108' filter='url(%23t)'/%3E%3C/g%3E%3C/svg%3E");
+  --tear-t-fibre:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='68'%3E%3Cfilter id='t' filterUnits='userSpaceOnUse' x='0' y='-80' width='1600' height='160' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0125' numOctaves='5' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='48' xChannelSelector='R' yChannelSelector='G' result='torn'/%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.24' numOctaves='3' seed='13' stitchTiles='stitch'/%3E%3CfeDisplacementMap in='torn' scale='15' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3Cg transform='matrix(1 0 0 -1 0 68)'%3E%3Crect y='-80' width='1600' height='115' filter='url(%23t)'/%3E%3C/g%3E%3C/svg%3E");
+  background:
+    /* chalk dust settled on the slate just above the tray */
+    linear-gradient(to top,transparent var(--tray),rgb(236 234 224 / 10%) var(--tray),rgb(236 234 224 / 3%) calc(var(--tray) + 44px),transparent calc(var(--tray) + 140px)),
+    /* fine grain, the haze of erasing (streaked along each swipe), and broad mottling */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='21' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .2 0 0 0 -.07'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 240px 240px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800' preserveAspectRatio='none'%3E%3Cfilter id='e' filterUnits='userSpaceOnUse' x='0' y='0' width='1200' height='800' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.006 .03' numOctaves='4' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .42 0 0 0 -.06'/%3E%3CfeComposite in2='SourceGraphic' operator='in'/%3E%3C/filter%3E%3Cfilter id='s' x='-10%25' y='-50%25' width='120%25' height='200%25'%3E%3CfeGaussianBlur stdDeviation='18'/%3E%3C/filter%3E%3Cg filter='url(%23e)'%3E%3Cg filter='url(%23s)' fill='none' stroke='%23fff' stroke-linecap='round'%3E%3Cpath d='M-40 130C200 70 430 190 660 120S1010 60 1240 150' stroke-width='130' stroke-opacity='0.34'/%3E%3Cpath d='M60 380C280 320 500 430 760 360' stroke-width='110' stroke-opacity='0.26'/%3E%3Cpath d='M540 560C760 490 980 600 1240 520' stroke-width='120' stroke-opacity='0.3'/%3E%3Cpath d='M-40 690C160 640 380 740 600 680' stroke-width='100' stroke-opacity='0.28'/%3E%3Cpath d='M880 250C960 180 1120 200 1180 300' stroke-width='70' stroke-opacity='0.22'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.005' numOctaves='3' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .13 0 0 0 -.045'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E") 0 0 / 600px 600px,
+    /* the room's light, from above */
+    linear-gradient(rgb(255 255 255 / 4%),transparent 45%,rgb(0 0 0 / 14%)),
+    #2c3237;
+  box-shadow:inset 0 0 0 calc(var(--frame) + 1.5px) rgb(10 12 14 / 60%),inset 0 0 22px calc(var(--frame) + 2px) rgb(0 0 0 / 40%),0 24px 44px -26px rgb(0 20 40 / 55%); }
+.chapter-section.goal-board-section > .container { padding-inline:clamp(32px,4.6vw,76px); }
+/* The frame: a top rail mitred into two stiles, grain running along each piece, lit from above. The stiles stop on the
+   tray, which runs the full width. */
+.goal-board-section::before,.goal-board-section::after { content:''; position:absolute; inset:0; z-index:1; pointer-events:none; }
+.goal-board-section::before {
+  background:
+    linear-gradient(rgb(255 240 220 / 34%) 0 1px,transparent 1px calc(var(--frame) - 1px),rgb(0 0 0 / 50%) calc(var(--frame) - 1px) var(--frame),transparent var(--frame)),
+    linear-gradient(rgb(255 230 200 / 16%),transparent var(--frame)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='48'%3E%3Cfilter id='w' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.003 .26' numOctaves='3' seed='6' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.46 0 0 0 .2 .3 0 0 0 .1 .19 0 0 0 .04 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E") 0 0 / 900px 48px;
+  clip-path:polygon(0 0,100% 0,calc(100% - var(--frame)) var(--frame),var(--frame) var(--frame)); }
+.goal-board-section::after {
+  background:
+    linear-gradient(90deg,rgb(255 240 220 / 20%) 0 1px,transparent 1px calc(var(--frame) - 1px),rgb(0 0 0 / 45%) calc(var(--frame) - 1px) var(--frame),transparent var(--frame) calc(100% - var(--frame)),rgb(255 240 220 / 10%) calc(100% - var(--frame)) calc(100% - var(--frame) + 1px),transparent calc(100% - var(--frame) + 1px) calc(100% - 1px),rgb(0 0 0 / 40%) calc(100% - 1px)),
+    linear-gradient(rgb(255 230 200 / 8%),transparent 40%,rgb(0 0 0 / 18%)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='900'%3E%3Cfilter id='w' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.26 .003' numOctaves='3' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.46 0 0 0 .19 .3 0 0 0 .095 .19 0 0 0 .04 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E") 0 0 / 48px 900px;
+  clip-path:polygon(0 0,var(--frame) var(--frame),var(--frame) calc(100% - var(--tray)),0 calc(100% - var(--tray)),0 0,100% 0,100% calc(100% - var(--tray)),calc(100% - var(--frame)) calc(100% - var(--tray)),calc(100% - var(--frame)) var(--frame),100% 0); }
+/* The tray: a shelf seen slightly from above, chalk dust gathered at the back of it against the board, then its front
+   edge, turned away from the light. */
+.goal-board__tray { position:absolute; z-index:2; left:0; right:0; bottom:0; height:var(--tray); pointer-events:none;
+  background:
+    linear-gradient(rgb(0 0 0 / 40%) 0 1px,transparent 1px 12px,rgb(255 240 222 / 45%) 12px 13px,transparent 13px calc(100% - 1px),rgb(0 0 0 / 55%) calc(100% - 1px)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='12'%3E%3Cfilter id='d' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='30' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 .97 1.3 0 0 0 -.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E") 0 1px / 160px 11px repeat-x,
+    linear-gradient(rgb(238 236 228 / 50%) 1px,rgb(238 236 228 / 22%) 5px,rgb(238 236 228 / 8%) 12px,transparent 12px),
+    linear-gradient(rgb(255 236 214 / 18%) 0 12px,rgb(0 0 0 / 4%) 12px,rgb(0 0 0 / 36%)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='48'%3E%3Cfilter id='w' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.003 .26' numOctaves='3' seed='6' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.46 0 0 0 .2 .3 0 0 0 .1 .19 0 0 0 .04 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E") 0 -9px / 900px 48px; }
+/* Two pieces of chalk, white and pink, resting on the shelf. */
+.goal-board__chalk { position:absolute; left:68%; top:-3px; width:58px; height:10px; border-radius:2px 6px 6px 2px / 4px 5px 5px 4px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='12'%3E%3Cfilter id='d' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='30' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 .97 1.3 0 0 0 -.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E") 0 0 / 40px 10px,linear-gradient(#fff 0 22%,#f2efe7 48%,#d6d1c4 82%,#bdb7a9);
+  box-shadow:0 2px 2px -1px rgb(0 0 0 / 55%),1px 3px 4px rgb(0 0 0 / 22%); rotate:-3deg; }
+.goal-board__chalk--pink { left:calc(68% + 70px); top:-1px; width:22px; border-radius:3px; background:linear-gradient(#ffd3e7 0 22%,#f6b2d1 50%,#dc8fb3 85%,#c97ea1); rotate:7deg; }
+.goal-board__defs { position:absolute; width:0; height:0; overflow:hidden; }
+
+/* The heading, chalked large and leaning, underlined twice in pink; the season's aim written smaller beside it, with an
+   arrow down to the cards. */
+.goal-board__header { position:relative; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr); align-items:end; gap:24px clamp(32px,5vw,80px); margin-bottom:clamp(56px,6vw,88px); }
+.goal-board__title { position:relative; font-size:clamp(3rem,6.6vw,6.1rem); }
+.goal-board .goal-board__title h2 { max-width:none; margin:0; font-family:var(--font-hand); font-size:1em; font-weight:700; line-height:.92; letter-spacing:0; color:var(--chalk); rotate:-2.5deg; transform-origin:0 100%; filter:url(#goal-chalk-text); }
+.goal-board__underline { position:absolute; max-width:none; left:.02em; bottom:-.3em; width:3.25em; height:.24em; overflow:visible; rotate:-2.5deg; transform-origin:0 0; }
+.goal-board__underline path,.goal-board__arrow path { fill:none; stroke-linecap:round; stroke-linejoin:round; filter:url(#goal-chalk); }
+.goal-board__underline path { stroke:#f9a6cc; stroke-width:5; }
+.goal-board__lead { max-width:30ch; margin:0 0 .5em; font-family:var(--font-hand); font-size:clamp(1.35rem,1.75vw,1.7rem); font-weight:600; line-height:1.22; color:rgb(241 239 232 / 92%); rotate:1.2deg; filter:url(#goal-chalk-small); }
+.goal-board__arrow { position:absolute; right:clamp(80px,12vw,200px); bottom:calc(-1 * clamp(56px,6vw,84px)); width:clamp(84px,8vw,120px); overflow:visible; }
+.goal-board__arrow path { stroke:rgb(241 239 232 / 85%); stroke-width:3.5; }
+/* The closing promise, chalked small at the foot of the board. */
+.goal-board__note { width:fit-content; max-width:100%; margin:clamp(72px,7vw,104px) 0 0 auto; font-family:var(--font-hand); font-size:clamp(1.3rem,1.6vw,1.55rem); font-weight:600; line-height:1.2; color:rgb(241 239 232 / 90%); rotate:-1.5deg; filter:url(#goal-chalk-small); }
+
+/* The cards, staggered and tilted as if put up in a hurry. Each lies close to the slate (a tight shadow) except where
+   its untaped bottom corners lift away (a softer one beneath them). The <li> reaches past its card on both sides
+   (padding in, margin back out) so a strip of tape over a corner stays inside it. */
+.goal-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:48px clamp(24px,2.6vw,40px); margin:0; padding:0; list-style:none; }
+.goal { --tilt:-1.6deg; --drop:0px; --lift:8px; position:relative; padding-inline:34px; margin-inline:-34px; rotate:var(--tilt); translate:0 var(--drop); filter:drop-shadow(0 1px .5px rgb(0 0 0 / 50%)) drop-shadow(0 4px 4px rgb(0 0 0 / 26%)); }
+.goal::after { content:''; position:absolute; z-index:-1; left:calc(34px + 10%); right:calc(34px + 10%); bottom:var(--lift); height:34%; border-radius:50%; background:rgb(0 0 0 / 50%); filter:blur(9px); translate:0 7px; }
+.goal--graph,.goal--kraft { --lift:24px; }
+.goal:nth-child(2) { --tilt:2deg; --drop:34px; }
+.goal:nth-child(3) { --tilt:-.8deg; --drop:6px; }
+.goal:nth-child(4) { --tilt:1.4deg; --drop:44px; }
+/* Masking tape: crêpe paper, a little translucent, its ends torn. */
+/* Tape sits where the paper starts: cards torn along their top begin a little below their box (--paper-top), so the
+   tape and the writing both move down with it. */
+.goal-card > .tape { margin-top:var(--paper-top,0px); }
+/* Corner tape straddles the corner itself, half above the paper, clear of the heading. */
+.goal-card > :is(.tape--left,.tape--right) { top:-14px; }
+.goal-board .tape { --tape-w:96px; height:30px; clip-path:none;
+  background:linear-gradient(180deg,rgb(110 90 50 / 26%) 0 1px,rgb(255 255 255 / 26%) 1px 5px,transparent 45%,rgb(110 90 50 / 10%) calc(100% - 2px),rgb(110 90 50 / 26%) calc(100% - 1px)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30'%3E%3Cfilter id='c' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9 .05' numOctaves='2' seed='12' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .28 0 0 0 0 .15 .4 0 0 0 -.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 60px 30px,rgb(232 221 190 / 85%);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='60' preserveAspectRatio='none'%3E%3Cfilter id='t' filterUnits='userSpaceOnUse' x='-20' y='-20' width='240' height='100' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.25 .2' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='1 0 0 0 0 0 0 0 0 .5 0 0 0 0 0 0 0 0 0 1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='20' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3Crect x='12' y='-12' width='176' height='84' filter='url(%23t)'/%3E%3C/svg%3E") 0 0 / 100% 100%; mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='60' preserveAspectRatio='none'%3E%3Cfilter id='t' filterUnits='userSpaceOnUse' x='-20' y='-20' width='240' height='100' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.25 .2' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='1 0 0 0 0 0 0 0 0 .5 0 0 0 0 0 0 0 0 0 1'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='20' xChannelSelector='R' yChannelSelector='G'/%3E%3C/filter%3E%3Crect x='12' y='-12' width='176' height='84' filter='url(%23t)'/%3E%3C/svg%3E") 0 0 / 100% 100%; }
+
+/* A scrap of paper: its surface (grain, the light across it, and shade where it bows away from the slate) is drawn
+   behind the writing, and so are its torn edges, so nothing readable is clipped. Torn paper shows a frayed, paler core
+   just beyond the edge. */
+.goal-card { --paper:#fffdf8; --fibre:#fffefa; --ink:var(--uw-blue-dark); --type:#24262a; --type-soft:#55585e; --marker:#d1202f; --tear-x:0px;
+  position:relative; isolation:isolate; display:flex; flex-direction:column; min-height:256px; padding:calc(34px + var(--paper-top,0px)) 22px 22px; color:var(--ink); }
+.goal-card::before,.goal-card::after { content:''; position:absolute; inset:0; }
+.goal-card::before { z-index:-1; border-radius:var(--corner,0);
+  background:
+    linear-gradient(166deg,rgb(255 255 255 / 30%),transparent 34%),
+    linear-gradient(transparent 60%,rgb(70 50 30 / 7%)),
+    radial-gradient(55% 38% at 99% 100%,rgb(70 50 30 / 11%),transparent 70%),
+    radial-gradient(45% 32% at 1% 100%,rgb(70 50 30 / 7%),transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .25 0 0 0 0 .2 0 0 0 0 .15 .26 0 0 0 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E") 0 0 / 180px 180px,
+    var(--paper);
+  -webkit-mask:var(--edge,none); mask:var(--edge,none); }
+.goal-card::after { z-index:-2; background:var(--fibre); -webkit-mask:var(--fibres,none); mask:var(--fibres,none); }
+.goal-card h3 { margin:0 0 18px; font-family:var(--font-hand); font-size:clamp(1.75rem,2.1vw,2.1rem); font-weight:700; line-height:.98; letter-spacing:0; color:var(--ink); rotate:-.8deg; mix-blend-mode:multiply; }
+.goal-card__figures { display:flex; flex-wrap:wrap; align-items:center; align-content:end; gap:12px 6px; margin:auto 0 0; mix-blend-mode:multiply; }
+.goal-card__figures > div { display:flex; align-items:baseline; gap:12px; }
+.goal-card dd { margin:0; }
+/* Year one, typed and struck through. Typewriter ribbon ink, spreading a touch into the paper. */
+.goal-card__was { flex-basis:100%; font-family:var(--font-type); font-size:.95rem; color:var(--type-soft); }
+.goal-card__was dd,.goal-card__goal dd { color:var(--type); text-shadow:0 0 .5px rgb(36 38 42 / 55%); }
+.goal-card__was dd { font-size:1.55rem; line-height:1; }
+/* This year's goal, typed large and circled; the increase scrawled beside it. */
+.goal-card__goal dd { margin-inline:.42em .48em; font-family:var(--font-type); font-size:clamp(2.4rem,3vw,3.1rem); line-height:1; }
+.goal-card__change dd { font-family:var(--font-hand); font-size:1.85rem; font-weight:700; line-height:1; color:var(--marker); rotate:-8deg; translate:0 -.45em; }
+.goal-card__struck,.goal-card__circled { position:relative; display:inline-block; }
+/* Marker ink soaks into the paper (multiply), and darkens where two strokes cross. */
+.goal-card__strike,.goal-card__circle { position:absolute; max-width:none; overflow:visible; pointer-events:none; mix-blend-mode:multiply; }
+.goal-card__strike { left:-.22em; top:50%; width:calc(100% + .44em); height:.62em; translate:0 -46%; }
+.goal-card__circle { left:50%; top:50%; width:auto; height:1.5em; aspect-ratio:var(--ratio); translate:-50% -50%; }
+.goal-card__strike path,.goal-card__circle path { fill:none; stroke:var(--marker); stroke-linecap:round; stroke-linejoin:round; stroke-opacity:.82; stroke-dasharray:1 2; stroke-dashoffset:0; filter:url(#goal-marker); }
+.goal-card__strike path { stroke-width:4.5; }
+.goal-card__circle path { stroke-width:3.2; }
+/* Waiting to be seen: no marker yet. Then, card by card, the strike out and back, the loop and its overshoot, and the
+   note. */
+.goal-board[data-draw="waiting"] :is(.goal-card__strike,.goal-card__circle) path { stroke-dashoffset:1.05; }
+.goal-board[data-draw="waiting"] .goal-card__change dd { opacity:0; }
+.goal-board[data-draw="done"] .goal-card__strike path { transition:stroke-dashoffset .26s cubic-bezier(.5,.1,.6,1) calc(var(--i) * .28s + .3s); }
+.goal-board[data-draw="done"] .goal-card__strike path + path { transition-delay:calc(var(--i) * .28s + .56s); }
+.goal-board[data-draw="done"] .goal-card__circle path { transition:stroke-dashoffset .6s cubic-bezier(.45,.1,.7,1) calc(var(--i) * .28s + .85s); }
+.goal-board[data-draw="done"] .goal-card__circle path + path { transition-duration:.12s; transition-timing-function:linear; transition-delay:calc(var(--i) * .28s + 1.45s); }
+.goal-board[data-draw="done"] .goal-card__change dd { transition:opacity .3s calc(var(--i) * .28s + 1.6s); }
+
+/* An index card: cardstock with softened corners, a red rule under the heading, blue lines below it. */
+.goal-card--index { --corner:3px; }
+.goal-card--index::after { content:none; }
+.goal-card--index h3 { margin-inline:-22px; padding:0 22px 10px; border-bottom:2px solid rgb(222 76 98 / 66%); rotate:none; }
+.goal-card--index h3 { text-indent:-.2em; }
+.goal-card--index .goal-card__figures { flex:1; margin:0 -22px -22px; padding:16px 22px 22px; border-radius:0 0 3px 3px; background:repeating-linear-gradient(transparent 0 25px,rgb(73 140 206 / 32%) 25px 26px); }
+/* Yellow legal pad, torn off along its top, with the double margin down the left. */
+.goal-card--legal { --paper-top:20px; --paper:linear-gradient(90deg,transparent 28px,rgb(216 74 74 / 50%) 28px 29.5px,transparent 29.5px 32px,rgb(216 74 74 / 50%) 32px 33.5px,transparent 33.5px),repeating-linear-gradient(transparent 0 25px,rgb(64 120 186 / 28%) 25px 26px) 0 8px,#fbee9c; --fibre:#fffbe6; --tear-x:-40px;
+  --edge:var(--tear-t) var(--tear-x) 0 / 800px 34px no-repeat,linear-gradient(#000 0 0) 0 33px / 100% calc(100% - 33px) no-repeat;
+  --fibres:var(--tear-t-fibre) var(--tear-x) 0 / 800px 34px no-repeat,linear-gradient(#000 0 0) 0 33px / 100% calc(100% - 33px) no-repeat; padding-left:48px; }
+/* Graph paper, torn along the bottom. */
+.goal-card--graph { --paper:linear-gradient(rgb(47 128 209 / 28%) 1px,transparent 1px) 0 0 / 100% 80px,linear-gradient(90deg,rgb(47 128 209 / 28%) 1px,transparent 1px) 0 0 / 80px 100%,linear-gradient(rgb(47 128 209 / 14%) 1px,transparent 1px) 0 0 / 100% 16px,linear-gradient(90deg,rgb(47 128 209 / 14%) 1px,transparent 1px) 0 0 / 16px 100%,#fbfcfd; --tear-x:-150px;
+  --edge:linear-gradient(#000 0 0) 0 0 / 100% calc(100% - 33px) no-repeat,var(--tear-b) var(--tear-x) 100% / 800px 34px no-repeat;
+  --fibres:linear-gradient(#000 0 0) 0 0 / 100% calc(100% - 33px) no-repeat,var(--tear-b-fibre) var(--tear-x) 100% / 800px 34px no-repeat; padding-bottom:30px; }
+/* Kraft paper, torn top and bottom, its fibres showing pale along the tears. Its darker ground takes darker ink. */
+.goal-card--kraft { --paper-top:20px; --type-soft:var(--type); --marker:#7d0f1c; --fibre:#ecdcbf;
+  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='k' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5 .9' numOctaves='3' seed='8' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .32 0 0 0 0 .2 0 0 0 0 .1 .5 0 0 0 -.18'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23k)'/%3E%3C/svg%3E") 0 0 / 200px 200px,radial-gradient(120% 100% at 30% 20%,#d6b487,#c39d6e);
+  --edge:var(--tear-t) -230px 0 / 800px 34px no-repeat,linear-gradient(#000 0 0) 0 33px / 100% calc(100% - 66px) no-repeat,var(--tear-b) -90px 100% / 800px 34px no-repeat;
+  --fibres:var(--tear-t-fibre) -230px 0 / 800px 34px no-repeat,linear-gradient(#000 0 0) 0 33px / 100% calc(100% - 66px) no-repeat,var(--tear-b-fibre) -90px 100% / 800px 34px no-repeat; padding-bottom:30px; }
+
+/* Launch day: eight taped snapshots, shown whole. */
+.launch-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:30px 24px; margin:40px 0 32px; padding:0; list-style:none; }
+.launch-strip li { --tilt:-1deg; padding-inline:5px; }
+.launch-strip li:nth-child(even) { --tilt:1.2deg; }
+.launch-strip figure { position:relative; margin:0; padding:9px 9px 0; background:#fff; rotate:var(--tilt); box-shadow:0 1px 2px rgb(40 20 5 / 16%),0 14px 26px -12px rgb(40 20 5 / 40%); }
+.launch-strip figure::before { content:''; position:absolute; z-index:1; top:-13px; left:50%; width:100px; height:30px; translate:-50% 0; rotate:-3deg; background:var(--tape-clear); clip-path:var(--tape-torn); pointer-events:none; }
+.launch-strip li:nth-child(even) figure::before { rotate:3deg; }
+.launch-strip img { display:block; width:100%; height:auto; background:#efe5d9; }
+.launch-strip figcaption { padding:8px 2px 10px; font-family:var(--font-hand); font-size:1.2rem; line-height:1.2; color:var(--uw-blue-dark); }
+
+/* Checklist: the steps printed straight on the page, each a square box, then the step and a dotted leader out to its
+   dates, which link to the step's action. The boxes are real checkboxes; a ticked one gets a marker tick that runs out
+   past the box's corner. */
+.season-checklist { max-width:960px; margin:0; padding:0; list-style:none; }
+.checklist-item { position:relative; display:flex; align-items:center; gap:18px; color:var(--uw-blue-dark); }
+.checklist-item input { position:absolute; z-index:1; left:-7px; top:50%; width:44px; height:44px; margin:0; translate:0 -50%; opacity:0; cursor:pointer; }
+.checklist-item__box { position:relative; flex:none; width:30px; height:30px; pointer-events:none; border:2.5px solid var(--uw-blue-dark); border-radius:3px; background:rgb(255 255 255 / 55%); transition:background-color .2s; }
+.checklist-item input:hover + .checklist-item__box { background:#fff; }
+.checklist-item input:focus-visible + .checklist-item__box { outline:3px solid var(--pink); outline-offset:4px; }
+.checklist-item__box svg { position:absolute; left:-8px; top:-18px; width:50px; height:50px; max-width:none; overflow:visible; mix-blend-mode:multiply; pointer-events:none; }
+.checklist-item__box path { fill:none; stroke:var(--pink-fill); stroke-width:4.2; stroke-linecap:round; stroke-linejoin:round; stroke-opacity:.9; stroke-dasharray:1 2; stroke-dashoffset:1.05; }
+.checklist-item input:checked + .checklist-item__box path { stroke-dashoffset:0; transition:stroke-dashoffset .35s cubic-bezier(.5,0,.4,1); }
+.checklist-item__link { display:flex; flex:1; align-items:baseline; gap:18px; min-width:0; padding-block:16px; color:inherit; text-decoration:none; }
+.checklist-item__link:focus-visible { outline:3px solid var(--pink); outline-offset:2px; border-radius:4px; }
+.checklist-item__task { min-width:0; font-size:clamp(1.2rem,2vw,1.6rem); font-weight:500; line-height:1.2; letter-spacing:-.025em; text-decoration:underline 1.5px transparent; text-underline-offset:.18em; transition:color .2s,text-decoration-color .2s; }
+.checklist-item__link:hover .checklist-item__task,.checklist-item__link:focus-visible .checklist-item__task { color:var(--pink-text); text-decoration-color:currentColor; }
+/* The leader is only its row of dots, so its bottom sits on the line's baseline with the words either side. */
+.checklist-item__leader { flex:1; min-width:24px; height:4px; background:radial-gradient(circle,rgb(0 43 81 / 40%) 1.2px,transparent 1.7px) 0 0 / 10px 4px repeat-x; }
+.checklist-item__when { flex:none; font-family:var(--font-type); font-size:clamp(.95rem,1.3vw,1.1rem); color:var(--uw-grey); white-space:nowrap; }
+.checklist-item__go { flex:none; font-weight:600; color:var(--pink-text); transition:translate .2s; }
+.checklist-item__link:hover .checklist-item__go,.checklist-item__link:focus-visible .checklist-item__go { translate:3px 0; }
+
+@media(max-width:1000px) {
+  .launch-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+/* Narrower screens: each step's dates sit under it instead of across a leader. */
+@media(max-width:820px) {
+  .checklist-item { align-items:start; gap:16px; }
+  .checklist-item__box { margin-top:17px; }
+  .checklist-item input { top:10px; translate:none; }
+  .checklist-item__link { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:6px 12px; padding-block:14px; }
+  .checklist-item__leader { display:none; }
+  .checklist-item__when { grid-row:2; white-space:normal; }
+}
+@media(max-width:600px) {
+  .launch-strip { gap:24px 14px; }
+  .launch-strip figure { padding:6px 6px 0; }
+  .launch-strip figcaption { font-size:1.05rem; }
+}
+/* Goals: two to a row on tablets, the heading over its note below 900px, one card at a time on phones (alternating
+   sides, tilted less). */
+@media(max-width:1180px) {
+  .goal-cards { grid-template-columns:repeat(2,minmax(0,1fr)); gap:56px clamp(40px,6vw,72px); }
+  .goal:nth-child(2),.goal:nth-child(4) { --drop:30px; }
+  .goal:nth-child(3) { --drop:0px; }
+  .goal-card { min-height:228px; }
+}
+@media(max-width:900px) {
+  .goal-board__header { grid-template-columns:minmax(0,1fr); }
+  .goal-board__title { margin-bottom:.2em; }
+  .goal-board__lead { rotate:.6deg; }
+  .goal-board__arrow { display:none; }
+}
+@media(max-width:600px) {
+  .chapter-section.goal-board-section { --frame:11px; --tray:28px; border-radius:4px; }
+  .chapter-section.goal-board-section > .container { padding-inline:28px; }
+  .goal-cards { grid-template-columns:minmax(0,1fr); gap:40px; }
+  .goal { --drop:0px!important; --tilt:-1deg; }
+  .goal:nth-child(even) { --tilt:1.2deg; }
+  .goal-card { max-width:min(340px,92%); min-height:0; }
+  .goal:nth-child(even) .goal-card { margin-left:auto; }
+  /* Corner tape reaches less far off the card, clear of the frame. */
+  .goal-board .tape--left { translate:-18% 0; }
+  .goal-board .tape--right { translate:18% 0; }
+  .goal-board__chalk { left:62%; width:44px; height:8px; top:-2px; }
+  .goal-board__chalk--pink { left:calc(62% + 54px); width:18px; }
+}
+/* Small phones: a slimmer card and goal figure, so the widest goal and its increase still share a line. */
+@media(max-width:420px) {
+  .goal-card { max-width:95%; padding-inline:18px; }
+  .goal-card__change dd { font-size:1.65rem; }
+  .goal-card--index h3,.goal-card--index .goal-card__figures { margin-inline:-18px; padding-inline:18px; }
+  .goal-card--index .goal-card__figures { margin-bottom:-22px; }
+  .goal-card--legal { padding-left:44px; }
+  .goal-card__goal dd { margin-inline:.4em .42em; font-size:2.1rem; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .checklist-item input:checked + .checklist-item__box path,.checklist-item__box,.checklist-item__task,.checklist-item__go { transition:none; }
+  .goal-board :is(.goal-card__strike,.goal-card__circle) path,.goal-board .goal-card__change dd { transition:none!important; }
+}

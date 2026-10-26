@@ -2,6 +2,9 @@
 export const SITE = {
   siteName: 'Hult Prize at University of Windsor',
   tagline: 'One idea. Four minutes. $1,000,000.',
+  // Grayfel Technologies sponsored the website build, domain and hosting; the footer credits and links it.
+  sponsorName: 'Grayfel Technologies',
+  sponsorUrl: 'https://grayfeltechnologiesinc.ca/',
   // Organiser-approved invite; also the attendance email default in Attendance.gs.
   discordUrl: 'https://discord.gg/ybeQYQxcqZ',
   contactEmail: 'hultprizeatuwindsor@gmail.com',

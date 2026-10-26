@@ -1,0 +1,33 @@
+/* This Year's season planner: a row per month, events as cards with tear-off date badges; key dates get a dashed edge. */
+.season-planner { margin-top:8px; }
+.planner-note { margin:0 0 8px; font-size:.85rem; color:var(--uw-grey); }
+
+.planner-month { display:grid; grid-template-columns:minmax(150px,200px) minmax(0,1fr); gap:28px; padding:28px 0; border-top:1px dashed rgb(0 43 81 / 16%); }
+.planner-month h3 { margin:6px 0 0; font-size:clamp(1.6rem,2.4vw,2.2rem); line-height:1; letter-spacing:-.045em; color:var(--pink-text); }
+.planner-month h3 span { display:block; margin-top:6px; font-size:.45em; letter-spacing:0; color:var(--uw-grey); }
+.planner-month__items { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; margin:0; padding:0; list-style:none; }
+
+.planner-item { position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:16px; padding:20px 18px; border:1px solid rgb(0 43 81 / 9%); border-radius:16px; background:#fff; box-shadow:0 10px 24px -16px rgb(0 43 81 / 30%); }
+.planner-item.is-key-date { border:2px dashed color-mix(in srgb,var(--mark) 55%,transparent); background:#fffdf8; }
+.planner-item.is-past { background:#f7f6f4; box-shadow:none; }
+.planner-item.is-past .date-badge { filter:grayscale(1); opacity:.7; }
+.planner-item.is-past h4,.planner-item.is-past p { color:var(--uw-grey); }
+.planner-item h4 { margin:0 0 4px; font-size:1.08rem; line-height:1.3; letter-spacing:-.015em; }
+.planner-item p { margin:0; font-size:.88rem; line-height:1.5; color:var(--uw-grey); }
+.planner-item__when { color:var(--ink) !important; font-weight:500; }
+.planner-link { display:inline-flex; align-items:center; gap:6px; min-height:44px; margin-top:6px; font-size:.88rem; font-weight:600; color:var(--pink-text); text-decoration:none; }
+.planner-link span { transition:translate .2s; }
+.planner-link:hover span,.planner-link:focus-visible span { translate:3px 0; }
+.planner-link:focus-visible { outline:3px solid var(--pink); outline-offset:3px; border-radius:4px; }
+/* The next event: a note written on its card, and the card's edge drawn in marker. */
+.planner-item:has(.planner-next) { border:2px solid rgb(255 50 155 / 55%); }
+.planner-next { margin:-4px 0 2px; font-family:var(--font-hand); font-size:1.35rem; font-weight:700; line-height:1.1; color:var(--pink-text); rotate:-2deg; transform-origin:0 50%; }
+.planner-done { margin:8px 0 0; font-family:var(--font-hand); font-size:1.35rem; font-weight:700; line-height:1.1; color:#1d7a4a; rotate:-3deg; transform-origin:0 50%; }
+.planner-closing { margin:8px 0 0; padding-top:24px; border-top:1px dashed rgb(0 43 81 / 16%); font-size:.92rem; line-height:1.6; }
+
+@media(max-width:760px) {
+  .planner-month { grid-template-columns:minmax(0,1fr); gap:16px; padding:22px 0; }
+  .planner-month h3 span { display:inline; margin-left:6px; }
+  .planner-month__items { grid-template-columns:minmax(0,1fr); }
+}
+@media(prefers-reduced-motion:reduce) { .planner-link span { transition:none; } }

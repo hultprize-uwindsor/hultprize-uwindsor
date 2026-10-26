@@ -8,7 +8,7 @@ export function useReveals(pathname: string, _hash: string) {
     const animations: Animation[] = []
     const maskTimers = new Set<number>()
     let observer: IntersectionObserver | undefined
-    const targets = [...document.querySelectorAll<HTMLElement>('main [data-hero-reveal], [data-text-reveal], main .page-heading__intro, main .home-hero__aside, main .home-hero .eyebrow, main .person-tile, main .partner-tile, main .season-gallery__grid > a, main .stat-band > div, main .timeline > li, main .eligibility-card, main .tier-card')]
+    const targets = [...document.querySelectorAll<HTMLElement>('main [data-hero-reveal], [data-text-reveal], main .page-heading__intro, main .home-hero__tagline, main .team-card, main .partner-tile, main .season-gallery__column > a, main .stat-band > div, main .entry-sheet, main .tier-card')]
     const arrive = (el: HTMLElement, delay = 0) => {
       if (el.dataset.motion === 'done') return
       el.dataset.motion = 'done'

@@ -1,0 +1,27 @@
+/* Event colours, the tear-off date badge, filter chips and the offline schedule note, shared by the homepage calendar,
+   the This Year planner and the Events page.
+   Each type has a bright mark (rings, dots, borders), a fill with its text colour (badges, ticket stubs; 4.5:1 or better)
+   and a text colour for small labels. Shapes back the colours up: workshops a round dot, community a diamond,
+   the finale a star, key dates a dashed ring. */
+:root { --mark-workshops:#ff329b; --mark-community:#2f80d1; --mark-finale:#e8a800; --mark-deadline:#002b51; --mark-milestone:#002b51; }
+.mark--workshops { --mark:var(--mark-workshops); --mark-fill:var(--pink-fill); --mark-on:#fff; --mark-text:var(--pink-text); }
+.mark--community { --mark:var(--mark-community); --mark-fill:var(--blue-fill); --mark-on:#fff; --mark-text:#1f62a8; }
+.mark--finale { --mark:var(--mark-finale); --mark-fill:var(--mark-finale); --mark-on:var(--uw-blue-dark); --mark-text:#7d5c00; }
+.mark--deadline { --mark:var(--mark-deadline); --mark-fill:var(--mark-deadline); --mark-on:#fff; --mark-text:var(--uw-blue-dark); }
+.mark--milestone { --mark:var(--mark-milestone); --mark-fill:var(--mark-milestone); --mark-on:#fff; --mark-text:var(--uw-blue-dark); }
+.date-badge { width:44px; flex:none; overflow:hidden; border-radius:6px; background:#fff; text-align:center; box-shadow:0 1px 3px rgb(0 0 0 / 16%); rotate:-3deg; }
+.date-badge span { display:block; padding:2px 0 1px; background:var(--mark-fill); color:var(--mark-on); font-size:.6rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+.date-badge strong { display:block; font-size:1.15rem; line-height:1.55; font-variant-numeric:tabular-nums; }
+/* Filter chips: the type's shape in its colour (set via a mark--* class), dark when pressed. */
+.mark-filters { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+.mark-filters button { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border:1px solid rgb(0 43 81 / 18%); border-radius:99px; background:#fff; color:var(--ink); font:inherit; font-size:.88rem; font-weight:500; cursor:pointer; transition:background-color .2s,border-color .2s,color .2s; }
+.mark-filters button[class]::before,.mark-shape::before { content:''; flex:none; width:9px; height:9px; border-radius:50%; background:var(--mark); }
+.mark-filters button.mark--community::before,.mark-shape.mark--community::before { width:8px; height:8px; border-radius:1px; rotate:45deg; }
+.mark-filters button.mark--finale::before,.mark-shape.mark--finale::before { content:'★'; width:auto; height:auto; border-radius:0; background:none; color:var(--mark); font-size:13px; line-height:1; }
+.mark-filters button:is(.mark--deadline,.mark--milestone)::before,.mark-shape:is(.mark--deadline,.mark--milestone)::before { box-sizing:border-box; width:11px; height:11px; border:2px dashed var(--mark); background:none; }
+/* On the pressed (navy) chip, a navy shape turns white. */
+.mark-filters button[aria-pressed="true"]:is(.mark--deadline,.mark--milestone)::before { border-color:#fff; }
+.mark-filters button:hover { border-color:var(--uw-blue-dark); }
+.mark-filters button[aria-pressed="true"] { background:var(--uw-blue-dark); border-color:var(--uw-blue-dark); color:#fff; }
+.mark-filters button:focus-visible { outline:3px solid var(--pink); outline-offset:2px; }
+.schedule-note { padding:12px 16px; border-left:3px solid var(--uw-blue); background:var(--paper-blue); margin-top:24px; font-size:.9rem; }

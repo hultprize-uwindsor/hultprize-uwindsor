@@ -1,0 +1,148 @@
+/* Compete: the registration countdown beside the actions; who can enter as a ticked checklist; the prize podium with
+   a boarding pass and a cheque for the prizes beyond Windsor; and how to enter as one route of steps. */
+.deadline-chip { display:inline-flex; align-items:center; gap:14px; margin:0; font-size:.95rem; color:var(--ink); }
+.deadline-chip strong { color:var(--pink-text); }
+.deadline-chip__date { display:flex; flex-direction:column; align-items:center; width:42px; overflow:hidden; border-radius:8px; background:#fff; text-align:center; box-shadow:0 1px 3px rgb(0 0 0 / 14%); }
+.deadline-chip__date span { align-self:stretch; padding:1px 0; background:var(--uw-blue-dark); color:#fff; font-size:.58rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+.deadline-chip__date strong { font-size:1.05rem; line-height:1.5; color:var(--uw-blue-dark); }
+.deadline-chip.is-closed { color:var(--uw-grey); }
+
+.prize-stakes { display:grid; justify-items:center; gap:18px; }
+/* Handwritten captions that walk through the prizes in order. */
+.prize-stage { margin:0; font-family:var(--font-hand); font-size:clamp(1.7rem,2.4vw,2.2rem); font-weight:700; line-height:1; color:var(--pink-text); rotate:-2deg; }
+.prize-stakes__note { margin:0; font-size:.9rem; color:var(--uw-grey); text-align:center; }
+
+/* The campus prizes as award rosettes: a pleated ring with a ruled centre disc, and two ribbon tails with notched
+   ends. Gold sits in the middle, largest and highest. Sizes are set per rosette; the writing scales with it. */
+.prize-rosettes { display:flex; justify-content:center; align-items:flex-end; gap:clamp(18px,4vw,60px); margin:8px 0 0; padding:0; list-style:none; }
+.rosette { --size:clamp(150px,15vw,200px); --c1:#f8e08a; --c2:#e9b322; --c3:#a8780c; --ink:#5c3f00; display:flex; flex-direction:column; align-items:center; width:var(--size); }
+.rosette--gold { --size:clamp(190px,19vw,260px); order:2; margin-bottom:28px; }
+.rosette--silver { --c1:#f2f5f8; --c2:#c7cfd8; --c3:#7e8a97; --ink:#3c4652; order:1; rotate:-4deg; }
+.rosette--bronze { --c1:#f3cfa8; --c2:#d08b4c; --c3:#8e5222; --ink:#5a3212; order:3; rotate:5deg; }
+.rosette__badge { position:relative; z-index:1; isolation:isolate; display:flex; flex-direction:column; align-items:center; justify-content:center; width:var(--size); aspect-ratio:1; font-size:calc(var(--size) / 9); text-align:center; filter:drop-shadow(0 2px 2px rgb(60 30 0 / 25%)) drop-shadow(0 14px 14px rgb(60 30 0 / 22%)); }
+/* The pleats: alternating stripes round a scalloped edge. */
+.rosette__badge::before { content:''; position:absolute; inset:0; z-index:-2; background:repeating-conic-gradient(var(--c1) 0 3.75deg,var(--c2) 3.75deg 7.5deg); clip-path:polygon(50.0% 0.0%,53.0% 3.9%,56.5% 0.4%,59.0% 4.7%,62.9% 1.7%,64.9% 6.3%,69.1% 3.8%,70.4% 8.6%,75.0% 6.7%,75.7% 11.6%,80.4% 10.3%,80.5% 15.3%,85.4% 14.6%,84.7% 19.5%,89.7% 19.6%,88.4% 24.3%,93.3% 25.0%,91.4% 29.6%,96.2% 30.9%,93.7% 35.1%,98.3% 37.1%,95.3% 41.0%,99.6% 43.5%,96.1% 47.0%,100.0% 50.0%,96.1% 53.0%,99.6% 56.5%,95.3% 59.0%,98.3% 62.9%,93.7% 64.9%,96.2% 69.1%,91.4% 70.4%,93.3% 75.0%,88.4% 75.7%,89.7% 80.4%,84.7% 80.5%,85.4% 85.4%,80.5% 84.7%,80.4% 89.7%,75.7% 88.4%,75.0% 93.3%,70.4% 91.4%,69.1% 96.2%,64.9% 93.7%,62.9% 98.3%,59.0% 95.3%,56.5% 99.6%,53.0% 96.1%,50.0% 100.0%,47.0% 96.1%,43.5% 99.6%,41.0% 95.3%,37.1% 98.3%,35.1% 93.7%,30.9% 96.2%,29.6% 91.4%,25.0% 93.3%,24.3% 88.4%,19.6% 89.7%,19.5% 84.7%,14.6% 85.4%,15.3% 80.5%,10.3% 80.4%,11.6% 75.7%,6.7% 75.0%,8.6% 70.4%,3.8% 69.1%,6.3% 64.9%,1.7% 62.9%,4.7% 59.0%,0.4% 56.5%,3.9% 53.0%,0.0% 50.0%,3.9% 47.0%,0.4% 43.5%,4.7% 41.0%,1.7% 37.1%,6.3% 35.1%,3.8% 30.9%,8.6% 29.6%,6.7% 25.0%,11.6% 24.3%,10.3% 19.6%,15.3% 19.5%,14.6% 14.6%,19.5% 15.3%,19.6% 10.3%,24.3% 11.6%,25.0% 6.7%,29.6% 8.6%,30.9% 3.8%,35.1% 6.3%,37.1% 1.7%,41.0% 4.7%,43.5% 0.4%,47.0% 3.9%); }
+/* The centre disc: card with a ruled ring round its edge. */
+.rosette__badge::after { content:''; position:absolute; inset:19%; z-index:-1; border-radius:50%; background:radial-gradient(circle,#fffdf5 0 80%,var(--c3) 80% 82%,var(--c1) 82% 91%,var(--c3) 91% 93%,var(--c2) 93%); box-shadow:inset 0 1px 2px rgb(255 255 255 / 70%),0 1px 3px rgb(60 30 0 / 25%); }
+.rosette__place { font-family:var(--font-hand); font-size:1.1em; font-weight:700; line-height:1; color:var(--ink); }
+.rosette__prize { margin-top:.05em; font-size:1.35em; font-weight:700; line-height:1; letter-spacing:-.04em; color:var(--uw-blue-dark); font-variant-numeric:tabular-nums; }
+/* The tails hang behind the badge, splayed, with a V cut into each end. */
+.rosette__tails { position:relative; width:calc(var(--size) * .55); height:calc(var(--size) * .58); margin-top:calc(var(--size) * -.3); }
+.rosette__tails::before,.rosette__tails::after { content:''; position:absolute; top:0; width:44%; height:100%; background:linear-gradient(90deg,var(--c3),var(--c2) 30%,var(--c1) 55%,var(--c2) 80%,var(--c3)); clip-path:polygon(0 0,100% 0,100% 100%,50% 84%,0 100%); transform-origin:50% 0; }
+.rosette__tails::before { left:2%; rotate:12deg; }
+.rosette__tails::after { right:2%; rotate:-12deg; }
+
+/* Beyond Windsor: a boarding pass and a cheque, laid down at slight angles. */
+.prize-beyond { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:40px; width:100%; max-width:1080px; margin:44px 0 0; padding:0; list-style:none; text-align:left; }
+/* A little room each side, so the tilted pass and cheque stay inside their items. */
+.prize-beyond > li { display:grid; gap:18px; justify-items:start; padding-inline:8px; }
+.prize-beyond > li > .prize-pass,.prize-beyond > li > .prize-cheque { justify-self:stretch; }
+.prize-beyond h3 { margin:0; letter-spacing:-.02em; }
+
+/* The boarding pass: a navy band, the route between airport codes, the details, and a stub torn off along a
+   perforation, with notches cut where the two halves meet. */
+.prize-pass { --notch:radial-gradient(circle at 0 50%,transparent 11px,#000 11.5px); display:grid; grid-template-columns:minmax(0,1fr) 112px; border-radius:14px; background:#fff; color:var(--uw-blue-dark); rotate:-1.2deg; box-shadow:0 1px 2px rgb(0 43 81 / 16%),0 22px 34px -18px rgb(0 43 81 / 45%); }
+.prize-pass__main { padding:0 26px 22px; }
+.prize-pass__band { display:flex; justify-content:space-between; margin:0 -26px 18px; padding:10px 26px; border-radius:14px 0 0 0; background:var(--uw-blue-dark); color:#fff; font-size:.85rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+.prize-pass h3 { font-size:1.55rem; }
+.prize-pass__route { display:flex; align-items:center; gap:14px; margin:14px 0 16px; font-size:.95rem; color:var(--uw-grey); }
+.prize-pass__route > span:not(.prize-pass__arc) { display:flex; flex-direction:column; }
+.prize-pass__route strong { font-size:2.3rem; font-weight:700; line-height:1; letter-spacing:-.02em; color:var(--uw-blue-dark); }
+/* The flight path: a dashed arc with the plane at its peak. */
+.prize-pass__arc { position:relative; flex:1; height:30px; border-top:2px dashed rgb(0 43 81 / 35%); border-radius:50% 50% 0 0 / 100% 100% 0 0; }
+.prize-pass__arc::after { content:'✈'; position:absolute; top:-15px; left:50%; translate:-50% 0; font-size:1.2rem; color:var(--pink-text); }
+.prize-pass__fields { display:grid; grid-template-columns:auto auto; justify-content:start; gap:4px 32px; margin:0; }
+.prize-pass__fields dt { font-size:.8rem; color:var(--uw-grey); }
+.prize-pass__fields dd { margin:0; font-weight:600; }
+.prize-pass__fields > div { display:flex; flex-direction:column; }
+.prize-pass__note { margin:14px 0 0; padding-top:12px; border-top:1px solid rgb(0 43 81 / 12%); font-size:.95rem; color:var(--ink); }
+.prize-pass__stub { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border-left:2px dashed rgb(0 43 81 / 25%); border-radius:0 14px 14px 0; background:#f6f9fc; font-size:.85rem; color:var(--uw-grey); }
+.prize-pass__stub strong { font-size:1.6rem; line-height:1; color:var(--uw-blue-dark); }
+.prize-pass__barcode { width:64px; height:44px; margin-top:8px; background:repeating-linear-gradient(90deg,var(--uw-blue-dark) 0 2px,transparent 2px 4px,var(--uw-blue-dark) 4px 5px,transparent 5px 8px,var(--uw-blue-dark) 8px 11px,transparent 11px 12px); }
+
+/* The cheque: an oversized presentation cheque on a pale green security pattern, filled in by hand. */
+.prize-cheque { position:relative; display:grid; gap:10px; padding:24px 28px 26px; border:2px solid #9cc9a6; border-radius:6px; color:#1f3d2b; rotate:1.4deg; box-shadow:0 1px 2px rgb(20 50 30 / 18%),0 22px 34px -18px rgb(20 50 30 / 45%);
+  background:repeating-radial-gradient(circle at 18% 120%,transparent 0 9px,rgb(80 150 100 / 9%) 9px 10px),repeating-radial-gradient(circle at 92% -40%,transparent 0 13px,rgb(80 150 100 / 7%) 13px 14px),linear-gradient(135deg,#f2fbf2,#e4f4e6); }
+.prize-cheque h3 { font-size:1.35rem; color:#1f3d2b; }
+.prize-cheque__line { display:flex; align-items:baseline; gap:12px; margin:0; font-family:var(--font-type); font-size:.9rem; color:#3b5a46; }
+.prize-cheque__line > span:first-child:not(.prize-cheque__fill) { flex:none; }
+/* What's written in: handwriting on a ruled line. */
+.prize-cheque__fill { flex:1; padding:0 6px 2px; border-bottom:1.5px solid rgb(31 61 43 / 45%); font-family:var(--font-hand); font-size:1.75rem; font-weight:700; line-height:1.1; color:var(--uw-blue-dark); }
+.prize-cheque__amount { position:absolute; top:22px; right:24px; margin:0; padding:6px 14px; border:2px solid rgb(31 61 43 / 55%); border-radius:4px; background:#fff; font-family:var(--font-type); font-size:clamp(1.3rem,2.2vw,1.7rem); font-weight:700; color:var(--uw-blue-dark); }
+.prize-cheque__payee { margin-top:22px; }
+
+/* Who can enter: a sheet with each rule ticked in pen; the key rule is swiped with highlighter, with a margin note. */
+.entry-sheet { position:relative; max-width:960px; margin:8px auto 0; padding:clamp(30px,4vw,48px) clamp(22px,4vw,56px) clamp(22px,3vw,36px); background:#fffefb; text-align:left; rotate:-.4deg; box-shadow:0 1px 2px rgb(40 20 5 / 14%),0 24px 40px -22px rgb(0 43 81 / 40%); }
+.entry-sheet > .tape { --tape-w:120px; }
+.entry-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 52px; margin:0; padding:0; list-style:none; }
+.entry-list li { display:grid; grid-template-columns:30px minmax(0,1fr); align-items:start; gap:18px; padding:18px 0; border-bottom:1px solid #d6e3ef; }
+.entry-list__box { position:relative; width:28px; height:28px; margin-top:1px; border:2.5px solid var(--uw-blue-dark); border-radius:3px; }
+.entry-list__box svg { position:absolute; left:-3px; top:-13px; width:42px; height:42px; max-width:none; overflow:visible; }
+.entry-list__box path { fill:none; stroke:#1f4fa6; stroke-width:3.3; stroke-linecap:round; stroke-linejoin:round; }
+.entry-list p { margin:0; font-size:1.08rem; line-height:1.5; color:var(--uw-blue-dark); }
+/* Highlighter: a translucent yellow swipe, ragged at the ends, behind the words it marks. */
+.entry-list mark { padding:.05em .25em; margin-inline:-.25em; border-radius:.4em .2em .5em .25em; background:linear-gradient(100deg,rgb(255 230 70 / 15%),rgb(255 226 60 / 78%) 4%,rgb(255 222 55 / 66%) 92%,rgb(255 230 70 / 20%)); color:inherit; font-weight:600; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+.entry-list__note { margin-top:6px !important; font-family:var(--font-hand); font-size:1.5rem !important; font-weight:700; line-height:1 !important; color:var(--pink-text) !important; rotate:-2deg; transform-origin:0 50%; }
+
+/* How to enter: five steps along a dashed route, each number circled in marker. */
+.entry-route { position:relative; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) repeat(3,minmax(0,1fr)); gap:28px; margin:0; padding:0; list-style:none; text-align:left; }
+.entry-route::before { content:''; position:absolute; top:31px; left:calc(10% - 10px); right:calc(10% - 10px); border-top:2.5px dashed rgb(0 43 81 / 30%); pointer-events:none; }
+.route-step { --step:var(--pink-fill); position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding:0 4px 8px; }
+.route-step:nth-child(2) { --step:var(--pink-text); }
+.route-step:nth-child(3) { --step:var(--blue-fill); }
+.route-step:nth-child(4) { --step:#1f8f70; }
+.route-step:nth-child(5) { --step:var(--uw-blue-dark); }
+.route-step__number { display:grid; place-items:center; width:60px; height:60px; margin:0 0 8px; border:3px solid var(--step); border-radius:58% 42% 54% 46% / 46% 56% 44% 54%; background:#fff; font-family:var(--font-hand); font-size:2rem; font-weight:700; line-height:1; color:var(--step); rotate:-7deg; }
+.route-step:nth-child(even) .route-step__number { rotate:6deg; border-radius:46% 54% 44% 56% / 55% 45% 55% 45%; }
+.route-step h3 { margin:0; font-size:1.2rem; line-height:1.25; letter-spacing:-.02em; }
+.route-step p { margin:0; font-size:.95rem; line-height:1.55; color:var(--uw-grey); }
+.route-step__link { display:inline-flex; align-items:center; min-height:44px; font-size:.9rem; font-weight:600; }
+/* The official registration: a pink ground behind the step (the step itself, widened by padding and pulled back by
+   matching negative margins, so nothing sticks out of it) and a note in the margin. */
+.route-step--official { margin:-18px -12px -14px; padding:18px 16px 22px; border-radius:18px; background:var(--paper-pink); }
+/* The note sits above the step's pink ground, on one line, clear of the route. */
+.route-step__note { position:absolute; top:-32px; left:12px; white-space:nowrap; font-family:var(--font-hand); font-size:1.45rem; font-weight:700; line-height:1.05; color:var(--pink-text); rotate:-4deg; transform-origin:0 50%; }
+.route-step--official .btn { margin-top:4px; }
+
+/* Below wide screens: the route runs down the page, the dashed line beside the numbers. */
+@media(max-width:1280px) {
+  .entry-route { grid-template-columns:minmax(0,1fr); max-width:620px; margin-inline:auto; gap:30px; }
+  .entry-route::before { top:30px; bottom:30px; left:29px; right:auto; border-top:0; border-left:2.5px dashed rgb(0 43 81 / 30%); }
+  .route-step { display:grid; grid-template-columns:60px minmax(0,1fr); column-gap:22px; row-gap:8px; align-items:start; justify-items:start; }
+  .route-step > :not(.route-step__number) { grid-column:2; }
+  .route-step__number { grid-row:1 / span 4; margin:0; }
+  .route-step__note { position:static; justify-self:start; }
+  .route-step--official { margin:-14px -14px -12px; padding:14px 14px 12px; }
+}
+@media(max-width:1100px) {
+  .prize-beyond { grid-template-columns:minmax(0,1fr); max-width:620px; }
+}
+@media(max-width:760px) {
+  .entry-list { grid-template-columns:minmax(0,1fr); }
+  .entry-sheet { rotate:0deg; }
+}
+@media(max-width:600px) {
+  .prize-rosettes { flex-wrap:wrap; gap:4px 18px; }
+  .rosette { --size:136px; }
+  .rosette--gold { --size:180px; order:0; flex-basis:100%; margin-bottom:0; }
+  .prize-pass { grid-template-columns:minmax(0,1fr); rotate:-.6deg; }
+  .prize-pass__stub { display:none; }
+  .prize-pass__band { border-radius:14px 14px 0 0; }
+  /* Tighter on phones, so the route fits a 320px screen. */
+  .prize-pass__main { padding:0 18px 18px; }
+  .prize-pass__band { margin-inline:-18px; padding-inline:18px; }
+  .prize-pass__route { gap:8px; }
+  .prize-pass__route strong { font-size:1.9rem; }
+  .prize-cheque { rotate:.6deg; padding:20px 18px 22px; }
+  .prize-cheque__amount { position:static; justify-self:start; }
+  .prize-cheque__payee { margin-top:0; }
+  /* Each printed caption above its handwritten line, so the writing gets the full width. */
+  .prize-cheque__line { flex-direction:column; align-items:stretch; gap:0; }
+  .prize-cheque__fill { font-size:1.5rem; }
+}
+/* The narrowest phones: silver and bronze small enough to stay side by side under gold. */
+@media(max-width:380px) {
+  .prize-rosettes { column-gap:12px; }
+  .rosette { --size:108px; }
+  .rosette--gold { --size:156px; }
+}

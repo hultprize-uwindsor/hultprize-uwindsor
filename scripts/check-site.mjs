@@ -6,7 +6,7 @@ const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
 const allPaths = [
   '/', '/about', '/year-one', '/this-year', '/compete', '/partners', '/contact', '/events',
   '/attend', '/attend/manage', '/organiser/events', '/privacy', '/events/workshop-1',
-  '/events/fusion-launch', '/events/registration-closes-november-20',
+  '/events/fusion-launch', '/events/registration-closes-november-20', '/events/google-devfest',
   '/partners/fusion', '/partners/sterling', '/partners/wetech', '/not-a-real-page',
 ]
 const allViewports = [[320, 568], [390, 844], [768, 1024], [1024, 768], [1280, 800], [1920, 1080], [844, 390]]

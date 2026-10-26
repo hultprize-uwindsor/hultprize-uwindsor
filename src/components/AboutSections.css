@@ -1,35 +1,19 @@
-/* About page: an introduction with stickers and pinned photos, the road to $1M, four offer cards and pinned sticky notes. */
+/* About page: the road to $1M, four offer cards and taped sticky notes. The introduction's torn sheet is in AboutIntro.css. */
 
-/* Introduction: copy and stickers beside two overlapping polaroids. */
-.about-intro { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); align-items:center; gap:6%; }
-.about-intro--text { grid-template-columns:minmax(0,1fr); }
-.about-intro h2 { margin-bottom:28px; }
-.about-stickers { display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px; margin:34px 0 0; padding:0; list-style:none; }
-.about-sticker { color:#fff; font-weight:600; line-height:1.15; box-shadow:0 10px 22px rgb(0 43 81 / 22%); }
-.about-sticker--award { display:grid; place-items:center; width:116px; aspect-ratio:1; padding:14px; border-radius:50%; background:var(--pink); outline:2px dashed #ffffffb3; outline-offset:-7px; text-align:center; font-size:.78rem; font-weight:500; rotate:-8deg; box-shadow:0 10px 24px rgb(190 18 94 / 30%); }
-.about-sticker--navy,.about-sticker--gold { padding:.65em 1.15em; border-radius:99px; font-size:.9rem; }
-.about-sticker--navy { background:var(--uw-blue-dark); rotate:3deg; }
-.about-sticker--gold { background:#e8a800; color:var(--uw-blue-dark); rotate:-3deg; }
-.about-polaroids { position:relative; min-height:clamp(400px,39vw,560px); }
-.about-polaroid { --pin-x:50%; position:absolute; width:64%; margin:0; padding:4.5% 4.5% 3%; background:#fff; border-radius:2px; box-shadow:0 1px 2px rgb(40 20 5 / 18%),0 18px 34px -12px rgb(40 20 5 / 45%); }
-/* The first photo sits on top so its caption stays readable; the second's pin moves right to stay clear of it. */
-.about-polaroid:nth-child(1) { z-index:2; top:0; left:0; rotate:-4deg; }
-.about-polaroid:nth-child(2) { --pin-x:74%; right:0; bottom:0; rotate:4deg; }
-.about-polaroid img { display:block; width:100%; height:auto; background:#efe5d9; }
-.about-polaroid figcaption { padding-top:10px; text-align:center; font-size:.85rem; color:var(--uw-grey); }
-
-/* The road to $1M: four stops joined by a dashed line; vertical on narrow screens. */
+/* The road to $1M: five stops joined by a dashed line; vertical on narrower screens. */
 .chapter-section .competition-road { margin-top:56px; }
-.competition-road { position:relative; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:28px; padding:0; list-style:none; }
-.competition-road::before { content:''; position:absolute; top:27px; left:28px; right:22%; border-top:3px dashed rgb(0 43 81 / 25%); }
+.competition-road { position:relative; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:24px; padding:0; list-style:none; }
+.competition-road::before { content:''; position:absolute; top:27px; left:28px; right:18%; border-top:3px dashed rgb(0 43 81 / 25%); }
 .road-stop { position:relative; min-width:0; }
 .road-stop:nth-child(1) { --marker:var(--pink); }
 .road-stop:nth-child(2) { --marker:#2f80d1; }
-.road-stop:nth-child(3) { --marker:var(--uw-blue-dark); }
-.road-stop:nth-child(4) { --marker:#e8a800; }
-.road-stop__marker { position:relative; z-index:1; display:grid; place-items:center; width:56px; height:56px; margin-bottom:20px; border-radius:50%; background:var(--marker); color:#fff; box-shadow:0 0 0 7px var(--paper-blue),0 10px 20px rgb(0 43 81 / 22%); }
+/* Light markers (teal, gold) carry a navy icon so it reads at 3:1 or better. */
+.road-stop:nth-child(3) { --marker:#2fbf97; --marker-ink:var(--uw-blue-dark); }
+.road-stop:nth-child(4) { --marker:var(--uw-blue-dark); }
+.road-stop:nth-child(5) { --marker:#e8a800; --marker-ink:var(--uw-blue-dark); }
+.road-stop__marker { position:relative; z-index:1; display:grid; place-items:center; width:56px; height:56px; margin-bottom:20px; border-radius:50%; background:var(--marker); color:var(--marker-ink,#fff); box-shadow:0 0 0 7px var(--paper-blue),0 10px 20px rgb(0 43 81 / 22%); }
 .road-stop__marker svg { width:26px; height:26px; }
-.road-stop__where { display:block; font-size:.74rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--pink-text); }
+.road-stop__where { display:block; font-size:.88rem; font-weight:600; color:var(--pink-text); }
 .road-stop h3 { margin:6px 0 8px; font-size:clamp(1.25rem,1.7vw,1.5rem); letter-spacing:-.025em; }
 .road-stop p { margin:0; line-height:1.6; color:var(--uw-grey); }
 
@@ -38,45 +22,54 @@
 .about-offer { display:flex; flex-direction:column; gap:12px; min-width:0; padding:28px 24px; border:1px solid rgb(0 43 81 / 8%); border-radius:20px; background:#fff; box-shadow:0 12px 28px -16px rgb(0 43 81 / 30%); }
 .about-offer:nth-child(1) { --chip:var(--pink); }
 .about-offer:nth-child(2) { --chip:#2f80d1; }
-.about-offer:nth-child(3) { --chip:#e8a800; }
-.about-offer:nth-child(4) { --chip:#2fbf97; }
-.about-offer__icon { display:grid; place-items:center; width:52px; height:52px; border-radius:16px; background:var(--chip); color:#fff; }
+.about-offer:nth-child(3) { --chip:#e8a800; --chip-ink:var(--uw-blue-dark); }
+.about-offer:nth-child(4) { --chip:#2fbf97; --chip-ink:var(--uw-blue-dark); }
+.about-offer__icon { display:grid; place-items:center; width:52px; height:52px; border-radius:16px; background:var(--chip); color:var(--chip-ink,#fff); }
 .about-offer__icon svg { width:26px; height:26px; }
 .about-offer h3 { margin:4px 0 0; font-size:1.25rem; letter-spacing:-.02em; }
 .about-offer p { margin:0; line-height:1.6; color:var(--uw-grey); }
 .about-offers__more { display:inline-flex; margin-top:32px; }
 
-/* Get involved: three sticky notes, each pinned at the top. */
-.about-ways { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px; margin:0; padding:0; list-style:none; }
-.about-way { --pin-x:50%; position:relative; display:flex; flex-direction:column; gap:10px; min-width:0; padding:36px 26px 22px; border-radius:2px; background:var(--note); box-shadow:0 1px 2px rgb(40 20 5 / 15%),0 18px 28px -14px rgb(40 20 5 / 40%); }
-.about-way--yellow { --note:linear-gradient(180deg,#fff7c2,#ffef93); }
-.about-way--pink { --note:linear-gradient(180deg,#ffe6f2,#ffd2e7); }
-.about-way--blue { --note:linear-gradient(180deg,#e6f2fc,#d3e7f8); }
-.about-way h3 { margin:0; font-size:1.45rem; letter-spacing:-.025em; }
-.about-way p { flex:1; margin:0; line-height:1.6; color:#4b4636; }
-.about-way a { display:inline-flex; align-items:center; align-self:flex-start; gap:6px; min-height:44px; font-weight:600; color:var(--pink-text); text-decoration:none; }
+/* Get involved: three sticky notes, each taped at the top. */
+/* Get involved: three sticky notes, each off a different pad. They stick along the top and lift a little at the
+   bottom, so each casts a deeper shadow under its lower edge; every one has its own size, lean and drop. The
+   writing is in marker. */
+.about-ways { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:start; justify-items:center; gap:36px 28px; margin:0; padding:12px 0 24px; list-style:none; isolation:isolate; }
+.about-way { --tilt:-2deg; --size:300px; position:relative; display:flex; flex-direction:column; gap:8px; width:min(100%,var(--size)); min-height:var(--size); padding:30px 26px 24px; color:var(--uw-blue-dark); rotate:var(--tilt);
+  background:linear-gradient(180deg,rgb(0 0 0 / 3%),transparent 18%,transparent 72%,rgb(255 255 255 / 22%) 92%,rgb(0 0 0 / 4%)),var(--note);
+  /* Flat along the top, lifting at the bottom: a tight shadow all round, a deeper one only under the lower edge. */
+  box-shadow:0 1px 1px rgb(40 20 5 / 18%),0 2px 4px -2px rgb(40 20 5 / 20%),0 22px 14px -16px rgb(40 20 5 / 42%); transition:rotate .35s var(--ease-ui); }
+.about-way:hover { rotate:calc(var(--tilt) / 3); }
+.about-way--yellow { --note:#fff27a; }
+.about-way--pink { --note:#ff9fcd; --tilt:2.2deg; --size:280px; margin-top:34px; }
+.about-way--blue { --note:#a9dcff; --tilt:-1deg; --size:320px; margin-top:6px; min-height:340px;
+  background:linear-gradient(180deg,rgb(0 0 0 / 3%),transparent 18%,transparent 72%,rgb(255 255 255 / 22%) 92%,rgb(0 0 0 / 4%)),repeating-linear-gradient(transparent 0 33px,rgb(0 43 81 / 16%) 33px 34px) 0 62px / 100% calc(100% - 62px) no-repeat,var(--note); }
+/* The pink note's bottom corner has folded over: the corner is cut away and the flap's back shows above the cut,
+   casting a little shadow on the note. (A drop shadow follows the cut, where a box shadow could not.) */
+.about-way--pink { background:linear-gradient(315deg,transparent 30px,var(--note) 30px); box-shadow:none; filter:drop-shadow(0 1px 1px rgb(40 20 5 / 22%)) drop-shadow(0 10px 8px rgb(40 20 5 / 22%)); }
+.about-way--pink::before { content:''; position:absolute; right:0; bottom:0; width:42px; height:42px; background:linear-gradient(315deg,transparent 50%,#e676aa 50%,#ffc2df 85%); filter:drop-shadow(-2px -2px 2px rgb(40 20 5 / 18%)); pointer-events:none; }
+.about-way h3 { margin:0; font-family:var(--font-hand); font-size:2.15rem; font-weight:700; line-height:1; letter-spacing:0; }
+.about-way p { flex:1; margin:0; font-family:var(--font-hand); font-size:1.4rem; line-height:1.22; color:#1f2a36; }
+.about-way a { display:inline-flex; align-items:center; align-self:flex-start; gap:6px; min-height:44px; font-family:var(--font-hand); font-size:1.45rem; font-weight:700; color:var(--uw-blue-dark); text-decoration:underline 2px; text-underline-offset:4px; }
 .about-way a span { transition:translate .2s; }
 .about-way a:hover span,.about-way a:focus-visible span { translate:3px 0; }
-.about-way a:focus-visible { outline:3px solid var(--pink); outline-offset:3px; border-radius:4px; }
+.about-way a:focus-visible { outline:3px solid var(--uw-blue-dark); outline-offset:3px; border-radius:4px; }
 
 @media(max-width:1100px) {
   .about-offers { grid-template-columns:repeat(2,minmax(0,1fr)); }
-}
-@media(max-width:900px) {
-  .about-intro { grid-template-columns:minmax(0,1fr); gap:48px; }
-  .about-polaroids { max-width:520px; min-height:clamp(360px,80vw,460px); }
-  .competition-road { grid-template-columns:minmax(0,1fr); gap:30px; }
+  .competition-road { grid-template-columns:minmax(0,1fr); gap:30px; max-width:640px; }
   .competition-road::before { top:28px; bottom:28px; left:27px; right:auto; border-top:0; border-left:3px dashed rgb(0 43 81 / 25%); }
   .road-stop { display:grid; grid-template-columns:56px minmax(0,1fr); column-gap:20px; }
   .road-stop__marker { grid-row:1 / span 3; margin:0; }
-  .about-ways { grid-template-columns:minmax(0,1fr); gap:36px; }
+}
+@media(max-width:900px) {
+  .about-ways { grid-template-columns:minmax(0,1fr); gap:40px; }
+  /* One note at a time, alternating sides, leaning less. */
+  .about-way { margin-top:0; rotate:calc(var(--tilt) / 2); }
+  .about-way:nth-child(odd) { justify-self:start; }
+  .about-way:nth-child(even) { justify-self:end; }
 }
 @media(max-width:600px) {
   .about-offers { grid-template-columns:minmax(0,1fr); }
-  .about-polaroid { width:68%; }
-  /* The round award sits beside the two pills instead of each sticker taking a line. */
-  .about-stickers { display:grid; grid-template-columns:auto minmax(0,auto); justify-content:start; gap:12px 16px; }
-  .about-sticker--award { grid-row:1 / span 2; width:92px; padding:10px; font-size:.7rem; }
-  .about-sticker--navy,.about-sticker--gold { justify-self:start; padding:.55em .95em; border-radius:16px; font-size:.8rem; }
 }
-@media(prefers-reduced-motion:reduce) { .about-way a span { transition:none; } }
+@media(prefers-reduced-motion:reduce) { .about-way,.about-way a span { transition:none; } }

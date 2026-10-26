@@ -1,0 +1,76 @@
+/* Year one as a page in a spiral notebook: ruled in blue with a pink margin, bound with coils along the top. Each stage
+   is a handwritten note taped along a pen-drawn line. Wide screens lay the notes out in a row and widen the open one;
+   narrower screens stack them down the line and drop the open one down. */
+.notebook { --rule:32px; --margin:64px; position:relative; margin-top:72px; padding:76px clamp(20px,2.4vw,32px) 48px calc(var(--margin) + 28px); border-radius:4px 4px 10px 10px;
+  background:
+    linear-gradient(90deg,transparent var(--margin),rgb(255 50 155 / 50%) var(--margin) calc(var(--margin) + 2px),transparent 0),
+    linear-gradient(#fffdf6 0 44px,transparent 44px),
+    repeating-linear-gradient(transparent 0 calc(var(--rule) - 1px),rgb(47 128 209 / 24%) calc(var(--rule) - 1px) var(--rule)),
+    #fffdf6;
+  box-shadow:0 1px 2px rgb(40 20 5 / 14%),0 24px 40px -22px rgb(0 43 81 / 40%); }
+/* The binding: a metal coil through a punched hole, repeated along the top edge. */
+.notebook::before { content:''; position:absolute; top:-20px; left:calc(var(--margin) + 8px); right:20px; height:44px; pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='44'%3E%3Cdefs%3E%3ClinearGradient id='m' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%237d8794'/%3E%3Cstop offset='.45' stop-color='%23f1f4f7'/%3E%3Cstop offset='1' stop-color='%238e98a3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='33' r='5' fill='%23d9d0bf'/%3E%3Crect x='12.5' y='2' width='7' height='33' rx='3.5' fill='url(%23m)'/%3E%3C/svg%3E") repeat-x 0 0 / 32px 44px; }
+/* The page's date, written in the top corner like a planner. */
+.notebook__date { position:absolute; top:32px; right:clamp(20px,2.4vw,32px); margin:0; font-family:var(--font-hand); font-size:1.5rem; font-weight:600; line-height:1; color:var(--pink-text); rotate:-2deg; }
+
+/* Phones and tablets: the notes stack down a pen line drawn just inside the margin. */
+.notebook-steps { position:relative; display:grid; grid-template-columns:minmax(0,1fr); gap:30px; margin:0; padding:0; list-style:none; }
+.notebook-steps::before { content:''; position:absolute; top:10px; bottom:10px; left:9px; border-left:2.5px solid rgb(0 43 81 / 45%); pointer-events:none; }
+.notebook-step { --note:#fff7c2; --tilt:-1.4deg; position:relative; min-width:0; padding-left:40px; }
+.notebook-step:nth-child(3n + 2) { --note:#ffe6f2; --tilt:1.2deg; }
+.notebook-step:nth-child(3n) { --note:#e6f2fc; --tilt:-.6deg; }
+/* The stop on the line: an open ring, filled in pink for the open stage. */
+.notebook-step::before { content:''; position:absolute; top:4px; left:2px; box-sizing:border-box; width:17px; height:17px; border:2.5px solid var(--uw-blue-dark); border-radius:50%; background:#fffdf6; transition:background-color .3s,border-color .3s; }
+.notebook-step.is-open::before { border-color:var(--pink-text); background:var(--pink); }
+.notebook-step__stage { display:block; margin-bottom:18px; font-family:var(--font-hand); font-size:1.25rem; font-weight:600; line-height:1.1; color:var(--uw-grey); }
+.notebook-step.is-open .notebook-step__stage { color:var(--pink-text); }
+
+/* The note: a square of coloured paper taped to the page, straightened when it is open. */
+.notebook-note { position:relative; background:var(--note); rotate:var(--tilt); box-shadow:0 1px 2px rgb(40 20 5 / 15%),0 14px 22px -12px rgb(40 20 5 / 40%); transition:rotate .4s var(--ease-ui),box-shadow .4s var(--ease-ui); }
+.notebook-step.is-open .notebook-note { rotate:0deg; box-shadow:0 2px 3px rgb(40 20 5 / 15%),0 22px 34px -14px rgb(40 20 5 / 45%); }
+.notebook-note > .tape { --tape-w:84px; top:-14px; }
+.notebook-note__toggle { display:grid; gap:6px; width:100%; padding:24px 16px 14px; border:0; background:none; font:inherit; text-align:left; color:var(--uw-blue-dark); cursor:pointer; }
+.notebook-note__toggle:focus-visible { outline:3px solid var(--pink); outline-offset:4px; }
+.notebook-note__figure { font-family:var(--font-hand); font-size:clamp(1.9rem,2vw,2.5rem); font-weight:700; line-height:1; color:var(--pink-text); }
+.notebook-note__title { font-family:var(--font-hand); font-size:1.3rem; font-weight:600; line-height:1.12; }
+/* A pen-drawn plus that becomes a minus when the note is open. */
+.notebook-note__mark { position:relative; justify-self:end; width:22px; height:22px; }
+.notebook-note__mark::before,.notebook-note__mark::after { content:''; position:absolute; top:50%; left:50%; width:14px; height:2.5px; translate:-50% -50%; border-radius:2px; background:var(--uw-blue-dark); transition:rotate .3s var(--ease-ui); }
+.notebook-note__mark::after { rotate:90deg; }
+.notebook-step.is-open .notebook-note__mark::after { rotate:0deg; }
+.notebook-note__toggle:hover .notebook-note__mark::before,.notebook-note__toggle:hover .notebook-note__mark::after { background:var(--pink-text); }
+
+/* Details drop open: the row grows from 0fr to 1fr, then the writing fades in. */
+.notebook-note__details { display:grid; grid-template-rows:0fr; transition:grid-template-rows .5s var(--ease-ui); }
+.notebook-step.is-open .notebook-note__details { grid-template-rows:1fr; }
+.notebook-note__details > div { min-height:0; overflow:hidden; }
+.notebook-note__body { padding:0 16px 20px; opacity:0; transition:opacity .25s; }
+.notebook-step.is-open .notebook-note__body { opacity:1; transition:opacity .35s .2s; }
+.notebook-note dl { display:grid; gap:12px; margin:0; padding-top:12px; border-top:1.5px dashed rgb(0 43 81 / 25%); }
+.notebook-note dt { font-family:var(--font-hand); font-size:1.15rem; font-weight:700; line-height:1.1; color:var(--pink-text); }
+.notebook-note dd { margin:2px 0 0; font-family:var(--font-hand); font-size:1.3rem; line-height:1.25; color:var(--uw-blue-dark); }
+.notebook-note dd ul { margin:0; padding-left:1.1em; }
+.notebook-note__link { display:inline-flex; align-items:center; gap:6px; min-height:44px; margin-top:8px; font-weight:600; color:var(--pink-text); text-decoration:none; }
+.notebook-note__link span { transition:translate .2s; }
+.notebook-note__link:hover span,.notebook-note__link:focus-visible span { translate:3px 0; }
+.notebook-note__link:focus-visible { outline:3px solid var(--pink); outline-offset:3px; border-radius:4px; }
+
+/* Wide screens: one row along a horizontal pen line. The open note's column widens (the grid animates between the
+   column lists the component sets in --cols); its writing keeps a fixed width so it never reflows mid-animation. */
+@media(min-width:1280px) {
+  .notebook-steps { grid-template-columns:var(--cols); align-items:start; gap:14px; transition:grid-template-columns .55s var(--ease-ui); }
+  .notebook-steps::before { top:31px; bottom:auto; left:0; right:0; border-left:0; border-top:2.5px solid rgb(0 43 81 / 45%); }
+  .notebook-step { padding:0; }
+  .notebook-step::before { top:23px; left:50%; translate:-50% 0; }
+  .notebook-step__stage { margin-bottom:44px; text-align:center; }
+  .notebook-note__body { min-width:300px; }
+}
+@media(max-width:600px) {
+  .notebook { --margin:36px; padding:72px 16px 36px calc(var(--margin) + 16px); }
+  .notebook::before { left:24px; right:12px; }
+  .notebook__date { top:30px; font-size:1.3rem; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .notebook-steps,.notebook-step::before,.notebook-note,.notebook-note__mark::before,.notebook-note__mark::after,.notebook-note__details,.notebook-note__body { transition:none!important; }
+}

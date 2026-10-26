@@ -1,0 +1,34 @@
+/* Launch day's gallery: two rows of taped Polaroids drifting in opposite directions, running out to the section's edges
+   and fading at both ends. Each track holds its photos twice, so sliding it by half loops seamlessly. */
+.launch-gallery { --gap:28px; display:grid; gap:12px; margin:32px calc(50% - 50vw) 0; overflow:hidden; -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); }
+.launch-gallery:focus-visible { outline:3px solid var(--pink); outline-offset:-3px; }
+.launch-gallery__row { overflow:hidden; }
+.launch-gallery__track { display:flex; width:max-content; animation:launch-drift var(--duration,45s) linear infinite; }
+.launch-gallery__row--reverse .launch-gallery__track { animation-direction:reverse; }
+/* Hold still while someone is looking. */
+.launch-gallery:hover .launch-gallery__track,.launch-gallery:focus-within .launch-gallery__track { animation-play-state:paused; }
+.launch-gallery__set { display:flex; align-items:flex-start; gap:var(--gap); margin:0; padding:20px var(--gap) 26px 0; list-style:none; }
+@keyframes launch-drift { to { translate:-50% 0; } }
+
+/* A Polaroid, taped across its top; the <li> leans, so nothing inside it sticks out sideways. */
+.launch-gallery li { --tilt:-1.4deg; flex:none; rotate:var(--tilt); }
+.launch-gallery li:nth-child(even) { --tilt:1.6deg; }
+.launch-gallery li:nth-child(3n) { --tilt:-.5deg; }
+.launch-gallery figure { position:relative; width:min-content; margin:0; padding:10px 10px 0; background:#fff; box-shadow:0 1px 2px rgb(40 20 5 / 16%),0 14px 24px -12px rgb(40 20 5 / 40%); }
+.launch-gallery figure::before { content:''; position:absolute; z-index:1; top:-13px; left:50%; width:96px; height:28px; translate:-50% 0; rotate:-3deg; background:var(--tape-clear); clip-path:var(--tape-torn); pointer-events:none; }
+.launch-gallery li:nth-child(even) figure::before { rotate:3deg; }
+.launch-gallery img { display:block; width:auto; max-width:none; height:clamp(150px,15vw,220px); background:#efe5d9; }
+.launch-gallery figcaption { padding:8px 2px 10px; font-family:var(--font-hand); font-size:1.2rem; line-height:1.15; color:var(--uw-blue-dark); }
+
+@media(max-width:760px) {
+  .launch-gallery { --gap:18px; }
+  .launch-gallery img { height:140px; }
+  .launch-gallery figcaption { font-size:1.05rem; }
+}
+/* Reduced motion: no drift. The rows stand still, wrapped to the page, and the looping copy is left out. */
+@media(prefers-reduced-motion:reduce) {
+  .launch-gallery { margin-inline:0; -webkit-mask-image:none; mask-image:none; }
+  .launch-gallery__track { width:auto; animation:none; }
+  .launch-gallery__set { flex-wrap:wrap; justify-content:center; padding-right:0; }
+  .launch-gallery__set[aria-hidden] { display:none; }
+}
