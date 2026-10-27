@@ -53,11 +53,13 @@ export default function App() {
     return () => { window.removeEventListener('scroll', save) }
   }, [pathname, hash, key, navigationType])
   useReveals(pathname, hash)
-  return <><PageMeta /><a href="#main" className="skip-link">Skip to main content</a><Header /><main ref={main} id="main" tabIndex={-1}><Routes>
+  // The organiser dashboard is a working tool: it brings its own slim bar instead of the public site's header and footer.
+  const tool = pathname.startsWith('/organiser')
+  return <><PageMeta /><a href="#main" className="skip-link">Skip to main content</a>{!tool && <Header />}<main ref={main} id="main" tabIndex={-1}><Routes>
     <Route path="/" element={hash === '#signup' ? <Navigate to="/compete#signup" replace /> : <HomePage />} />
     <Route path="/about" element={<AboutPage />} /><Route path="/year-one" element={<YearOnePage />} /><Route path="/this-year" element={<ThisYearPage />} />
     <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/partners/:slug" element={<PartnerPage />} /><Route path="/contact" element={<ContactPage />} />
     <Route path="/attend" element={<AttendPage />} /><Route path="/attend/manage" element={<ManageAttendancePage />} /><Route path="/organiser/events" element={<AttendanceAdminPage />} /><Route path="/privacy" element={<RegistrationPrivacyPage />} />
     <Route path="/team" element={<Navigate to="/about#team" replace />} /><Route path="/go" element={<GoRedirect />} /><Route path="*" element={<NotFoundPage />} />
-  </Routes></main>{SHOW_PARTNER_STRIP && <PartnerStrip />}<Footer /><ScrollToTop /><SiteDrawers /></>
+  </Routes></main>{!tool && <>{SHOW_PARTNER_STRIP && <PartnerStrip />}<Footer /><ScrollToTop /></>}<SiteDrawers /></>
 }

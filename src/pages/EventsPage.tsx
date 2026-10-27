@@ -1,11 +1,13 @@
 import AttendanceCatalogue from '../components/AttendanceCatalogue'
-import { canSelectEvent, downloadCalendar, eventDate, eventTime, eventStatusLabel, googleCalendarUrl, GROUP_LABELS, localDay, useAttendanceEvents, type AttendanceEvent } from '../lib/attendance'
+import { canSelectEvent, downloadCalendar, eventDate, eventTime, eventStatusLabel, googleCalendarUrl, outlookCalendarUrl, GROUP_LABELS, localDay, useAttendanceEvents, type AttendanceEvent } from '../lib/attendance'
 import LaunchGallery from '../components/LaunchGallery'
 import { LAUNCH_DAY_GALLERY } from '../data/assets'
+import { SITE } from '../data/site'
+import { eventStructuredData } from '../data/eventSeo'
 import '../components/eventMarks.css'
 import './EventsPage.css'
 import { RevealText, RollingLabel } from '../components/MotionText'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { Link } from '../components/PageLink'
 import { publishedPosts, formatPostDate, postStatus, type Post } from '../data/posts'
@@ -142,6 +144,15 @@ export function EventPostPage() {
   const { events } = useAttendanceEvents()
   const [now] = useState(() => Date.now())
   const event = events.find(item => item.id === slug)
+  // The event's schema.org data, kept in step with the live schedule (the build writes the first version into the
+  // page); taken away when leaving the event.
+  useEffect(() => {
+    if (!event) return
+    let script = document.getElementById('event-structured-data')
+    if (!script) { script = document.createElement('script'); script.id = 'event-structured-data'; script.setAttribute('type', 'application/ld+json'); document.head.append(script) }
+    script.textContent = JSON.stringify(eventStructuredData(event, SITE.websiteUrl))
+    return () => document.getElementById('event-structured-data')?.remove()
+  }, [event])
   if (event) {
     const ended = new Date(event.endsAt).getTime() <= now
     const more = events.filter(item => item.id !== event.id && item.status !== 'cancelled' && new Date(item.endsAt).getTime() > now).slice(0, 3)
@@ -166,9 +177,13 @@ export function EventPostPage() {
             {event.preparation && <p className="event-detail__prep"><strong>Before you come:</strong> {event.preparation}</p>}
             <div className="event-detail__actions">
               <Link className="btn btn--primary" to={`/attend?events=${encodeURIComponent(event.id)}`}>{canSelectEvent(event) ? 'Register to attend' : 'View attendance options'}</Link>
-              {!ended && <><a className="btn btn--secondary" href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Google Calendar <span aria-hidden="true">↗</span></a>
-              <button type="button" className="btn btn--secondary" onClick={() => downloadCalendar(event)}>Apple / Outlook (.ics) <span aria-hidden="true">↓</span></button></>}
             </div>
+            {!ended && <div className="event-detail__calendar" role="group" aria-labelledby="event-calendar-label">
+              <span id="event-calendar-label">Add to calendar</span>
+              <a href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Google Calendar <span aria-hidden="true">↗</span><span className="visually-hidden"> (opens in a new tab)</span></a>
+              <a href={outlookCalendarUrl(event)} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Outlook <span aria-hidden="true">↗</span><span className="visually-hidden"> (opens in a new tab)</span></a>
+              <button type="button" onClick={() => downloadCalendar(event)}>Apple / other (.ics) <span aria-hidden="true">↓</span></button>
+            </div>}
             <p className="event-detail__note">Event attendance does not register your team for the competition. <Link to="/compete">Learn how to compete</Link>.</p>
           </div>
         </div>

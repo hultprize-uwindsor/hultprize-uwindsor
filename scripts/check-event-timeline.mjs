@@ -75,7 +75,7 @@ try {
     await page.locator('.event-detail').waitFor()
     assert.match(await page.locator('main').innerText(), /FRCT/)
     assert.equal(await page.locator('main a[href="/attend?events=workshop-1"]').count(), 1)
-    assert(await page.locator('main a[href^="https://calendar.google.com/"]').count() === 1 && await page.getByRole('button', { name: /Apple \/ Outlook/ }).count() === 1, 'the event page offers both calendar options')
+    assert(await page.locator('main a[href^="https://calendar.google.com/"]').count() === 1 && await page.locator('main a[href^="https://outlook.office.com/"]').count() === 1 && await page.getByRole('button', { name: /Apple \/ other/ }).count() === 1, 'the event page offers Google, Outlook and ICS calendar options')
     assert(await page.locator('.event-detail__more a[href^="/events/"]').count() >= 1, 'the event page suggests more events')
     // An administrator edit is reflected by every consumer on the next read.
     await page.unroute('**/api/attendance*')

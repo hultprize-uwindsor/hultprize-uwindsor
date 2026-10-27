@@ -14,7 +14,7 @@ Executable plain-text templates live in `attEmail_()` and `attEventText_()` in `
 | Cancelled event | “Event cancelled: [event title].” Explains that the organiser cancelled the event and no attendance reminder will be sent. |
 | Material update | “Event update: [event title].” Provides current date, local time, full venue and attendance status. Triggered by the organiser's send-update control. |
 
-Every event block contains title, status, day/date, Windsor start/end time with timezone, full venue including floor, supplied preparation instructions, and the free refreshments note. Confirmed events include a Google Calendar link; the confirmation/manage page also offers an Apple/Outlook ICS download.
+Every event block contains title, status, day/date, Windsor start/end time with timezone, full venue including floor, supplied preparation instructions, and the free refreshments note. Confirmed events include Google Calendar and Outlook (Microsoft 365) links; the confirmation/manage page also offers an ICS download for Apple Calendar and other apps.
 
 Every email includes a private management link, separate competition registration link and November 20, 2026 deadline, a reminder that each team member registers individually, and the approved Discord invite https://discord.gg/ybeQYQxcqZ by default. The optional `ATTENDANCE_DISCORD_URL` script property overrides the email invite; leave it unset to use the approved default shared with `SITE.discordUrl`. The global prize is identified as the US$1 million seed investment prize.
 

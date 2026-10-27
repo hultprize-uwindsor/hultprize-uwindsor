@@ -12,25 +12,20 @@
 .prize-stage { margin:0; font-family:var(--font-hand); font-size:clamp(1.7rem,2.4vw,2.2rem); font-weight:700; line-height:1; color:var(--pink-text); rotate:-2deg; }
 .prize-stakes__note { margin:0; font-size:.9rem; color:var(--uw-grey); text-align:center; }
 
-/* The campus prizes as award rosettes: a pleated ring with a ruled centre disc, and two ribbon tails with notched
-   ends. Gold sits in the middle, largest and highest. Sizes are set per rosette; the writing scales with it. */
-.prize-rosettes { display:flex; justify-content:center; align-items:flex-end; gap:clamp(18px,4vw,60px); margin:8px 0 0; padding:0; list-style:none; }
-.rosette { --size:clamp(150px,15vw,200px); --c1:#f8e08a; --c2:#e9b322; --c3:#a8780c; --ink:#5c3f00; display:flex; flex-direction:column; align-items:center; width:var(--size); }
-.rosette--gold { --size:clamp(190px,19vw,260px); order:2; margin-bottom:28px; }
-.rosette--silver { --c1:#f2f5f8; --c2:#c7cfd8; --c3:#7e8a97; --ink:#3c4652; order:1; rotate:-4deg; }
-.rosette--bronze { --c1:#f3cfa8; --c2:#d08b4c; --c3:#8e5222; --ink:#5a3212; order:3; rotate:5deg; }
-.rosette__badge { position:relative; z-index:1; isolation:isolate; display:flex; flex-direction:column; align-items:center; justify-content:center; width:var(--size); aspect-ratio:1; font-size:calc(var(--size) / 9); text-align:center; filter:drop-shadow(0 2px 2px rgb(60 30 0 / 25%)) drop-shadow(0 14px 14px rgb(60 30 0 / 22%)); }
-/* The pleats: alternating stripes round a scalloped edge. */
-.rosette__badge::before { content:''; position:absolute; inset:0; z-index:-2; background:repeating-conic-gradient(var(--c1) 0 3.75deg,var(--c2) 3.75deg 7.5deg); clip-path:polygon(50.0% 0.0%,53.0% 3.9%,56.5% 0.4%,59.0% 4.7%,62.9% 1.7%,64.9% 6.3%,69.1% 3.8%,70.4% 8.6%,75.0% 6.7%,75.7% 11.6%,80.4% 10.3%,80.5% 15.3%,85.4% 14.6%,84.7% 19.5%,89.7% 19.6%,88.4% 24.3%,93.3% 25.0%,91.4% 29.6%,96.2% 30.9%,93.7% 35.1%,98.3% 37.1%,95.3% 41.0%,99.6% 43.5%,96.1% 47.0%,100.0% 50.0%,96.1% 53.0%,99.6% 56.5%,95.3% 59.0%,98.3% 62.9%,93.7% 64.9%,96.2% 69.1%,91.4% 70.4%,93.3% 75.0%,88.4% 75.7%,89.7% 80.4%,84.7% 80.5%,85.4% 85.4%,80.5% 84.7%,80.4% 89.7%,75.7% 88.4%,75.0% 93.3%,70.4% 91.4%,69.1% 96.2%,64.9% 93.7%,62.9% 98.3%,59.0% 95.3%,56.5% 99.6%,53.0% 96.1%,50.0% 100.0%,47.0% 96.1%,43.5% 99.6%,41.0% 95.3%,37.1% 98.3%,35.1% 93.7%,30.9% 96.2%,29.6% 91.4%,25.0% 93.3%,24.3% 88.4%,19.6% 89.7%,19.5% 84.7%,14.6% 85.4%,15.3% 80.5%,10.3% 80.4%,11.6% 75.7%,6.7% 75.0%,8.6% 70.4%,3.8% 69.1%,6.3% 64.9%,1.7% 62.9%,4.7% 59.0%,0.4% 56.5%,3.9% 53.0%,0.0% 50.0%,3.9% 47.0%,0.4% 43.5%,4.7% 41.0%,1.7% 37.1%,6.3% 35.1%,3.8% 30.9%,8.6% 29.6%,6.7% 25.0%,11.6% 24.3%,10.3% 19.6%,15.3% 19.5%,14.6% 14.6%,19.5% 15.3%,19.6% 10.3%,24.3% 11.6%,25.0% 6.7%,29.6% 8.6%,30.9% 3.8%,35.1% 6.3%,37.1% 1.7%,41.0% 4.7%,43.5% 0.4%,47.0% 3.9%); }
-/* The centre disc: card with a ruled ring round its edge. */
-.rosette__badge::after { content:''; position:absolute; inset:19%; z-index:-1; border-radius:50%; background:radial-gradient(circle,#fffdf5 0 80%,var(--c3) 80% 82%,var(--c1) 82% 91%,var(--c3) 91% 93%,var(--c2) 93%); box-shadow:inset 0 1px 2px rgb(255 255 255 / 70%),0 1px 3px rgb(60 30 0 / 25%); }
-.rosette__place { font-family:var(--font-hand); font-size:1.1em; font-weight:700; line-height:1; color:var(--ink); }
-.rosette__prize { margin-top:.05em; font-size:1.35em; font-weight:700; line-height:1; letter-spacing:-.04em; color:var(--uw-blue-dark); font-variant-numeric:tabular-nums; }
-/* The tails hang behind the badge, splayed, with a V cut into each end. */
-.rosette__tails { position:relative; width:calc(var(--size) * .55); height:calc(var(--size) * .58); margin-top:calc(var(--size) * -.3); }
-.rosette__tails::before,.rosette__tails::after { content:''; position:absolute; top:0; width:44%; height:100%; background:linear-gradient(90deg,var(--c3),var(--c2) 30%,var(--c1) 55%,var(--c2) 80%,var(--c3)); clip-path:polygon(0 0,100% 0,100% 100%,50% 84%,0 100%); transform-origin:50% 0; }
-.rosette__tails::before { left:2%; rotate:12deg; }
-.rosette__tails::after { right:2%; rotate:-12deg; }
+/* The campus prizes as trophies standing on a shelf: gold in the middle and tallest, silver and bronze either side.
+   Each trophy is sized by --size (its width); the engraving scales with it. */
+.prize-trophies { display:flex; justify-content:center; align-items:flex-end; gap:clamp(18px,4vw,64px); margin:8px 0 0; padding:0 0 18px; list-style:none; }
+.trophy { --size:clamp(140px,13vw,180px); --c1:#fbe9a6; --c2:#e7b52a; --c3:#9a6e08; --ink:#4d3500; position:relative; width:var(--size); aspect-ratio:200 / 244; }
+.trophy--gold { --size:clamp(180px,17vw,240px); order:2; }
+.trophy--silver { --c1:#f7f9fb; --c2:#c3ccd6; --c3:#6f7c8a; --ink:#2c3640; order:1; }
+.trophy--bronze { --c1:#f6d3ae; --c2:#c9844a; --c3:#7d461b; --ink:#4a2810; order:3; }
+.trophy__art { display:block; width:100%; height:100%; max-width:none; overflow:visible; }
+/* Its shadow on the shelf, spreading behind it from the light above and in front. */
+.trophy::after { content:''; position:absolute; z-index:-1; left:14%; right:6%; bottom:-4px; height:16px; border-radius:50%; background:rgb(40 20 5 / 30%); filter:blur(7px); }
+/* Engraved: dark letters cut into the metal, a shadowed upper edge and a lit lower one. */
+.trophy__prize,.trophy__place { position:absolute; left:0; right:0; text-align:center; line-height:1; color:var(--ink); text-shadow:0 -1px 0 rgb(0 0 0 / 22%),0 1px 0 rgb(255 255 255 / 55%); }
+.trophy__prize { top:24.5%; font-size:calc(var(--size) / 8.4); font-weight:700; letter-spacing:-.01em; color:color-mix(in srgb,var(--ink) 86%,transparent); font-variant-numeric:tabular-nums; }
+.trophy__place { top:84.4%; font-family:var(--font-type); font-size:calc(var(--size) / 10.5); letter-spacing:.04em; }
 
 /* Beyond Windsor: a boarding pass and a cheque, laid down at slight angles. */
 .prize-beyond { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:40px; width:100%; max-width:1080px; margin:44px 0 0; padding:0; list-style:none; text-align:left; }
@@ -122,9 +117,10 @@
   .entry-sheet { rotate:0deg; }
 }
 @media(max-width:600px) {
-  .prize-rosettes { flex-wrap:wrap; gap:4px 18px; }
-  .rosette { --size:136px; }
-  .rosette--gold { --size:180px; order:0; flex-basis:100%; margin-bottom:0; }
+  .prize-trophies { flex-wrap:wrap; gap:28px 22px; }
+  /* Gold on its own row above the other two. */
+  .trophy { --size:128px; }
+  .trophy--gold { --size:168px; order:0; margin-inline:calc(50% - 84px); }
   .prize-pass { grid-template-columns:minmax(0,1fr); rotate:-.6deg; }
   .prize-pass__stub { display:none; }
   .prize-pass__band { border-radius:14px 14px 0 0; }
@@ -142,7 +138,7 @@
 }
 /* The narrowest phones: silver and bronze small enough to stay side by side under gold. */
 @media(max-width:380px) {
-  .prize-rosettes { column-gap:12px; }
-  .rosette { --size:108px; }
-  .rosette--gold { --size:156px; }
+  .prize-trophies { column-gap:14px; }
+  .trophy { --size:112px; }
+  .trophy--gold { --size:150px; margin-inline:calc(50% - 75px); }
 }

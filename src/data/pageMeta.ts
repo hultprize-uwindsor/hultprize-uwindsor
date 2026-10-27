@@ -2,6 +2,8 @@ import { COMMUNITY_PARTNERS } from './communityPartners.ts'
 import { publishedPosts } from './posts.ts'
 import { SITE } from './site.ts'
 import attendanceEvents from '../../shared/attendance-events.json' with { type: 'json' }
+import { eventPageDescription, eventPageTitle } from './eventSeo.ts'
+import type { AttendanceEvent } from '../lib/attendance.ts'
 
 export interface PageMetadata {
   path: string
@@ -11,6 +13,8 @@ export interface PageMetadata {
   imageAlt: string
   type: 'website' | 'article'
   noindex?: boolean
+  // The schedule event this page is for, if any: the build writes its details into the page for search engines.
+  event?: AttendanceEvent
 }
 
 export const META_SITE_NAME = 'Hult Prize at the University of Windsor'
@@ -22,6 +26,9 @@ const page = (path: string, title: string, description: string, type: PageMetada
   image: socialImage(path),
   imageAlt: `${title}: ${META_SITE_NAME}`,
 })
+
+/** A schedule event's page: titled with its day, described with when and where (see eventSeo.ts). */
+export const eventMetadata = (event: AttendanceEvent): PageMetadata => ({ ...page(`/events/${event.id}`, eventPageTitle(event), eventPageDescription(event), 'article'), image: socialImage('/events'), imageAlt: `${event.title}: ${META_SITE_NAME}`, event })
 
 // One source for client navigation, static HTML heads, social cards and the sitemap.
 export const PAGE_METADATA: PageMetadata[] = [
@@ -37,7 +44,7 @@ export const PAGE_METADATA: PageMetadata[] = [
   { ...page('/attend/manage', 'Manage attendance', 'Securely manage your Hult Prize at UWindsor event attendance.'), image: socialImage('/events'), noindex: true },
   { ...page('/organiser/events', 'Organiser dashboard', 'Private event attendance dashboard for authorised Hult Prize at UWindsor organisers.'), image: socialImage('/events'), noindex: true },
   { ...page('/privacy', 'Event registration privacy', 'How Hult Prize at UWindsor uses event registration information.'), image: socialImage('/events') },
-  ...attendanceEvents.map(event => ({ ...page(`/events/${event.id}`, event.title, event.description, 'article'), image: socialImage('/events') })),
+  ...(attendanceEvents as AttendanceEvent[]).map(eventMetadata),
   ...COMMUNITY_PARTNERS.map(partner => page(`/partners/${partner.slug}`, partner.name, `${partner.subtitle} ${partner.withUs[0]}`)),
   ...publishedPosts().map(post => page(`/events/${post.slug}`, post.title, post.excerpt, 'article')),
 ]

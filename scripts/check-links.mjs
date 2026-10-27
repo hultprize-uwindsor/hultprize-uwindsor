@@ -72,7 +72,8 @@ try {
           assert.equal(await anchor.count(), 1, `missing anchor: ${href}`)
           assert(await anchor.evaluate(e => e.getBoundingClientRect().top < innerHeight), `anchor not reached: ${href}`)
         }
-        if (width <= 1180) assert.equal(await page.locator('#mobile-navigation').evaluate(e => e.open), false, 'menu closes after navigation')
+        // The organiser dashboard brings its own bar instead of the site header, so there is no menu to check there.
+        if (width <= 1180 && !new URL(href, base).pathname.startsWith('/organiser')) assert.equal(await page.locator('#mobile-navigation').evaluate(e => e.open), false, 'menu closes after navigation')
         report.push({ width, region, label, href, status: 'clicked and destination verified' })
       }
     }

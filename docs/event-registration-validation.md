@@ -30,7 +30,7 @@ Playwright on this workstation used its installed Chromium executable through `P
 | 8 | November DST | Oct 29 4:30 PM = 20:30 UTC; Nov 16 4:30 PM = 21:30 UTC. Admin date entry tested from a Tokyo browser timezone; nonexistent/repeated DST hours are rejected. |
 | 9 | Secure changes and cancellation | Hash-only expiring single-use email tokens; signed HttpOnly cookies; expired/tampered/foreign-attendee requests rejected. UI tests cancel one event, add another, edit support details and sign out. |
 | 10 | Cancelled attendee reminders | Reminder delivery checks current registration/event status. Tests suppress cancelled and obsolete reminders, including event rescheduling. |
-| 11 | Calendar consistency | Google Calendar parameters and downloaded ICS use the same UTC schedule and full venue; tested on both sides of DST. |
+| 11 | Calendar consistency | Google Calendar and Outlook parameters and downloaded ICS use the same UTC schedule and full venue; tested on both sides of DST. |
 | 12 | Roster export and check-in | Organiser tests export filtered event/multi-event rosters, escape formula-leading cells, exclude restricted support information by default and record check-ins once. |
 | 13 | People vs registrations vs actual attendance | UI fixture demonstrates two people, three event registrations and one check-in. Filters preserve distinct counts; category values drive student reporting. |
 | 14 | Mobile, keyboard, reduced motion | Form tested at 320/375px, dashboard at 390px, schedule at 320/1440px; keyboard checkbox activation and zero reduced-motion transitions verified. |

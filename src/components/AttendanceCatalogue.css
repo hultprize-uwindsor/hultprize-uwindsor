@@ -49,7 +49,10 @@
 .event-detail__prep { margin:0; padding:12px 14px; border-radius:10px; background:var(--paper-blue); font-size:.92rem; line-height:1.55; }
 .event-detail__actions { display:flex; flex-wrap:wrap; gap:10px; }
 .event-detail__actions .btn { min-height:46px; }
-.event-detail__actions button.btn { font:inherit; font-weight:600; cursor:pointer; }
+.event-detail__calendar { display:flex; flex-wrap:wrap; align-items:center; gap:0 20px; margin-top:-8px; font-size:.88rem; }
+.event-detail__calendar > span { font-weight:600; color:var(--uw-grey); }
+.event-detail__calendar :is(a,button) { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:0; border:0; background:none; color:var(--uw-blue-dark); font:inherit; text-decoration:underline; text-underline-offset:4px; cursor:pointer; }
+.event-detail__calendar :is(a,button):hover { color:var(--pink-text); }
 .event-detail__note { margin:0; font-size:.88rem; color:var(--uw-grey); }
 .event-detail__more h2 { margin:0 0 14px; font-size:1.35rem; letter-spacing:-.025em; }
 .event-detail__more ul { display:grid; gap:12px; margin:0 0 16px; padding:0; list-style:none; }

@@ -7,7 +7,7 @@ import { SITE } from '../data/site'
 import {
   CATEGORY_OPTIONS, GROUP_LABELS, REGISTRATION_STATUS_LABELS,
   attendanceApi, canSelectEvent, downloadCalendar, eventDate, eventStatus, eventStatusLabel,
-  eventTime, googleCalendarUrl, teamRegistrationUrl, useAttendanceEvents,
+  eventTime, googleCalendarUrl, outlookCalendarUrl, teamRegistrationUrl, useAttendanceEvents,
 } from '../lib/attendance'
 import type { AttendanceEvent, AttendanceRegistration, AttendeeCategory, AttendeeDetails, RegistrationResponse } from '../lib/attendance'
 import './Attendance.css'
@@ -27,7 +27,8 @@ function initialSelection() {
 export function CalendarActions({ event }: { event: AttendanceEvent }) {
   return <div className="attendance-calendar" aria-label={`Add ${event.title} to your calendar`}>
     <a href={googleCalendarUrl(event)} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Google Calendar <span aria-hidden="true">↗</span><span className="visually-hidden"> (opens in a new tab)</span></a>
-    <button type="button" onClick={() => downloadCalendar(event)}>Apple / Outlook (.ics) <span aria-hidden="true">↓</span></button>
+    <a href={outlookCalendarUrl(event)} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer">Outlook <span aria-hidden="true">↗</span><span className="visually-hidden"> (opens in a new tab)</span></a>
+    <button type="button" onClick={() => downloadCalendar(event)}>Apple / other (.ics) <span aria-hidden="true">↓</span></button>
   </div>
 }
 

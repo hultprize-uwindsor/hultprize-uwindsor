@@ -25,7 +25,13 @@
 .site-footer__social a:hover { background: #fff; }
 .site-footer__brand { display: block; width: min(100%, 1100px); margin: clamp(64px, 8vw, 128px) auto 44px; }
 .site-footer__brand img { display: block; width: 100%; height: auto; object-fit: contain; }
-.site-footer__bottom { display: flex; justify-content: space-between; gap: 24px; padding-top: 24px; border-top: 1px solid rgb(0 43 81 / 16%); font-size: 12px; color: #586579; }
+.site-footer__bottom { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-top: 24px; border-top: 1px solid rgb(0 43 81 / 16%); font-size: 12px; color: #586579; }
+/* The privacy notice, and the organiser sign-in as a small outlined button the team can find. */
+.site-footer__staff { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin: 0; }
+.site-footer__staff > a:not(.site-footer__organiser) { display: inline-flex; align-items: center; min-height: 44px; }
+.site-footer__organiser { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid rgb(0 43 81 / 30%); border-radius: 12px; font-size: 13px; font-weight: 600; color: var(--uw-blue-dark); text-decoration: none; transition: background-color .2s, border-color .2s; }
+.site-footer__organiser:hover { border-color: var(--uw-blue-dark); background: #fff; }
+.site-footer__organiser:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
 .site-footer__sponsor a { color: var(--pink-text); font-weight: 600; text-decoration: none; }
 .site-footer__sponsor a:hover, .site-footer__sponsor a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 1000px) {

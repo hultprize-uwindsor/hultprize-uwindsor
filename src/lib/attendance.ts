@@ -174,11 +174,20 @@ export function eventStatusLabel(event: AttendanceEvent) {
   return { open: 'Open', full: 'Full · Join the waitlist', closed: 'Registration closed', cancelled: 'Cancelled', completed: 'Completed' }[eventStatus(event)]
 }
 
-const calendarStamp = (date: string) => new Date(date).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')
+const isoStamp = (date: string) => new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z')
+const calendarStamp = (date: string) => isoStamp(date).replace(/[-:]/g, '')
+const calendarDetails = (event: AttendanceEvent) => [event.description, event.preparation, 'Free · Drinks and snacks provided.'].filter(Boolean).join('\n')
 
 export function googleCalendarUrl(event: AttendanceEvent) {
-  const params = new URLSearchParams({ action: 'TEMPLATE', text: event.title, dates: `${calendarStamp(event.startsAt)}/${calendarStamp(event.endsAt)}`, ctz: event.timeZone, location: event.venue, details: `${event.description}\n${event.preparation || ''}\nFree · Drinks and snacks provided.` })
+  const params = new URLSearchParams({ action: 'TEMPLATE', text: event.title, dates: `${calendarStamp(event.startsAt)}/${calendarStamp(event.endsAt)}`, ctz: event.timeZone, location: event.venue, details: calendarDetails(event) })
   return `https://calendar.google.com/calendar/render?${params}`
+}
+
+// Outlook on the web for Microsoft 365 accounts, which UWindsor uses. Times go in as UTC and Outlook shows them in the attendee's own zone.
+// Spaces are encoded as %20 because Outlook keeps a '+' literally.
+export function outlookCalendarUrl(event: AttendanceEvent) {
+  const params = { rru: 'addevent', subject: event.title, startdt: isoStamp(event.startsAt), enddt: isoStamp(event.endsAt), location: event.venue, body: calendarDetails(event) }
+  return `https://outlook.office.com/calendar/0/action/compose?${Object.entries(params).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&')}`
 }
 
 const icsText = (value: string) => value.replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,')
@@ -198,7 +207,7 @@ function foldCalendarLine(line: string) {
 }
 
 export function calendarFile(event: AttendanceEvent) {
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Hult Prize UWindsor//Event Attendance//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT', `UID:${event.id}@hultprizeuwindsor.ca`, `DTSTAMP:${calendarStamp(new Date().toISOString())}`, `DTSTART:${calendarStamp(event.startsAt)}`, `DTEND:${calendarStamp(event.endsAt)}`, `SUMMARY:${icsText(event.title)}`, `LOCATION:${icsText(event.venue)}`, `DESCRIPTION:${icsText(`${event.description}\n${event.preparation || ''}\nFree · Drinks and snacks provided.`)}`, 'END:VEVENT', 'END:VCALENDAR'].map(foldCalendarLine).join('\r\n') + '\r\n'
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Hult Prize UWindsor//Event Attendance//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT', `UID:${event.id}@hultprizeuwindsor.ca`, `DTSTAMP:${calendarStamp(new Date().toISOString())}`, `DTSTART:${calendarStamp(event.startsAt)}`, `DTEND:${calendarStamp(event.endsAt)}`, `SUMMARY:${icsText(event.title)}`, `LOCATION:${icsText(event.venue)}`, `DESCRIPTION:${icsText(calendarDetails(event))}`, 'END:VEVENT', 'END:VCALENDAR'].map(foldCalendarLine).join('\r\n') + '\r\n'
 }
 
 export function downloadCalendar(event: AttendanceEvent) {

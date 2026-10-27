@@ -295,9 +295,14 @@ function attCalendar_(event) {
   var compact = function(value) { return value.replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(event.title) + '&dates=' + compact(event.startsAt) + '/' + compact(event.endsAt) + '&ctz=America%2FToronto&location=' + encodeURIComponent(event.venue) + '&details=' + encodeURIComponent(event.description + '\nFree. Drinks and snacks provided.');
 }
+// Outlook on the web (Microsoft 365, which UWindsor uses), in UTC so it shows in the attendee's own zone.
+function attOutlook_(event) {
+  var utc = function(value) { return new Date(value).toISOString().replace(/\.\d{3}Z$/, 'Z'); };
+  return 'https://outlook.office.com/calendar/0/action/compose?rru=addevent&subject=' + encodeURIComponent(event.title) + '&startdt=' + encodeURIComponent(utc(event.startsAt)) + '&enddt=' + encodeURIComponent(utc(event.endsAt)) + '&location=' + encodeURIComponent(event.venue) + '&body=' + encodeURIComponent(event.description + '\nFree. Drinks and snacks provided.');
+}
 function attEventText_(event, registration) {
   var start = Utilities.formatDate(new Date(event.startsAt), 'America/Toronto', 'EEEE, MMMM d, yyyy'), from = Utilities.formatDate(new Date(event.startsAt), 'America/Toronto', 'h:mm a'), to = Utilities.formatDate(new Date(event.endsAt), 'America/Toronto', 'h:mm a z');
-  return [event.title, 'Status: ' + registration.status, start + ', ' + from + '-' + to + ' (Windsor local time)', event.venue, event.preparation ? 'Prepare: ' + event.preparation : '', 'Free · Drinks and snacks provided.', registration.status === 'confirmed' ? 'Add to calendar: ' + attCalendar_(event) : ''].filter(Boolean).join('\n');
+  return [event.title, 'Status: ' + registration.status, start + ', ' + from + '-' + to + ' (Windsor local time)', event.venue, event.preparation ? 'Prepare: ' + event.preparation : '', 'Free · Drinks and snacks provided.', registration.status === 'confirmed' ? 'Add to Google Calendar: ' + attCalendar_(event) + '\nAdd to Outlook: ' + attOutlook_(event) : ''].filter(Boolean).join('\n');
 }
 function attEmail_(db, delivery, now) {
   var person = db.attendees.find(function(item) { return item.id === delivery.attendeeId; });

@@ -133,6 +133,13 @@
 .tier-card { padding:36px; border:1px solid var(--grey); border-radius:24px; display:flex; flex-direction:column; justify-content:space-between; gap:36px; }
 .tier-card--lead { background:var(--paper-pink); border-color:transparent; }
 .tier-card h3 { margin-bottom:24px; font-size:1.5rem; }
+/* Prize partner tiers in the metal of their prize, as on the Compete page's rosettes: a sheen across the card and a
+   darker rule of the same metal. */
+.tier-card--gold { --metal-1:#fff3c4; --metal-2:#f5d36b; --metal-3:#b88a10; }
+.tier-card--silver { --metal-1:#f7f9fb; --metal-2:#d5dce4; --metal-3:#7e8a97; }
+.tier-card--bronze { --metal-1:#fbe4cc; --metal-2:#e2a877; --metal-3:#9a5c28; }
+.tier-card:is(.tier-card--gold,.tier-card--silver,.tier-card--bronze) { border-color:var(--metal-3); background:linear-gradient(135deg,var(--metal-1) 0%,var(--metal-2) 55%,var(--metal-1) 100%); box-shadow:inset 0 1px 0 rgb(255 255 255 / 70%),0 14px 28px -18px var(--metal-3); }
+.tier-card:is(.tier-card--gold,.tier-card--silver,.tier-card--bronze) .tier-report { border-top-color:var(--metal-3); color:var(--uw-blue-dark); }
 .tier-amount { font-size:2.5rem; line-height:1.15; letter-spacing:-.04em; margin:0; }
 .tier-report { font-size:.8rem; border-top:1px solid var(--grey); padding-top:20px; margin:24px 0 0; color:var(--uw-grey); }
 .tier-heading { margin-top:72px; }

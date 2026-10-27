@@ -23,19 +23,91 @@ const CAMPUS_PRIZES = [
   { place: '3rd', prize: '$500', tone: 'bronze' },
 ]
 
-/** What's at stake, in the order a team meets it: award rosettes for the campus prizes (gold in the middle), then a
+/** A trophy drawn in the metal of its place: a loving cup (open mouth, engraved band, tube handles) on a knotted stem
+    and flared foot, standing on a glossy black base with a screwed-on brushed plaque. The metal's colours come from the
+    trophy's CSS (--c1 light, --c2 mid, --c3 dark), so one drawing serves all three. */
+function TrophyArt({ tone }: { tone: string }) {
+  const id = `trophy-${tone}`
+  const url = (name: string) => `url(#${id}-${name})`
+  const stop = (offset: string, color: string, opacity = 1) => <stop offset={offset} style={{ stopColor: color, stopOpacity: opacity }} />
+  return <svg className="trophy__art" viewBox="0 0 200 244" aria-hidden="true" focusable="false">
+    <defs>
+      {/* Round polished metal: dark at both edges, a white-hot reflection left of centre, a dim reflection near the
+          right edge and a thin rim of light at it. */}
+      <linearGradient id={`${id}-metal`} x1="0" x2="1">{stop('0', 'var(--c3)')}{stop('.07', 'var(--c2)')}{stop('.18', 'var(--c1)')}{stop('.26', '#fff')}{stop('.34', 'var(--c1)')}{stop('.6', 'var(--c2)')}{stop('.8', 'var(--c2)')}{stop('.88', 'var(--c3)')}{stop('.95', 'var(--c1)')}{stop('1', 'var(--c3)')}</linearGradient>
+      {/* The bowl turns away from the light as it curves under. */}
+      <linearGradient id={`${id}-under`} x1="0" x2="0" y2="1">{stop('0', '#fff', .18)}{stop('.35', '#fff', 0)}{stop('.7', '#000', 0)}{stop('1', '#000', .38)}</linearGradient>
+      {/* Inside the cup: the far wall catches the light, the near wall is in shadow. */}
+      <linearGradient id={`${id}-inside`} x1="0" x2="0" y2="1">{stop('0', 'var(--c1)')}{stop('.45', 'var(--c2)')}{stop('1', 'var(--c3)')}</linearGradient>
+      <linearGradient id={`${id}-black`} x1="0" x2="0" y2="1">{stop('0', '#3a3b42')}{stop('.12', '#1c1d22')}{stop('1', '#08080a')}</linearGradient>
+      <linearGradient id={`${id}-black-top`} x1="0" x2="1">{stop('0', '#2a2b31')}{stop('.4', '#55575f')}{stop('1', '#2a2b31')}</linearGradient>
+      <linearGradient id={`${id}-plate`} x1="0" x2="1" y2=".4">{stop('0', 'var(--c2)')}{stop('.35', 'var(--c1)')}{stop('.55', '#fff', .9)}{stop('.7', 'var(--c1)')}{stop('1', 'var(--c2)')}</linearGradient>
+      {/* Brushed finish: fine horizontal grain. */}
+      <pattern id={`${id}-brush`} width="4" height="1.6" patternUnits="userSpaceOnUse"><rect width="4" height=".5" fill="#000" opacity=".07" /></pattern>
+      <radialGradient id={`${id}-screw`}>{stop('0', '#fff')}{stop('.45', 'var(--c2)')}{stop('1', 'var(--c3)')}</radialGradient>
+      <filter id={`${id}-soft`} x="-50%" y="-20%" width="200%" height="140%"><feGaussianBlur stdDeviation="1.6" /></filter>
+      <filter id={`${id}-blur`} x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="3" /></filter>
+    </defs>
+
+    {/* The base, seen a little from above: its top face, then its front, lit along the top edge. */}
+    <ellipse cx="100" cy="241" rx="58" ry="3" fill="#000" opacity=".35" filter={url('blur')} />
+    <path d="M60 180H140L150 188H50Z" fill={url('black-top')} />
+    <rect x="50" y="188" width="100" height="52" rx="1.5" fill={url('black')} />
+    <rect x="50" y="188" width="100" height="1.2" fill="#fff" opacity=".28" />
+    {/* The plaque: brushed metal held by four screws. */}
+    <rect x="64" y="198" width="72" height="31" rx="2" fill={url('plate')} />
+    <rect x="64" y="198" width="72" height="31" rx="2" fill={url('brush')} />
+    <rect x="64.5" y="198.5" width="71" height="30" rx="1.6" fill="none" stroke="#000" strokeOpacity=".3" />
+    {[[68.5, 202.5], [131.5, 202.5], [68.5, 224.5], [131.5, 224.5]].map(([x, y]) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.6" fill={url('screw')} stroke="#000" strokeOpacity=".35" strokeWidth=".5" />)}
+
+    {/* The foot and stem: a flared foot, a knot, and a neck rising into the bowl. */}
+    <ellipse cx="100" cy="180" rx="30" ry="4.5" fill={url('metal')} />
+    <path d="M70 180V176C70 173 84 171 100 171S130 173 130 176V180Z" fill={url('metal')} />
+    <path d="M70 176C70 173 84 171 100 171S130 173 130 176" fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="1" />
+    <path d="M93 145C93 156 88 165 77 172H123C112 165 107 156 107 145Z" fill={url('metal')} />
+    <path d="M93 145C93 156 88 165 77 172H123C112 165 107 156 107 145Z" fill={url('under')} />
+    <ellipse cx="100" cy="143" rx="14" ry="6" fill={url('metal')} />
+    <ellipse cx="100" cy="141.5" rx="12" ry="3" fill="#fff" opacity=".22" />
+    <path d="M89 118C92 126 94 132 95 140H105C106 132 108 126 111 118Z" fill={url('metal')} />
+
+    {/* Handles, behind the bowl: a dark tube, the metal over it, and a line of light along each. */}
+    <g fill="none" strokeLinecap="round">
+      {['M40 36C6 30 4 84 52 96', 'M160 36C194 30 196 84 148 96'].map(d => <g key={d}>
+        <path d={d} stroke="var(--c3)" strokeWidth="10" />
+        <path d={d} stroke={url('metal')} strokeWidth="7" />
+        <path d={d} stroke="#fff" strokeOpacity=".55" strokeWidth="1.6" transform="translate(-1.2 -1.4)" />
+      </g>)}
+    </g>
+
+    {/* The bowl: polished metal, darkening as it curves under, with an engraved band below the rim. */}
+    <path d="M34 22C34 70 52 104 84 116C92 119 108 119 116 116C148 104 166 70 166 22A66 9 0 0 1 34 22Z" fill={url('metal')} />
+    <path d="M34 22C34 70 52 104 84 116C92 119 108 119 116 116C148 104 166 70 166 22A66 9 0 0 1 34 22Z" fill={url('under')} />
+    <path d="M36 41A64 8.5 0 0 0 164 41" fill="none" stroke="#000" strokeOpacity=".28" strokeWidth="1.2" />
+    <path d="M36 42.6A64 8.5 0 0 0 164 42.6" fill="none" stroke="#fff" strokeOpacity=".4" strokeWidth=".8" />
+    <path d="M38 47A62 8 0 0 0 162 47" fill="none" stroke="#000" strokeOpacity=".2" strokeWidth=".8" />
+    {/* The open mouth, seen from just above, and the rolled rim around it. */}
+    <ellipse cx="100" cy="22" rx="66" ry="9" fill={url('inside')} />
+    <ellipse cx="100" cy="24" rx="60" ry="6" fill="#000" opacity=".18" />
+    <ellipse cx="100" cy="22" rx="66" ry="9" fill="none" stroke={url('metal')} strokeWidth="3.4" />
+    <path d="M40 24A62 7.5 0 0 0 160 24" fill="none" stroke="#fff" strokeOpacity=".6" strokeWidth="1" />
+    {/* Reflections: a soft streak down the lit side and a glint on the rim. */}
+    <path d="M62 30C60 58 66 86 80 104" fill="none" stroke="#fff" strokeOpacity=".7" strokeWidth="5" strokeLinecap="round" filter={url('soft')} />
+    <ellipse cx="66" cy="27" rx="7" ry="1.6" fill="#fff" opacity=".9" filter={url('soft')} />
+  </svg>
+}
+
+/** What's at stake, in the order a team meets it: a trophy for each campus prize (gold in the middle), then a
     boarding pass to Nationals in Calgary and an oversized cheque for the global prize, each under a handwritten
     caption. The pass and cheque say only what the site says elsewhere; the cheque names no bank and carries no
     signature. */
 export function PrizePodium() {
   return <div className="prize-stakes">
     <p className="prize-stage" aria-hidden="true">Win in Windsor</p>
-    <ol className="prize-rosettes" aria-label="Campus Grand Finale cash prizes">{CAMPUS_PRIZES.map(prize => <li key={prize.place} className={`rosette rosette--${prize.tone}`}>
-      <span className="rosette__badge">
-        <span className="rosette__place">{prize.place}<span className="visually-hidden"> place:</span></span>
-        <strong className="rosette__prize">{prize.prize}</strong>
-      </span>
-      <span className="rosette__tails" aria-hidden="true" />
+    <ol className="prize-trophies" aria-label="Campus Grand Finale cash prizes">{CAMPUS_PRIZES.map(prize => <li key={prize.place} className={`trophy trophy--${prize.tone}`}>
+      <TrophyArt tone={prize.tone} />
+      {/* The amount is engraved on the cup, the place on the plaque. */}
+      <strong className="trophy__prize">{prize.prize}</strong>
+      <span className="trophy__place"><span className="visually-hidden">, </span>{prize.place}<span className="visually-hidden"> place</span></span>
     </li>)}</ol>
     <p className="prize-stakes__note">Cash prizes for the top three teams at the Campus Grand Finale, in Canadian dollars.</p>
     <ul className="prize-beyond">

@@ -75,12 +75,15 @@ export function CompetePage() {
     </div>
   </div>
 }
-// Each tier reads "Name, amount.  What it includes." The first card of a lead set is highlighted.
+// Each tier reads "Name, amount.  What it includes." The first card of a lead set is highlighted, and the prize
+// partner tiers wear the colour of their prize, matched on the tier's name.
+const PRIZE_METALS: [RegExp, string][] = [[/^First Prize/, 'gold'], [/^Second Prize/, 'silver'], [/^Third Prize/, 'bronze']]
 function TierCards({ tiers, lead = false }: { tiers: string[]; lead?: boolean }) {
   return <div className="tier-list">{tiers.map((text, i) => {
     const [heading, ...rest] = text.split('.  ')
     const [name, amount] = heading.split(', ')
-    return <article className={`tier-card ${lead && i === 0 ? 'tier-card--lead' : ''}`} key={name}><div><h3>{name}</h3><p className="tier-amount">{amount}</p></div><div><p>{rest.join('.  ')}</p><p className="tier-report">{copy.tierReport}</p></div></article>
+    const metal = PRIZE_METALS.find(([pattern]) => pattern.test(name))?.[1]
+    return <article className={['tier-card', lead && i === 0 && 'tier-card--lead', metal && `tier-card--${metal}`].filter(Boolean).join(' ')} key={name}><div><h3>{name}</h3><p className="tier-amount">{amount}</p></div><div><p>{rest.join('.  ')}</p><p className="tier-report">{copy.tierReport}</p></div></article>
   })}</div>
 }
 export function PartnersPage() {
