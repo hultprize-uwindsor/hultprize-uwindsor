@@ -160,7 +160,9 @@ async function introChecks(page) {
       const heading = element.querySelector('h2')
       const rect = heading.getBoundingClientRect()
       const paintedHeading = document.elementsFromPoint(Math.max(1, Math.min(innerWidth - 1, rect.x + rect.width / 2)), Math.max(1, Math.min(innerHeight - 1, rect.y + rect.height / 2))).includes(heading)
-      return { scale: matrix.a, titleOpacity: Number(getComputedStyle(centre).opacity), separation, stickyTop: sticky.top, stickyWidth: sticky.width, viewportWidth: innerWidth, paintedHeading, words }
+      // The title is laid out at its starting zoom and only scaled down, so its size on screen is the two together.
+      const zoom = Number(heading.style.getPropertyValue('--title-zoom')) || 1
+      return { scale: matrix.a * zoom, transformScale: matrix.a, titleOpacity: Number(getComputedStyle(centre).opacity), separation, stickyTop: sticky.top, stickyWidth: sticky.width, viewportWidth: innerWidth, paintedHeading, words }
     })
   }
   const start = await snapshot(.03)
@@ -170,6 +172,7 @@ async function introChecks(page) {
   assert(start.stickyWidth >= start.viewportWidth * .98 && middle.stickyWidth >= middle.viewportWidth * .98, 'pinned scene has a real full-width clipping box')
   assert(start.paintedHeading, 'visible heading passes viewport hit testing instead of being clipped by a zero-width scene')
   assert(start.scale > 1.5 && middle.scale < start.scale * .65 && gathered.scale < middle.scale * .4, 'heading continuously shrinks through scroll progress')
+  assert([start, middle, gathered].every(shot => shot.transformScale <= 1.001), 'heading is never scaled up, which would blur its letters')
   assert(gathered.separation < start.separation * .1, 'independent cards converge into the centre stack')
   assert(middle.separation > gathered.separation && middle.separation < start.separation, 'card gathering is continuous, not a threshold switch')
   assert(Math.abs(middle.stickyTop) < 2 && Math.abs(gathered.stickyTop) < 2, 'scene remains pinned while title and cards move')

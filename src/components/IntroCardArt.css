@@ -1,0 +1,64 @@
+/* The intro cards' pictures fill their card's width, and don't take the card's big-number lettering. Chromium sizes
+   SVG lettering for the scale the card is drawn at, then scales it again, unless it's set for geometric precision. */
+:is(.team-puzzle, .free-ticket, .money-bag) svg { display:block; width:100%; height:auto; overflow:visible; font-weight:400; letter-spacing:normal; }
+:is(.free-ticket, .money-bag, .pitch-timer) text { text-rendering:geometricPrecision; }
+/* $1M printed into the burlap. */
+.money-bag__print { mix-blend-mode:multiply; opacity:.9; }
+/* The ticket's print, in its units: rules, the red price stamped on the stub, and the ticket's lettering. */
+.free-ticket__rule { fill:none; stroke:#2b1b24; stroke-opacity:.6; stroke-width:.75; }
+.free-ticket__rule--fine { stroke-opacity:.4; stroke-width:.45; }
+.free-ticket__price { font-family:var(--font-type); font-size:12px; text-anchor:middle; dominant-baseline:central; fill:#b3202d; fill-opacity:.9; }
+.free-ticket__admit,.free-ticket__free,.free-ticket__what { font-family:var(--font-sans); font-weight:800; text-anchor:middle; fill:#2b1b24; fill-opacity:.9; }
+.free-ticket__admit { font-size:7.2px; letter-spacing:1.6px; }
+.free-ticket__free { font-size:31px; letter-spacing:.5px; }
+.free-ticket__what { font-size:5.2px; font-weight:700; letter-spacing:.8px; }
+
+/* The four-minute card's stopwatch. A press of the crown starts it, the hand sweeps round the dial five seconds at a
+   time, and at four minutes it rings and shakes. Its resting state, shown with reduced motion, is the ringing one. */
+.pitch-timer { --timer-cycle:6.4s; display:block; width:78%; height:auto; margin:0 auto 8px; overflow:visible; }
+.pitch-timer__hand, .pitch-timer__body, .pitch-timer__ring { transform-box:view-box; transform-origin:100px 112px; }
+.pitch-timer__button { transform-box:view-box; transform-origin:100px 40px; animation:pitch-timer-button var(--timer-cycle) infinite; }
+.pitch-timer__hand { animation:pitch-timer-hand var(--timer-cycle) infinite; }
+.pitch-timer__elapsed { stroke-dashoffset:0; animation:pitch-timer-elapsed var(--timer-cycle) infinite; }
+.pitch-timer__body { animation:pitch-timer-shake var(--timer-cycle) infinite linear; }
+.pitch-timer__ring { animation:pitch-timer-ring var(--timer-cycle) infinite; }
+.floating-intro:not([data-in-view]) :is(.pitch-timer, .idea-bulb) * { animation-play-state:paused; }
+@keyframes pitch-timer-button { 0% { translate:0 4px; } 4%, 100% { translate:0 0; } }
+@keyframes pitch-timer-hand { 0% { rotate:0deg; animation-timing-function:steps(48, end); } 62%, 100% { rotate:360deg; } }
+@keyframes pitch-timer-elapsed {
+  0% { stroke-dashoffset:304.73; opacity:.85; animation-timing-function:steps(48, end); }
+  62%, 88% { stroke-dashoffset:0; opacity:.85; }
+  97%, 100% { stroke-dashoffset:0; opacity:0; }
+}
+@keyframes pitch-timer-shake {
+  0%, 62% { rotate:0deg; translate:0 0; }
+  63%, 65%, 67%, 69%, 71%, 73%, 75% { rotate:-6deg; translate:-1.5px -2px; }
+  64%, 66%, 68%, 70%, 72%, 74%, 76% { rotate:6deg; translate:1.5px -1px; }
+  77% { rotate:-4deg; translate:0 -1px; }
+  78% { rotate:3deg; translate:0 0; }
+  79% { rotate:-2deg; }
+  80% { rotate:1deg; }
+  81%, 100% { rotate:0deg; translate:0 0; }
+}
+@keyframes pitch-timer-ring {
+  0%, 62% { opacity:0; scale:.85; }
+  63%, 67%, 71%, 75%, 79% { opacity:1; scale:1; }
+  65%, 69%, 73%, 77%, 81% { opacity:1; scale:1.12; }
+  84%, 100% { opacity:0; scale:1; }
+}
+
+/* The student ideas card's bulb. Off for a moment, it flickers as it catches, comes up to full, glows with the little
+   unsteadiness of a hot filament, then fades and comes on again; its light spreads across the card as it brightens. */
+.idea-bulb { --bulb-cycle:6.5s; display:block; width:80%; height:auto; margin:-6px auto 8px; overflow:visible; }
+.idea-bulb__light { animation:idea-bulb-light var(--bulb-cycle) infinite; }
+.idea-bulb__glow { transform-box:view-box; transform-origin:100px 72px; animation:idea-bulb-light var(--bulb-cycle) infinite, idea-bulb-spread var(--bulb-cycle) infinite; }
+@keyframes idea-bulb-light {
+  0%, 12% { opacity:0; }
+  13.5% { opacity:.75; } 14.5% { opacity:.1; } 16.5% { opacity:.9; } 17.5% { opacity:.3; }
+  22% { opacity:1; }
+  38% { opacity:.92; } 52% { opacity:1; } 66% { opacity:.94; } 80% { opacity:1; }
+  86% { opacity:1; }
+  96%, 100% { opacity:0; }
+}
+@keyframes idea-bulb-spread { 0%, 12% { scale:.55; } 26% { scale:1.03; } 52% { scale:.98; } 86% { scale:1.02; } 100% { scale:.7; } }
+@media (prefers-reduced-motion:reduce) { :is(.pitch-timer, .idea-bulb) * { animation:none; } }

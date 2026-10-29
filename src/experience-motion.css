@@ -2,7 +2,8 @@
 .floating-intro { height:350svh; min-height:0; display:block; overflow:clip; background:white; }
 .floating-intro__sticky { position:sticky; top:0; width:100%; height:100svh; min-height:0; overflow:clip; }
 .floating-intro__centre { position:absolute; inset:0; max-width:none; display:grid; place-items:center; margin:0; padding:0; z-index:1; transform-origin:50% 50%; will-change:transform; }
-.floating-intro h2 { margin:0; font-size:clamp(4.5rem,8vw,8.5rem); color:var(--pink); line-height:1.01; letter-spacing:-.06em; }
+.floating-intro h2 { --title-size:clamp(4.5rem,8vw,8.5rem); margin:0; font-size:calc(var(--title-size) * var(--title-zoom, 1)); color:var(--pink); line-height:1.01; letter-spacing:-.06em; }
+.floating-intro[data-scroll-scene] h2 { white-space:nowrap; }
 .floating-intro__cards { position:absolute; inset:0; pointer-events:none; z-index:2; }
 .floating-intro .floating-card { position:absolute; width:230px; top:50%; left:50%; right:auto; bottom:auto; padding:24px; border-radius:23px; margin:0; opacity:0; box-shadow:0 5px 30px #002b5109; transform:translate(-50%,-50%); will-change:transform; }
 .floating-intro .floating-card--one { background:#ccebdc; z-index:2; }
@@ -11,10 +12,13 @@
 .floating-intro .floating-card--four { background:#ece4f4; z-index:3; }
 .floating-intro .floating-card--five { background:var(--uw-blue-dark); color:white; z-index:5; }
 .floating-card--five strong { color:#ffb5da; }
-/* The two photo cards are prints: a white frame, the photo square-cornered, its line written underneath. */
-.floating-intro .floating-card:has(> img) { padding:12px 12px 14px; border-radius:2px; background:#fff; box-shadow:0 1px 2px rgb(40 20 5 / 18%),0 18px 30px -14px rgb(40 20 5 / 40%); }
-.floating-intro .floating-card:has(> img) img { border-radius:0; margin-bottom:8px; }
-.floating-intro .floating-card:has(> img) > span { display:block; font-family:var(--font-hand); font-size:1.35rem; line-height:1.15; color:var(--uw-blue-dark); }
+/* The team card's jigsaw, the student ideas card's bulb and the four-minute card's stopwatch with their lines written
+   under them, the $0 card's ticket and the $1M card's money bag. */
+.floating-intro .team-puzzle { display:block; margin:-6px -10px 10px; }
+.floating-intro .floating-card--one > strong { margin:12px 0 16px; }
+.floating-intro .free-ticket { margin:14px -14px 12px; }
+.floating-intro .floating-card > .floating-card__note { display:block; font-family:var(--font-hand); font-size:1.35rem; line-height:1.15; color:var(--uw-blue-dark); text-align:center; }
+.floating-intro .money-bag { margin:14px -4px 12px; }
 .intro-actions { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px; padding-bottom:70px; pointer-events:none; }
 .intro-action { display:flex; align-items:center; gap:32px; transform:translateY(110vh); opacity:0; will-change:transform; }
 .intro-action > span { display:grid; place-items:center; width:76px; height:76px; background:var(--pink); color:white; border-radius:23px; }
@@ -58,7 +62,7 @@
 @media(max-width:1100px) { .floating-intro .floating-card { width:195px; padding:20px; } .intro-action { gap:24px; } .intro-action > span { width:64px; height:64px; border-radius:18px; } }
 @media(max-width:760px) {
  .floating-intro { height:290svh; }
- .floating-intro h2 { font-size:clamp(3rem,12.5vw,5.5rem); }
+ .floating-intro h2 { --title-size:clamp(3rem,12.5vw,5.5rem); }
  .floating-intro .floating-card { width:190px; padding:20px; }
  .floating-intro .floating-card strong { font-size:3.5rem; }
  .floating-intro .floating-card > span,.floating-intro .floating-card > p { font-size:.75rem; }
@@ -83,7 +87,7 @@
  .floating-intro { height:auto; padding:96px 24px; }
  .floating-intro__sticky { position:relative; height:auto; overflow:visible; }
  .floating-intro__centre { position:relative; transform:none!important; opacity:1!important; }
- .floating-intro__cards { position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,230px)); gap:24px; justify-content:center; margin-top:56px; }
+ .floating-intro__cards { position:relative; display:grid; grid-template-columns:repeat(3,minmax(0,230px)); gap:24px; justify-content:center; align-items:start; margin-top:56px; }
  .floating-intro .floating-card { position:relative; width:100%; top:auto; left:auto; opacity:1!important; transform:none!important; }
  .intro-actions { display:none; }
  .journey-copy > *, .journey-experience .journey-visual, .journey-metric { transform:none!important; transition:none!important; }

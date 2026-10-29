@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from './PageLink'
 import { ArrowLeft, ArrowRight, Mic, Trophy, Users } from 'lucide-react'
-import { CAMPUS_PHOTOS, HOME_EVENT_PHOTOS, SHOW_EVENT_PHOTOS } from '../data/assets'
+import { HOME_EVENT_PHOTOS } from '../data/assets'
+import { FreeTicket, IdeaBulb, MoneyBag, PitchTimer, TeamPuzzle } from './IntroCardArt'
 
 const clamp = (value: number) => Math.max(0, Math.min(1, value))
 const steps = [
@@ -22,17 +23,23 @@ export function FloatingIntroduction() {
     let frame = 0
     const render = () => {
       frame = 0
-      if (reduce.matches) { el.removeAttribute('data-scroll-scene'); return }
+      const title = el.querySelector<HTMLElement>('.floating-intro__centre')!
+      const heading = title.querySelector('h2')!
+      if (reduce.matches) { el.removeAttribute('data-scroll-scene'); heading.style.removeProperty('--title-zoom'); return }
       el.dataset.scrollScene = 'active'
       const rect = el.getBoundingClientRect()
+      el.toggleAttribute('data-in-view', rect.bottom > 0 && rect.top < innerHeight)
       const progress = clamp(-rect.top / Math.max(1, rect.height - innerHeight))
       const gather = clamp(progress / .55)
       const leave = clamp((progress - .53) / .14)
-      const title = el.querySelector<HTMLElement>('.floating-intro__centre')!
-      const heading = title.querySelector('h2')!
-      const initialScale = Math.min(1.85, (innerWidth - 40) / heading.offsetWidth, (innerHeight - 120) / heading.offsetHeight)
+      // The title is laid out at the size it starts at (--title-zoom) and only ever scaled down. Browsers draw a moving
+      // layer once at its laid-out size, so scaling it up would stretch that drawing and blur the letters.
+      const zoom = Number(heading.style.getPropertyValue('--title-zoom')) || 1
+      const fit = Math.min(1.85, (innerWidth - 40) * zoom / heading.offsetWidth, (innerHeight - 120) * zoom / heading.offsetHeight)
+      const initialScale = Math.abs(fit - zoom) > .01 ? fit : zoom
+      if (initialScale !== zoom) heading.style.setProperty('--title-zoom', String(initialScale))
       const titleScale = Math.max(.12, initialScale - gather * (initialScale - .15))
-      title.style.transform = `translate3d(0,${-leave * innerHeight * .95}px,0) scale(${titleScale})`
+      title.style.transform = `translate3d(0,${-leave * innerHeight * .95}px,0) scale(${titleScale / initialScale})`
       title.style.opacity = String(1 - clamp((gather - .87) / .13))
       const cards = el.querySelectorAll<HTMLElement>('.floating-card')
       const narrow = innerWidth <= 760
@@ -63,11 +70,11 @@ export function FloatingIntroduction() {
   return <section ref={ref} className="floating-intro" aria-labelledby="intro-heading"><div className="floating-intro__sticky">
     <div className="floating-intro__centre"><h2 id="intro-heading">Big ideas<br />Start here</h2></div>
     <div className="floating-intro__cards">
-      <div className="floating-card floating-card--one"><span>The team</span><strong>2-4</strong><p>Different skills. Shared ambition.</p></div>
-      <div className="floating-card floating-card--two">{SHOW_EVENT_PHOTOS ? <img src={CAMPUS_PHOTOS.applause.src} alt="" loading="lazy" /> : <span className="floating-symbol" aria-hidden="true">✳</span>}<span>Made of student ideas.</span></div>
-      <div className="floating-card floating-card--three"><span>Your starting point</span><strong>$0</strong><p>Free entry. Free workshops.</p></div>
-      <div className="floating-card floating-card--four">{SHOW_EVENT_PHOTOS ? <img src={CAMPUS_PHOTOS.pitch.src} alt="" loading="lazy" /> : <span className="floating-symbol" aria-hidden="true">↗</span>}<span>Four minutes. Make them count.</span></div>
-      <div className="floating-card floating-card--five"><span>The global prize</span><strong>$1M</strong><p>One winning startup.<br />A world of possibility.</p></div>
+      <div className="floating-card floating-card--one"><TeamPuzzle /><span>The team</span><strong>2-4</strong><p>Different skills. Shared ambition.</p></div>
+      <div className="floating-card floating-card--two"><IdeaBulb /><span className="floating-card__note">Made of student ideas.</span></div>
+      <div className="floating-card floating-card--three"><span>Your starting point</span><FreeTicket /><p>Free entry. Free workshops.</p></div>
+      <div className="floating-card floating-card--four"><PitchTimer /><span className="floating-card__note">Four minutes. Make them count.</span></div>
+      <div className="floating-card floating-card--five"><span>The global prize</span><MoneyBag /><p>One winning startup.<br />A world of possibility.</p></div>
     </div>
     <div className="intro-actions" aria-label="Build, pitch and compete">{steps.map(step => <div key={step.title} className="intro-action"><span aria-hidden="true"><step.icon strokeWidth={1.9} /></span><p>{step.title}</p></div>)}</div>
   </div></section>
