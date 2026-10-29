@@ -5,22 +5,82 @@ import { RegisterButton } from './PageParts'
 import { RollingLabel } from './MotionText'
 import { SITE } from '../data/site'
 import { COMMUNITY_PARTNERS } from '../data/communityPartners'
+import { committee } from '../data/committee'
+import { HOME_BOARD_PHOTOS } from '../data/assets'
+import { attendanceSeedEvents } from '../lib/attendance'
+import './eventMarks.css'
 import './Header.css'
 
 const MOBILE_QUERY = '(max-width: 1180px)'
+
+// Each menu item's picture is a scrap from that page: our team's Polaroids, year one's trophies, this year's flyers,
+// the next event's date, a news clipping, a partner's card. The photos have nobody in them, since the menu shows on
+// every page and the event photo consent names pages (photo-permissions.json).
+
+/** A board photo's small copy, if the board photos are published. */
+const boardPhoto = (name: string) => HOME_BOARD_PHOTOS.find(photo => photo.name === name)?.src
+
+/** A photo as a little print, tilted, that straightens when its item is hovered. */
+function Print({ name, focus }: { name: string; focus: string }) {
+  const src = boardPhoto(name)
+  if (!src) return <Clipping />
+  return <span className="nav-thumbnail" aria-hidden="true"><span className="nav-print"><img src={src} alt="" width="64" height="64" loading="lazy" style={{ objectPosition: focus }} /></span></span>
+}
+
+/** Three of the team's Polaroids, fanned out. */
+function TeamFan() {
+  return <span className="nav-thumbnail nav-thumbnail--fan" aria-hidden="true">{committee.slice(0, 3).map(([, , , slug]) => <span key={slug} className="nav-print"><img src={`/images/team/${slug}-polaroid-360.webp`} alt="" width="64" height="64" loading="lazy" /></span>)}</span>
+}
+
+/** The next event's date, torn off the calendar in its event type's colour. */
+function NextEventDate() {
+  const [now] = useState(() => Date.now())
+  const events = [...attendanceSeedEvents].sort((a, b) => a.startsAt.localeCompare(b.startsAt))
+  const next = events.find(event => Date.parse(event.endsAt) > now) ?? events[events.length - 1]
+  const part = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('en-US', { timeZone: next.timeZone, ...options }).format(new Date(next.startsAt))
+  return <span className="nav-thumbnail" aria-hidden="true"><span className={`date-badge nav-date mark--${next.group}`}><span>{part({ month: 'short' })}</span><strong>{part({ day: 'numeric' })}</strong></span></span>
+}
+
+/** A newspaper clipping: a headline over two columns of type, cut out by hand. */
+function Clipping() {
+  return <span className="nav-thumbnail" aria-hidden="true"><span className="nav-clipping" /></span>
+}
+
+/** A partner's logo on a business card. */
+function LogoCard({ logo }: { logo?: string }) {
+  return <span className="nav-thumbnail" aria-hidden="true"><span className="nav-card">{logo && <img src={logo} alt="" width="64" height="40" loading="lazy" />}</span></span>
+}
+
+/** Every partner's card in a pile, the first on top. */
+function LogoCards() {
+  return <span className="nav-thumbnail nav-thumbnail--pile" aria-hidden="true">{COMMUNITY_PARTNERS.filter(partner => partner.logo).slice(0, 3).map(partner => <span key={partner.slug} className="nav-card"><img src={partner.logo} alt="" width="64" height="40" loading="lazy" /></span>)}</span>
+}
+
+/** The homepage's cork board, with prints pinned to it. */
+function CorkBoard() {
+  return <span className="nav-thumbnail" aria-hidden="true"><span className="nav-cork"><i /><i /><i /></span></span>
+}
+
+/** An admission ticket, as on the homepage's "Up next". */
+function Ticket() {
+  return <span className="nav-thumbnail" aria-hidden="true"><span className="nav-ticket"><i /></span></span>
+}
+
+/** A stamped envelope. */
+function Envelope() {
+  return <span className="nav-thumbnail" aria-hidden="true"><span className="nav-envelope" /></span>
+}
+
 const programLinks = [
-  { to: '/about', label: 'About', description: 'The competition and our team', image: '/images/hult-placeholders/community.webp' },
-  { to: '/year-one', label: 'Year one', description: 'Where we started', image: '/images/hult-placeholders/competition.webp' },
-  { to: '/this-year', label: 'This year', description: 'The road to Nationals', image: '/images/hult-placeholders/global-final.webp' },
-  { to: '/events', label: 'Events', description: 'What’s happening next', image: '/images/events/hult-fusion-launch-flyer.jpg' },
+  { to: '/about', label: 'About', description: 'The competition and our team', picture: <TeamFan /> },
+  { to: '/year-one', label: 'Year one', description: 'Where we started', picture: <Print name="year-one-0083" focus="50% 72%" /> },
+  { to: '/this-year', label: 'This year', description: 'The road to Nationals', picture: <Print name="launch-1888" focus="38% 50%" /> },
+  { to: '/events', label: 'Events', description: 'What’s happening next', picture: <NextEventDate /> },
+  { to: '/blog', label: 'Blog', description: 'News, notices and stories', picture: <Clipping /> },
 ]
 
 function HomeIcon() {
   return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7M5 9v11h14V9M9 20v-7h6v7" /></svg>
-}
-
-function Thumbnail({ image, motif = 'orbit', logo = false }: { image?: string; motif?: string; logo?: boolean }) {
-  return <span className={`nav-thumbnail${logo ? ' nav-thumbnail--logo' : ''}${image ? '' : ` nav-thumbnail--${motif}`}`} aria-hidden="true">{image ? <img src={image} alt="" width="64" height="64" loading="lazy" /> : <i />}</span>
 }
 
 function NavMenu({ label, active, children }: { label: string; active: boolean; children: ReactNode }) {
@@ -169,10 +229,10 @@ export default function Header() {
       </div>
       <nav id="site-navigation" className="site-header__nav" aria-label="Main navigation">
         <NavLink to="/" end className="site-header__home" aria-label="Home"><span className="nav-hover-fill" aria-hidden="true" /><HomeIcon /></NavLink>
-        <NavMenu label="Programme" active={/^\/(about|year-one|this-year|events)(\/|$)/.test(location.pathname)}>{programLinks.map(link => <NavLink key={link.to} to={link.to}><Thumbnail image={link.image} /><span className="nav-item-copy"><span>{link.label}</span><small>{link.description}</small></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>)}</NavMenu>
+        <NavMenu label="Programme" active={/^\/(about|year-one|this-year|events|blog)(\/|$)/.test(location.pathname)}>{programLinks.map(link => <NavLink key={link.to} to={link.to}>{link.picture}<span className="nav-item-copy"><span>{link.label}</span><small>{link.description}</small></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>)}</NavMenu>
         <NavLink to="/attend"><span className="nav-hover-fill" aria-hidden="true" /><span>Attend our events</span></NavLink>
         <NavLink to="/compete"><span className="nav-hover-fill" aria-hidden="true" /><span>Compete</span></NavLink>
-        <NavMenu label="Partners" active={/^\/partners(\/|$)/.test(location.pathname)}><NavLink to="/partners" end><Thumbnail motif="steps" /><span className="nav-item-copy"><span>Our partners</span><small>Backing student founders</small></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>{COMMUNITY_PARTNERS.map(partner => <NavLink key={partner.slug} to={`/partners/${partner.slug}`}><Thumbnail image={partner.logo} logo /><span className="nav-item-copy"><span>{partner.name}</span></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>)}</NavMenu>
+        <NavMenu label="Partners" active={/^\/partners(\/|$)/.test(location.pathname)}><NavLink to="/partners" end><LogoCards /><span className="nav-item-copy"><span>Our partners</span><small>Backing student founders</small></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>{COMMUNITY_PARTNERS.map(partner => <NavLink key={partner.slug} to={`/partners/${partner.slug}`}><LogoCard logo={partner.logo} /><span className="nav-item-copy"><span>{partner.name}</span></span><span className="nav-item-arrow" aria-hidden="true">↗</span></NavLink>)}</NavMenu>
         <NavLink to="/contact"><span className="nav-hover-fill" aria-hidden="true" /><span>Contact</span></NavLink>
       </nav>
       <button ref={menuTrigger} type="button" className="site-header__toggle" aria-label="Menu" aria-haspopup="dialog" aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpenAt(location.key)}>Menu<span className="menu-symbol" aria-hidden="true"><i /><i /></span></button>
@@ -191,10 +251,10 @@ export default function Header() {
         <Link to="/" className="site-header__brand" aria-label="University of Windsor and EF Hult Prize, home"><img className="brand-mark" src="/images/logos/hult-uwindsor-navbar-dark.png" alt="University of Windsor and EF Hult Prize" width="1348" height="240" /></Link><RegisterButton>Compete</RegisterButton>
       </div>
       <nav className="mobile-navigation__links" aria-label="Main navigation">
-        <div className="mobile-navigation__group"><NavLink to="/" end><Thumbnail /><span>Home</span></NavLink><NavLink to="/attend"><Thumbnail motif="steps" /><span>Attend our events</span></NavLink></div>
-        <div className="mobile-navigation__group"><h2>Programme</h2>{programLinks.map(link => <NavLink key={link.to} to={link.to}><Thumbnail image={link.image} /><span>{link.label}</span></NavLink>)}</div>
-        <div className="mobile-navigation__group"><NavLink to="/compete"><Thumbnail motif="steps" /><span>Compete</span></NavLink><NavLink to="/contact"><Thumbnail motif="chat" /><span>Contact</span></NavLink></div>
-        <div className="mobile-navigation__group"><h2>Partners</h2><NavLink to="/partners" end><Thumbnail motif="steps" /><span>Our partners</span></NavLink>{COMMUNITY_PARTNERS.map(partner => <NavLink key={partner.slug} to={`/partners/${partner.slug}`}><Thumbnail image={partner.logo} logo /><span>{partner.name}</span></NavLink>)}</div>
+        <div className="mobile-navigation__group"><NavLink to="/" end><CorkBoard /><span>Home</span></NavLink><NavLink to="/attend"><Ticket /><span>Attend our events</span></NavLink></div>
+        <div className="mobile-navigation__group"><h2>Programme</h2>{programLinks.map(link => <NavLink key={link.to} to={link.to}>{link.picture}<span>{link.label}</span></NavLink>)}</div>
+        <div className="mobile-navigation__group"><NavLink to="/compete"><Print name="launch-1658" focus="72% 60%" /><span>Compete</span></NavLink><NavLink to="/contact"><Envelope /><span>Contact</span></NavLink></div>
+        <div className="mobile-navigation__group"><h2>Partners</h2><NavLink to="/partners" end><LogoCards /><span>Our partners</span></NavLink>{COMMUNITY_PARTNERS.map(partner => <NavLink key={partner.slug} to={`/partners/${partner.slug}`}><LogoCard logo={partner.logo} /><span>{partner.name}</span></NavLink>)}</div>
         <div className="mobile-navigation__actions"><Link to="/compete#signup">Get programme updates <span aria-hidden="true">↗</span></Link><a href={SITE.globalUrl} target="_blank" rel="noopener noreferrer">The global EF Hult Prize <span aria-hidden="true">↗</span></a></div>
       </nav>
       </div></div>

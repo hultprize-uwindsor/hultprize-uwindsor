@@ -1,0 +1,14 @@
+/* The minigame's raffle tickets, drawn in the post picture's 400 × 300 box. Print sizes are in its units. */
+.post-art--tickets svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.raffle-tickets__rule { fill:none; stroke:#2b1b24; stroke-opacity:.6; stroke-width:.7; }
+.raffle-tickets__rule--fine { stroke-opacity:.4; stroke-width:.4; }
+.raffle-tickets__game,.raffle-tickets__prize,.raffle-tickets__draw { font-family:var(--font-sans); font-weight:800; text-anchor:middle; fill:#2b1b24; fill-opacity:.9; }
+.raffle-tickets__game { font-size:6px; letter-spacing:.9px; }
+.raffle-tickets__prize { font-size:21px; letter-spacing:-.4px; }
+.raffle-tickets__draw { font-size:4.6px; font-weight:700; letter-spacing:.6px; }
+/* Numbered by the press in red. */
+.raffle-tickets__number { font-family:var(--font-type); font-size:8.6px; text-anchor:middle; dominant-baseline:central; fill:#b3202d; fill-opacity:.9; }
+/* Hovering a card lifts the strip a little. */
+.raffle-tickets__strip { transition:translate .5s var(--ease-ui); }
+.blog-card:hover .raffle-tickets__strip { translate:0 -4px; }
+@media(prefers-reduced-motion:reduce) { .raffle-tickets__strip { transition:none; } }

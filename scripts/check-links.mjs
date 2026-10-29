@@ -4,7 +4,7 @@ import { writeFileSync } from 'node:fs'
 
 const base = process.env.CHECK_BASE_URL || 'http://127.0.0.1:5173'
 const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {})
-const routeTitles = { '/': 'Home', '/about': 'About', '/year-one': 'Year one', '/this-year': 'This year', '/events': 'Events', '/attend': 'Attend our events', '/attend/manage': 'Manage attendance', '/organiser/events': 'Organiser dashboard', '/privacy': 'Event registration privacy', '/compete': 'Compete', '/partners': 'Partners', '/contact': 'Find us', '/partners/fusion': 'Fusion', '/partners/sterling': 'Sterling Cybersecurity and Advisory Group', '/partners/wetech': 'WEtech Alliance' }
+const routeTitles = { '/': 'Home', '/about': 'About', '/year-one': 'Year one', '/this-year': 'This year', '/events': 'Events', '/blog': 'Blog', '/attend': 'Attend our events', '/attend/manage': 'Manage attendance', '/organiser/events': 'Organiser dashboard', '/privacy': 'Event registration privacy', '/compete': 'Compete', '/partners': 'Partners', '/contact': 'Find us', '/partners/fusion': 'Fusion', '/partners/sterling': 'Sterling Cybersecurity and Advisory Group', '/partners/wetech': 'WEtech Alliance' }
 const visit = async (page, url) => {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
   await page.locator('.site-header').waitFor()
@@ -79,7 +79,7 @@ try {
     }
     console.log(`${width}px: navbar and footer links checked.`)
     // New page links, partner next steps, and legacy redirects must resolve too.
-    for (const path of ['/about', '/year-one', '/this-year', '/compete', '/partners', '/contact', '/events', '/events/fusion-launch', '/events/registration-closes-november-20', '/partners/fusion', '/partners/sterling', '/partners/wetech', '/team', '/go']) {
+    for (const path of ['/about', '/year-one', '/this-year', '/compete', '/partners', '/contact', '/events', '/events/fusion-launch', '/events/registration-closes-november-20', '/blog', '/blog/the-ticket-jar', '/blog/fusion-launch-day', '/partners/fusion', '/partners/sterling', '/partners/wetech', '/team', '/go']) {
       await visit(page, base + path)
       await page.locator('main h1').waitFor()
       const mainLinks = await page.locator('main a').evaluateAll(as => as.map(a => a.href).filter(href => href.startsWith(location.origin)))

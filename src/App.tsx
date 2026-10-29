@@ -13,6 +13,7 @@ import HomePage from './pages/HomePage'
 import { AboutPage, YearOnePage, ThisYearPage, CompetePage, PartnersPage } from './pages/ChapterPages'
 import ContactPage from './pages/ContactPage'
 import EventsPage, { EventPostPage, NotFoundPage } from './pages/EventsPage'
+import BlogPage, { BlogPostPage } from './pages/BlogPage'
 import AttendPage from './pages/AttendPage'
 import ManageAttendancePage from './pages/ManageAttendancePage'
 import AttendanceAdminPage from './pages/AttendanceAdminPage'
@@ -58,7 +59,7 @@ export default function App() {
   return <><PageMeta /><a href="#main" className="skip-link">Skip to main content</a>{!tool && <Header />}<main ref={main} id="main" tabIndex={-1}><Routes>
     <Route path="/" element={hash === '#signup' ? <Navigate to="/compete#signup" replace /> : <HomePage />} />
     <Route path="/about" element={<AboutPage />} /><Route path="/year-one" element={<YearOnePage />} /><Route path="/this-year" element={<ThisYearPage />} />
-    <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/partners/:slug" element={<PartnerPage />} /><Route path="/contact" element={<ContactPage />} />
+    <Route path="/events" element={<EventsPage />} /><Route path="/events/:slug" element={<EventPostPage />} /><Route path="/blog" element={<BlogPage />} /><Route path="/blog/:slug" element={<BlogPostPage />} /><Route path="/compete" element={<CompetePage />} /><Route path="/partners" element={<PartnersPage />} /><Route path="/partners/:slug" element={<PartnerPage />} /><Route path="/contact" element={<ContactPage />} />
     <Route path="/attend" element={<AttendPage />} /><Route path="/attend/manage" element={<ManageAttendancePage />} /><Route path="/organiser/events" element={<AttendanceAdminPage />} /><Route path="/privacy" element={<RegistrationPrivacyPage />} />
     <Route path="/team" element={<Navigate to="/about#team" replace />} /><Route path="/go" element={<GoRedirect />} /><Route path="*" element={<NotFoundPage />} />
   </Routes></main>{!tool && <>{SHOW_PARTNER_STRIP && <PartnerStrip />}<Footer /><ScrollToTop /></>}<SiteDrawers /></>

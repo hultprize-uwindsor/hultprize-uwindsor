@@ -61,6 +61,30 @@
       "destination": "/events/fusion-launch/index.html"
     },
     {
+      "source": "/blog",
+      "destination": "/blog/index.html"
+    },
+    {
+      "source": "/blog/the-ticket-jar",
+      "destination": "/blog/the-ticket-jar/index.html"
+    },
+    {
+      "source": "/blog/third-place-prize",
+      "destination": "/blog/third-place-prize/index.html"
+    },
+    {
+      "source": "/blog/peoples-choice-award",
+      "destination": "/blog/peoples-choice-award/index.html"
+    },
+    {
+      "source": "/blog/first-grand-finale",
+      "destination": "/blog/first-grand-finale/index.html"
+    },
+    {
+      "source": "/blog/fusion-launch-day",
+      "destination": "/blog/fusion-launch-day/index.html"
+    },
+    {
       "source": "/attend",
       "destination": "/attend/index.html"
     },

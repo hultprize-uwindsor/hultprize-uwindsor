@@ -29,23 +29,69 @@
 .program-menu__panel > a:hover, .program-menu__panel > a:focus-visible, .program-menu__panel > a.active { opacity:1; background:var(--paper-pink); }
 .program-menu__panel .nav-item-copy { transition:transform .2s cubic-bezier(.165,.84,.44,1); }
 .program-menu__panel > a:hover .nav-item-copy, .program-menu__panel > a:focus-visible .nav-item-copy { transform:translateX(.61875em); }
-.program-menu__panel .nav-thumbnail > * { transform:scale(1.15); transition:transform .6s .15s; }
-.program-menu__panel > a:hover .nav-thumbnail > *, .program-menu__panel > a:focus-visible .nav-thumbnail > * { transform:scale(1); transition-delay:0s; }
 .program-menu__panel .nav-item-arrow { transition:transform .2s cubic-bezier(.215,.61,.355,1); }
 .program-menu__panel > a:hover .nav-item-arrow { transform:translate(10%,-3%); }
 .nav-item-copy { display: grid; gap: 4px; min-width: 0; font-size: 16px; }
 .nav-item-copy small { font-size: 12px; line-height: 1.4; }
 .nav-item-arrow { margin-left: auto; padding: 0 4px; }
-.nav-thumbnail { display: grid; place-items: center; flex-shrink: 0; width: 52px; height: 52px; border-radius: 11px; background: #ffb4dd; overflow: hidden; }
-.nav-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
-.nav-thumbnail--logo { background: #fff; }
-.nav-thumbnail--logo img { object-fit: contain; padding: 6px; }
-.nav-thumbnail--orbit { background: linear-gradient(140deg, #ffdbed, #ff76be); }
-.nav-thumbnail--orbit i { width: 35px; height: 35px; border: 7px solid #e60078; border-radius: 50%; transform: rotate(-25deg) scaleX(.62); box-shadow: 6px 4px 0 #ff319b, 11px 8px 0 #ff75bf; }
-.nav-thumbnail--steps { background: #ffb4dd; }
-.nav-thumbnail--steps i { width: 26px; height: 9px; background: var(--uw-blue-dark); transform: rotate(-30deg); box-shadow: 0 9px 0 #e62b91, 0 -9px 0 #fff; border-radius: 4px; }
-.nav-thumbnail--chat i { position: relative; width: 28px; height: 23px; border: 2px solid var(--uw-blue-dark); border-radius: 7px; }
-.nav-thumbnail--chat i::after { content: ''; position: absolute; width: 7px; height: 7px; left: 4px; bottom: -5px; background: #ffb4dd; border-left: 2px solid var(--uw-blue-dark); border-bottom: 2px solid var(--uw-blue-dark); transform: skewY(-35deg); }
+/* Menu pictures: a scrap from each page, set down at a slight angle (alternating down the list) that straightens and
+   lifts when its item is hovered. Each lies close to the page with a soft shadow where it lifts, like the Polaroids. */
+.nav-thumbnail { --tilt:-4deg; --lift:0 1px 1.5px rgb(40 20 5 / 22%),0 6px 10px -5px rgb(40 20 5 / 45%); position: relative; display: grid; place-items: center; flex-shrink: 0; width: 60px; height: 56px; }
+a:nth-child(even) > .nav-thumbnail { --tilt:3.5deg; }
+.nav-thumbnail > * { rotate:var(--tilt); transition:rotate .5s var(--ease-ui),translate .5s var(--ease-ui); }
+:is(.program-menu__panel, .mobile-navigation__group) > a:is(:hover,:focus-visible) > .nav-thumbnail:not(.nav-thumbnail--fan, .nav-thumbnail--pile) > * { rotate:0deg; translate:0 -2px; }
+/* A print: a square photo in a white frame with a deeper bottom edge. */
+.nav-print { display: block; width: 44px; padding: 3px 3px 8px; background: #fff; box-shadow: var(--lift); }
+.nav-print img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; background: #efe5d9; }
+/* A fan of three prints, the middle one on top; hovering spreads them a little further. */
+.nav-thumbnail:is(.nav-thumbnail--fan, .nav-thumbnail--pile) > * { position: absolute; }
+.nav-thumbnail--fan > .nav-print { width: 30px; padding: 2px 2px 6px; }
+.nav-thumbnail--fan > :nth-child(1) { translate: -14px 3px; rotate: -10deg; }
+.nav-thumbnail--fan > :nth-child(2) { z-index: 1; translate: 0 -2px; rotate: -1deg; }
+.nav-thumbnail--fan > :nth-child(3) { translate: 14px 3px; rotate: 9deg; }
+:is(.program-menu__panel, .mobile-navigation__group) > a:is(:hover,:focus-visible) > .nav-thumbnail--fan > :nth-child(1) { translate: -17px 2px; rotate: -13deg; }
+:is(.program-menu__panel, .mobile-navigation__group) > a:is(:hover,:focus-visible) > .nav-thumbnail--fan > :nth-child(2) { translate: 0 -4px; rotate: 0deg; }
+:is(.program-menu__panel, .mobile-navigation__group) > a:is(:hover,:focus-visible) > .nav-thumbnail--fan > :nth-child(3) { translate: 17px 2px; rotate: 12deg; }
+/* A pile of cards from the front corner back, the first in front; hovering loosens it. */
+.nav-thumbnail--pile > :nth-child(1) { z-index: 3; translate: -5px 7px; rotate: -4deg; }
+.nav-thumbnail--pile > :nth-child(2) { z-index: 2; translate: 3px -1px; rotate: 6deg; }
+.nav-thumbnail--pile > :nth-child(3) { z-index: 1; translate: 6px -9px; rotate: -7deg; }
+:is(.program-menu__panel, .mobile-navigation__group) > a:is(:hover,:focus-visible) > .nav-thumbnail--pile > :nth-child(1) { translate: -7px 9px; rotate: -6deg; }
+:is(.program-menu__panel, .mobile-navigation__group) > a:is(:hover,:focus-visible) > .nav-thumbnail--pile > :nth-child(2) { translate: 4px -1px; rotate: 9deg; }
+:is(.program-menu__panel, .mobile-navigation__group) > a:is(:hover,:focus-visible) > .nav-thumbnail--pile > :nth-child(3) { translate: 8px -11px; rotate: -10deg; }
+/* The next event's date (eventMarks.css), with the next sheet of the pad showing beneath it. */
+.nav-thumbnail .nav-date { rotate: var(--tilt); box-shadow: 0 1px 2px rgb(40 20 5 / 22%), 2.5px 2.5px 0 -.5px #fff, 2.5px 3px 2px -.5px rgb(40 20 5 / 26%); }
+/* A newspaper clipping: a headline, a picture and two columns of type, cut out with scissors. */
+.nav-clipping { display: block; width: 46px; height: 42px; filter: drop-shadow(0 1px .8px rgb(40 20 5 / 30%)) drop-shadow(0 4px 4px rgb(40 20 5 / 18%)); }
+.nav-clipping::before { content: ''; display: block; height: 100%;
+  background: linear-gradient(#26282c 0 0) 5px 5px / 36px 4px no-repeat, linear-gradient(#26282c 0 0) 5px 11px / 24px 3px no-repeat,
+    linear-gradient(160deg, #c9c2b3, #9e978a) 5px 18px / 16px 11px no-repeat,
+    repeating-linear-gradient(rgb(38 40 44 / 55%) 0 1px, transparent 1px 3px) 5px 31px / 16px 7px no-repeat,
+    repeating-linear-gradient(rgb(38 40 44 / 55%) 0 1px, transparent 1px 3px) 25px 18px / 16px 20px no-repeat, #f4f0e6;
+  clip-path: polygon(0 3%, 9% 0, 22% 2%, 37% 0, 52% 2.5%, 68% .5%, 83% 2%, 100% 0, 98% 18%, 100% 36%, 98.5% 55%, 100% 74%, 98% 100%, 80% 98%, 63% 100%, 46% 97.5%, 29% 100%, 13% 98%, 0 100%, 2% 80%, 0 60%, 1.5% 40%, 0 20%); }
+/* A business card with the partner's logo. */
+.nav-card { display: grid; place-items: center; width: 54px; height: 36px; padding: 5px 6px; border-radius: 3px; background: #fff; box-shadow: 0 0 0 1px rgb(0 43 81 / 8%), var(--lift); }
+.nav-card img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.nav-thumbnail--pile > .nav-card { width: 42px; height: 28px; padding: 4px; }
+/* The homepage's cork board in its wooden frame, three prints pinned to it. */
+.nav-cork { position: relative; width: 50px; height: 42px; border: 2.5px solid #a37148; border-radius: 2px; background: radial-gradient(rgb(110 66 28 / 50%) .5px, transparent 1px) 0 0 / 3px 3px, radial-gradient(rgb(255 236 204 / 40%) .5px, transparent 1px) 1.5px 1.5px / 3px 3px, #c99a64; box-shadow: var(--lift); }
+.nav-cork i { position: absolute; width: 16px; height: 14px; padding: 1.5px 1.5px 3.5px; background: linear-gradient(var(--sky), var(--ground)) content-box, #fff; box-shadow: 0 1px 1.5px rgb(40 20 5 / 35%); }
+.nav-cork i::before { content: ''; position: absolute; top: -1.5px; left: 50%; width: 4px; height: 4px; translate: -50% 0; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #60646b, #050506 70%); box-shadow: .5px 1px 1px rgb(0 0 0 / 45%); }
+.nav-cork i:nth-child(1) { --sky:#9cc3e4; --ground:#4f7aa3; left: 3px; top: 3px; rotate: -7deg; }
+.nav-cork i:nth-child(2) { --sky:#f6b6d2; --ground:#c24f86; left: 23px; top: 2px; rotate: 5deg; }
+.nav-cork i:nth-child(3) { --sky:#f3d98b; --ground:#b98a2c; left: 12px; top: 19px; rotate: -2deg; }
+/* An admission ticket: a pink stub torn along a perforation notched at both edges, as on the homepage's "Up next". */
+.nav-ticket { display: block; filter: drop-shadow(0 1px .8px rgb(40 20 5 / 30%)) drop-shadow(0 4px 4px rgb(40 20 5 / 18%)); }
+.nav-ticket i { display: block; width: 50px; height: 30px; border-radius: 4px;
+  background: repeating-linear-gradient(transparent 0 2px, rgb(255 255 255 / 75%) 2px 3.5px) 14.5px 0 / 1px 100% no-repeat,
+    linear-gradient(rgb(0 43 81 / 75%) 0 0) 20px 8px / 22px 3px no-repeat, linear-gradient(rgb(0 43 81 / 35%) 0 0) 20px 15px / 16px 2px no-repeat, linear-gradient(rgb(0 43 81 / 35%) 0 0) 20px 20px / 20px 2px no-repeat,
+    linear-gradient(90deg, var(--pink-fill) 0 15px, #fffdf8 15px);
+  -webkit-mask: radial-gradient(circle at 15px 0, #0000 3.5px, #000 4px) 0 0 / 100% 51% no-repeat, radial-gradient(circle at 15px 100%, #0000 3.5px, #000 4px) 0 100% / 100% 51% no-repeat;
+  mask: radial-gradient(circle at 15px 0, #0000 3.5px, #000 4px) 0 0 / 100% 51% no-repeat, radial-gradient(circle at 15px 100%, #0000 3.5px, #000 4px) 0 100% / 100% 51% no-repeat; }
+/* An envelope from the back: its flap folded down and sealed in pink. */
+.nav-envelope { position: relative; width: 48px; height: 33px; border-radius: 2px; background: linear-gradient(to top right, transparent calc(50% - .6px), rgb(120 90 50 / 28%) 50%, transparent calc(50% + .6px)) 0 100% / 50% 62% no-repeat, linear-gradient(to top left, transparent calc(50% - .6px), rgb(120 90 50 / 28%) 50%, transparent calc(50% + .6px)) 100% 100% / 50% 62% no-repeat, #fbf6ea; box-shadow: var(--lift); }
+.nav-envelope::before { content: ''; position: absolute; inset: 0 0 auto; height: 62%; background: linear-gradient(#f3ead6, #ebdfc4); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.nav-envelope::after { content: ''; position: absolute; top: 52%; left: 50%; width: 9px; height: 9px; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle at 38% 35%, #ff6fb5, var(--pink-fill) 60%, #a3155c); box-shadow: 0 .5px 1px rgb(0 0 0 / 35%); }
 .site-header :focus-visible, .mobile-navigation :focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .site-header__toggle { display: none; position: fixed; z-index: 41; bottom: max(22px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); align-items: center; justify-content: center; gap: 14px; min-height: 50px; padding: 13px 20px; border: 0; border-radius: 50px; background: #fff; color: var(--uw-blue-dark); font: inherit; font-size: 15px; line-height: 1.4; cursor: pointer; pointer-events: auto; box-shadow: 0 8px 32px rgb(0 43 81 / 12%); }
 .menu-symbol { position: relative; width: 16px; height: 16px; }

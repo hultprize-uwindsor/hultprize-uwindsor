@@ -1,0 +1,100 @@
+/* The blog: the latest post leads, the rest follow as cards. Each post's picture is drawn in its own paper (taped
+   Polaroids, a typed note with the prize circled in marker, a strip of raffle tickets), sized from its box's width so
+   the same drawing serves the lead, a card and the post page. */
+.blog-page,.blog-post-page { --news-rule:rgb(0 43 81 / 14%); --type:#24262a; --marker:#d1202f;
+  /* Paper grain: fine fibres, darker in places. */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .24 0 0 0 0 .16 .32 0 0 0 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 160px 160px; }
+
+/* A post's picture: a 4:3 box the paper sits in. */
+.post-art { container-type:inline-size; position:relative; display:block; aspect-ratio:4 / 3; }
+.post-art .tape { --tape-w:clamp(70px,24cqi,128px); top:-13px; height:clamp(22px,7cqi,34px); }
+.post-art__polaroid,.post-art__note { transition:rotate .5s var(--ease-ui),translate .5s var(--ease-ui); }
+
+/* A story: two Polaroids, the second laid over the first. */
+.post-art__polaroid { position:absolute; display:block; padding:3cqi 3cqi 9cqi; background:#fff; box-shadow:0 1px 2px rgb(40 20 5 / 16%),0 14px 24px -12px rgb(40 20 5 / 40%); }
+.post-art__polaroid img { display:block; width:100%; aspect-ratio:3 / 2; object-fit:cover; background:#efe5d9; }
+.post-art__polaroid--back { left:5%; top:7%; width:54%; rotate:-6deg; }
+.post-art__polaroid--front { z-index:1; right:4%; top:22%; width:60%; padding-bottom:0; rotate:3.5deg; }
+.post-art__caption { display:block; padding:1.8cqi 1cqi 2.6cqi; font-family:var(--font-hand); font-size:5.6cqi; font-weight:600; line-height:1.1; color:var(--uw-blue-dark); }
+
+/* A sponsor notice: a typed note, the prize circled in marker and the thanks scrawled beneath. */
+.post-art--note { display:grid; place-items:center; }
+.post-art__note { position:relative; display:flex; flex-direction:column; align-items:center; width:66%; padding:6cqi 5cqi 5.5cqi; rotate:-2.5deg; color:var(--type); text-align:center; background:var(--grain),var(--paper-lines),var(--paper-colour); box-shadow:0 1px 2px rgb(40 20 5 / 16%),0 14px 24px -12px rgb(40 20 5 / 40%); }
+/* An index card: a red rule under the first line, blue lines below. */
+.post-art--index { --paper-colour:#fffdf8; --paper-lines:linear-gradient(transparent 14.5cqi,rgb(222 76 98 / 62%) 14.5cqi calc(14.5cqi + 2px),transparent calc(14.5cqi + 2px)),repeating-linear-gradient(transparent 0 6cqi,rgb(73 140 206 / 30%) 6cqi calc(6cqi + 1px)) 0 14.5cqi / 100% 100% no-repeat; }
+/* A sheet off a yellow legal pad: the double margin down the left and blue lines. */
+.post-art--legal .post-art__note { rotate:2deg; }
+.post-art--legal { --paper-colour:#fbee9c; --paper-lines:linear-gradient(90deg,transparent 6cqi,rgb(216 74 74 / 50%) 6cqi calc(6cqi + 1.5px),transparent calc(6cqi + 1.5px) calc(6cqi + 4px),rgb(216 74 74 / 50%) calc(6cqi + 4px) calc(6cqi + 5.5px),transparent calc(6cqi + 5.5px)),repeating-linear-gradient(transparent 0 6cqi,rgb(64 120 186 / 28%) 6cqi calc(6cqi + 1px)) 0 3cqi / 100% 100% no-repeat; }
+/* Typewriter ribbon ink, spreading a touch into the paper. */
+.post-art__what,.post-art__amount { font-family:var(--font-type); text-shadow:0 0 .5px rgb(36 38 42 / 55%); }
+.post-art__what { font-size:5cqi; line-height:1.2; }
+.post-art__amount { position:relative; margin:5cqi 0 4cqi; font-size:16cqi; line-height:1; }
+/* Marker soaks into the paper. */
+.post-art__circle { position:absolute; left:-16%; top:-24%; width:132%; height:148%; max-width:none; overflow:visible; pointer-events:none; mix-blend-mode:multiply; }
+.post-art__circle path { fill:none; stroke:var(--marker); stroke-width:max(2.5px,.85cqi); stroke-linecap:round; stroke-linejoin:round; stroke-opacity:.82; vector-effect:non-scaling-stroke; }
+.post-art__thanks { font-family:var(--font-hand); font-size:6.6cqi; font-weight:700; line-height:1; color:var(--marker); rotate:-4deg; mix-blend-mode:multiply; }
+
+/* Hovering a card lifts its paper a little. */
+.blog-card:hover .post-art__polaroid--front { rotate:1.5deg; translate:0 -1.5cqi; }
+.blog-card:hover .post-art__note { rotate:-1deg; translate:0 -1.5cqi; }
+.blog-card:hover .post-art--legal .post-art__note { rotate:.5deg; }
+
+/* A post on the front page: picture, headline, date, summary and a link to read it. */
+.blog-card { min-width:0; }
+.blog-card__art { display:block; text-decoration:none; }
+.blog-card__title { max-width:none; margin:14px 0 0; font-size:1.35rem; font-weight:600; line-height:1.2; letter-spacing:-.02em; }
+.chapter-section .blog-card__title { margin-bottom:0; }
+/* Inline padding lifts a one-line headline's hit area to 44px without moving the lines. */
+.blog-card__title a { padding-block:11px; color:var(--uw-blue-dark); text-decoration:none; }
+.blog-card__title a:hover { color:var(--pink-text); text-decoration:underline; text-decoration-thickness:1.5px; }
+.blog-card__title a:focus-visible { outline:3px solid var(--pink); outline-offset:3px; border-radius:4px; }
+.blog-card__date { margin:8px 0 0; font-size:.88rem; color:var(--uw-grey); }
+.blog-card__summary { max-width:62ch; margin:12px 0 0; line-height:1.55; color:var(--ink); }
+.blog-card__more { margin-top:6px; }
+/* The lead: its picture beside the text, ruled off from the cards below. */
+.blog-card--lead { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); align-items:center; gap:32px 64px; margin-bottom:64px; padding-bottom:64px; border-bottom:1px solid var(--news-rule); }
+.blog-card--lead .blog-card__title { margin-top:0; font-size:clamp(2rem,3.3vw,3rem); line-height:1.04; letter-spacing:-.04em; }
+.blog-card--lead .blog-card__summary { font-size:1.1rem; }
+.blog-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:56px 40px; }
+
+/* A post's headline is a sentence, so it runs wider than other page titles, as on event pages, and a long word
+   hyphenates (or, where the browser has no dictionary, wraps) rather than running off a narrow screen. */
+.blog-post-page .page-heading h1 { max-width:24ch; overflow-wrap:anywhere; -webkit-hyphens:auto; hyphens:auto; }
+
+/* A post: the article, with its picture and key facts beside it. */
+.blog-back { margin-bottom:40px; }
+.blog-post { display:grid; grid-template-columns:minmax(0,7fr) minmax(280px,4fr); grid-template-areas:"article art" "article facts" "article ."; grid-template-rows:auto auto 1fr; gap:24px 64px; }
+.blog-article { grid-area:article; }
+.blog-post__art { grid-area:art; }
+.blog-post__facts { grid-area:facts; }
+.blog-article__body h2 { max-width:none; margin:48px 0 12px; font-size:clamp(1.5rem,2.4vw,2rem); line-height:1.15; letter-spacing:-.03em; }
+.blog-article__body > :first-child { margin-top:0; }
+/* Steps, numbered by hand. */
+.blog-steps { margin:24px 0; padding:0; list-style:none; counter-reset:step; }
+.blog-steps li { position:relative; margin:0 0 18px; padding-left:56px; counter-increment:step; }
+.blog-steps li::before { content:counter(step); position:absolute; left:8px; top:-.3em; font-family:var(--font-hand); font-size:2.2em; font-weight:700; line-height:1; color:var(--pink-text); rotate:-6deg; }
+.blog-article__actions { display:flex; flex-wrap:wrap; gap:12px 16px; margin-top:40px; }
+.blog-post__facts dl { margin:0; }
+.blog-post__facts dl > div { padding-block:16px; border-top:1px solid #002b5120; }
+.blog-post__facts dt { font-size:.8rem; color:var(--uw-grey); }
+.blog-post__facts dd { margin:6px 0 0; }
+.blog-recap { margin-top:88px; }
+.blog-recap h2 { margin-bottom:0; }
+.blog-more { margin-top:96px; padding-top:48px; border-top:1px solid var(--news-rule); }
+.blog-more h2 { margin-bottom:32px; }
+
+@media(max-width:1100px) {
+  .blog-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .blog-post { column-gap:40px; }
+}
+/* Narrow screens: one column. A post's picture comes first, then the article, then its facts. */
+@media(max-width:860px) {
+  .blog-card--lead { grid-template-columns:minmax(0,1fr); }
+  .blog-post { grid-template-columns:minmax(0,1fr); grid-template-areas:"art" "article" "facts"; grid-template-rows:none; row-gap:32px; }
+  .blog-post__art { width:min(100%,520px); }
+}
+@media(max-width:700px) {
+  .blog-cards { grid-template-columns:minmax(0,1fr); }
+  .blog-card--lead { margin-bottom:48px; padding-bottom:48px; }
+}
+@media(prefers-reduced-motion:reduce) { .post-art__polaroid,.post-art__note { transition:none; } }

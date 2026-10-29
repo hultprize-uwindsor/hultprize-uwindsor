@@ -40,7 +40,7 @@ try {
  await row.scrollIntoViewIfNeeded()
  await page.mouse.move(0,0)
  assert(await row.locator('[data-clone] a').evaluateAll(links => links.every(a => a.tabIndex === -1)))
- assert.equal(await row.locator('.three-d-block:not([data-clone]) a').count(), 12)
+ assert.equal(await row.locator('.three-d-block:not([data-clone]) a').count(), 11)
  assert.equal(await originalLink.getAttribute('href'), 'https://www.wetech-alliance.com/')
  // Sustained upward scrolling should reverse the supplied velocity-driven tilt.
  let reversed = false
@@ -65,7 +65,7 @@ try {
   const mobile = await browser.newPage({ viewport: { width: 375, height: 812 }, reducedMotion: 'reduce' })
   await mobile.goto(base+path, { waitUntil: 'domcontentloaded' })
   assert.equal(await mobile.locator('.partner-strip .three-d-row').count(), 1)
-  assert.equal(await mobile.locator('.partner-strip .three-d-block:not([data-clone]) a').count(), 12)
+  assert.equal(await mobile.locator('.partner-strip .three-d-block:not([data-clone]) a').count(), 11)
   assert(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
   assert.equal(await mobile.locator('.partner-strip .three-d-track').evaluate(el => getComputedStyle(el).transform), 'none')
   await mobile.close()

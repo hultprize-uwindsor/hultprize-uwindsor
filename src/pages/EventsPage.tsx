@@ -11,6 +11,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { Link } from '../components/PageLink'
 import { publishedPosts, formatPostDate, postStatus, type Post } from '../data/posts'
+import { blogStoryForEvent } from '../data/blog'
 import { Copy, PageLayout, RegisterButton, Section } from '../components/PageParts'
 
 type Story = {
@@ -201,6 +202,7 @@ export function EventPostPage() {
   const post = publishedPosts().find(p => p.slug === slug)
   if (!post) return <NotFoundPage />
   const past = postStatus(post) === 'Past event'
+  const story = past ? blogStoryForEvent(post.slug) : undefined
   return <PageLayout className="event-page" title={post.title} subtitle={post.excerpt}><Section>
     <Link className="text-link event-back" to="/events">← All events and stories</Link>
     <div className="event-article-layout">
@@ -209,6 +211,7 @@ export function EventPostPage() {
         <Copy paragraphs={post.body} />
         {post.cover && <figure className="post-detail-cover"><img src={post.cover.src} alt={post.cover.alt} /><figcaption>{post.cover.caption}</figcaption></figure>}
         {post.flyer && <p className="post-flyer-download"><a className="text-link" href={post.flyer.download} download>Download the flyer (PNG) <span aria-hidden="true">↓</span></a></p>}
+        {story && <p className="post-flyer-download"><Link className="text-link" to={`/blog/${story.slug}`}>Read the story of the day on our blog <span aria-hidden="true">→</span></Link></p>}
       </article>
       <aside className="event-details" aria-labelledby="event-details-title"><h2 id="event-details-title" data-text-reveal><RevealText>Event details</RevealText></h2><dl><div><dt>Status</dt><dd>{postStatus(post)}</dd></div><div><dt>Date</dt><dd><time dateTime={post.date}>{formatPostDate(post.date)}</time></dd></div>{post.location && <div><dt>{post.flyer ? 'Visit' : post.hostRegistration ? 'Where' : 'Entry'}</dt><dd>{post.location}</dd></div>}</dl>
         {post.hostRegistration ? <><p>{past ? 'This event has passed. Come and find us at Fusion instead.' : 'This event has its own registration, separate from Hult Prize.'}</p>{!past && <a className="btn btn--primary" href={post.hostRegistration.url} target="_blank" rel="noopener noreferrer"><RollingLabel>{`Register at ${post.hostRegistration.site}`}</RollingLabel><span aria-hidden="true">↗</span></a>}</> : post.flyer ? <><p>{past ? 'Launch day has passed. Fusion is now our headquarters, so come and find us there.' : 'The launch welcomes students from every institution. Drop in; no event registration needed.'}</p><Link className="btn btn--secondary" to="/contact#come-and-find-us"><RollingLabel>Find Fusion</RollingLabel><span aria-hidden="true">→</span></Link></> : <><p>Complete the official Hult Prize form to enter your team.</p><RegisterButton /></>}

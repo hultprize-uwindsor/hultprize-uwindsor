@@ -1,8 +1,8 @@
 export interface Partner {
   name: string
   role?: string
-  url: string
-  logo?: string // path under /public/images/partners/, shown on a white box when set
+  url: string // empty until a website is confirmed; the logo strip then shows it without a link
+  logo?: string // path under /public/images/partners/, shown on a white box when set; otherwise the name stands in
   individual?: boolean
 }
 
@@ -19,13 +19,16 @@ export const PARTNERS: Partner[] = [
   { name: 'Small Business and Entrepreneurship Centre', role: 'Small Business Development and Entrepreneurship Partner', url: 'https://www.webusinesscentre.com/', logo: '/images/partners/small-business-entrepreneurship-centre.png' },
 ]
 
-// Only organisations explicitly marked confirmed in the supplied brief.
+// This year's partners and sponsors, as confirmed by the owner. FRCT (Averti Institute's Cyber First Aid programme)
+// sponsors the bootcamp workshops, Grayfel Technologies the Ticket Jar prize and Offshoot Initiative the People's
+// Choice Award. Grayfel's logo is still to come.
 export const CURRENT_PARTNERS: Partner[] = [
-  { name: 'Fusion', url: 'https://www.uwindsor.ca/fusion/', logo: '/images/partners/uwindsor.png' },
+  { name: 'Fusion', url: 'https://www.uwindsor.ca/fusion/', logo: '/images/partners/fusion.png' },
   { name: 'Sterling Cybersecurity and Advisory Group', url: 'https://www.sterlinginfo.com/', logo: '/images/partners/sterling-cybersecurity-advisory-group.png' },
-  { name: 'Hypercare', url: 'https://www.hypercare.com/', logo: '/images/partners/hypercare.png' },
+  { name: 'FRCT', url: 'https://www.averti.institute/frct.html', logo: '/images/partners/frct.png' },
+  { name: 'Grayfel Technologies Inc.', url: 'https://grayfeltechnologiesinc.ca/' },
+  { name: 'Offshoot Initiative', url: '', logo: '/images/partners/offshoot-initiative.svg' },
 ]
 
-// HIDDEN FOR NOW at the owner's request: the site-wide "Supported by" logo strip.
-// Set to true to show it again under every page (App.tsx).
-export const SHOW_PARTNER_STRIP = false
+// The site-wide "Supported by" logo strip under every page (App.tsx). Set to false to hide it.
+export const SHOW_PARTNER_STRIP = true

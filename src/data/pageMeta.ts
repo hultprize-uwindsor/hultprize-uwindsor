@@ -1,5 +1,6 @@
 import { COMMUNITY_PARTNERS } from './communityPartners.ts'
 import { publishedPosts } from './posts.ts'
+import { publishedBlogPosts } from './blog.ts'
 import { SITE } from './site.ts'
 import attendanceEvents from '../../shared/attendance-events.json' with { type: 'json' }
 import { eventPageDescription, eventPageTitle } from './eventSeo.ts'
@@ -40,6 +41,7 @@ export const PAGE_METADATA: PageMetadata[] = [
   page('/partners', 'Partners', 'Meet the organisations supporting Hult Prize at UWindsor. Explore sponsorship packages or contribute your time, expertise and resources.'),
   page('/contact', 'Find us', 'Visit Hult Prize at Fusion in Windsor, contact the organising team or ask about competing. Students from every institution are welcome.'),
   page('/events', 'Events', 'Workshops, campus events and competition deadlines for Hult Prize at the University of Windsor.'),
+  page('/blog', 'Blog', 'News, notices and stories from Hult Prize at the University of Windsor: prize sponsors, this term’s minigame and event recaps.'),
   { ...page('/attend', 'Attend our events', 'Register for free Hult Prize at UWindsor events, workshops and the Campus Grand Finale.'), image: socialImage('/events') },
   { ...page('/attend/manage', 'Manage attendance', 'Securely manage your Hult Prize at UWindsor event attendance.'), image: socialImage('/events'), noindex: true },
   { ...page('/organiser/events', 'Organiser dashboard', 'Private event attendance dashboard for authorised Hult Prize at UWindsor organisers.'), image: socialImage('/events'), noindex: true },
@@ -47,6 +49,7 @@ export const PAGE_METADATA: PageMetadata[] = [
   ...(attendanceEvents as AttendanceEvent[]).map(eventMetadata),
   ...COMMUNITY_PARTNERS.map(partner => page(`/partners/${partner.slug}`, partner.name, `${partner.subtitle} ${partner.withUs[0]}`)),
   ...publishedPosts().map(post => page(`/events/${post.slug}`, post.title, post.excerpt, 'article')),
+  ...publishedBlogPosts().map(post => page(`/blog/${post.slug}`, post.title, post.excerpt, 'article')),
 ]
 
 export function metadataForPath(pathname: string): PageMetadata {

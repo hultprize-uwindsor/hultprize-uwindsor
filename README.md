@@ -5,7 +5,7 @@ Intended domain: **hultprizeuwindsor.ca**.
 
 ## Pages
 
-Home (`/`), About (`/about`), Year One (`/year-one`), This Year (`/this-year`), Events (`/events`), Compete (`/compete`), Partners (`/partners`), Contact (`/contact`), Attend our events (`/attend`), Manage attendance (`/attend/manage`) and the private Organiser dashboard (`/organiser/events`). Events also have individual `/events/:slug` pages.
+Home (`/`), About (`/about`), Year One (`/year-one`), This Year (`/this-year`), Events (`/events`), Blog (`/blog`), Compete (`/compete`), Partners (`/partners`), Contact (`/contact`), Attend our events (`/attend`), Manage attendance (`/attend/manage`) and the private Organiser dashboard (`/organiser/events`). Events also have individual `/events/:slug` pages, and blog posts `/blog/:slug` pages.
 
 `/team` redirects to the About team section. `/go` and the legacy `/#signup` point to the interest form on Compete. Competition entry links open `https://www.hultprize.org/register`; event attendance links open `/attend`, with event-specific preselection.
 
@@ -25,6 +25,7 @@ With Vite running, run `node scripts/check-site.mjs` for browser checks. Use `PL
 - `src/data/copy.json`: finished copy from the build brief.
 - `src/data/site.ts`: domain, email, social and registration links.
 - `src/data/posts.ts`: competition/story entries and publication state.
+- `src/data/blog.ts`: blog posts (stories, sponsor notices and the term's minigame) and publication state.
 - `shared/attendance-events.json`: event installation defaults; live events come from the attendance API and are editable in the organiser dashboard.
 - `src/data/partners.ts`: returning and confirmed partners.
 - `src/data/assets.ts`: approved Year One photos and PDF download paths, currently pending.

@@ -1,0 +1,56 @@
+/* A community partner's page: how it supports us, what students can use, its people as taped Polaroids, then about
+   the organisation. */
+.partner-section-intro { margin:-16px 0 40px; }
+
+/* How the partner supports us: numbered by hand, as on the blog. */
+/* The logo card stays its own height beside the longer list. */
+.partner-overview .partner-card { align-self:start; }
+.partner-support { margin:32px 0 0; padding:0; list-style:none; counter-reset:support; }
+.partner-support li { position:relative; padding:20px 0 20px 64px; border-top:1px solid rgb(0 43 81 / 12%); counter-increment:support; }
+.partner-support li::before { content:counter(support); position:absolute; left:10px; top:12px; font-family:var(--font-hand); font-size:2.6rem; font-weight:700; line-height:1; color:var(--pink-text); rotate:-6deg; }
+.partner-support h3 { margin:0; font-size:1.15rem; line-height:1.3; letter-spacing:-.01em; }
+.partner-support p { max-width:62ch; margin:6px 0 0; line-height:1.6; }
+
+/* What students can use: a card for each resource, its details ruled off beneath. */
+.partner-resources { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin:0; padding:0; list-style:none; }
+.partner-resource { display:flex; flex-direction:column; align-items:flex-start; padding:32px; border-radius:24px; background:white; box-shadow:0 1px 2px rgb(40 20 5 / 8%),0 18px 32px -24px rgb(40 20 5 / 30%); }
+.partner-resource h3 { margin:0; font-size:1.35rem; line-height:1.2; letter-spacing:-.02em; }
+.partner-resource p { margin:12px 0 0; line-height:1.6; }
+.partner-resource dl { width:100%; margin:20px 0 0; }
+.partner-resource dl > div { display:grid; grid-template-columns:minmax(110px,1fr) minmax(0,2.4fr); gap:4px 16px; padding-block:12px; border-top:1px solid rgb(0 43 81 / 12%); }
+.partner-resource dt { font-size:.85rem; color:var(--uw-grey); }
+.partner-resource dd { margin:0; font-size:.95rem; line-height:1.5; overflow-wrap:anywhere; }
+.partner-resource .text-link { margin-top:auto; padding-top:16px; }
+
+/* The people: official photos as Polaroids, each held by clear tape and tilted a little differently, inset so the
+   tilted corners stay inside the column. */
+.partner-people { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:56px 40px; margin:0; padding:0; list-style:none; }
+/* A team of five or more sits three to a row, so no one is left alone on the last row. */
+.partner-people--rows-of-three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.partner-person { display:flex; flex-direction:column; align-items:flex-start; min-width:0; padding-inline:8px; }
+.partner-person__polaroid { position:relative; width:min(100%,260px); padding:10px 10px 0; background:white; box-shadow:0 1px 2px rgb(40 20 5 / 16%),0 14px 24px -12px rgb(40 20 5 / 40%); rotate:var(--tilt,-2deg); transition:rotate .5s var(--ease-ui),translate .5s var(--ease-ui); }
+.partner-person:nth-child(3n+2) .partner-person__polaroid { --tilt:1.8deg; }
+.partner-person:nth-child(3n) .partner-person__polaroid { --tilt:-.8deg; }
+.partner-person:hover .partner-person__polaroid { rotate:0deg; translate:0 -4px; }
+/* Portrait prints: WEtech publishes its headshots as circles, and a square cut from inside one would clip the heads. */
+.partner-person__polaroid img,.partner-person__initials { display:block; width:100%; aspect-ratio:4 / 5; object-fit:cover; object-position:50% 20%; background:#efe5d9; }
+.partner-person__initials { display:grid; place-items:center; font-family:var(--font-hand); font-size:4rem; font-weight:700; color:var(--uw-blue-dark); }
+.partner-person__name { margin:0; padding:10px 4px 14px; overflow-wrap:anywhere; font-family:var(--font-hand); font-size:1.65rem; font-weight:700; line-height:1.05; letter-spacing:0; color:var(--uw-blue-dark); }
+.partner-person__title { margin:20px 0 0; font-weight:600; line-height:1.4; }
+.partner-person__role { margin:8px 0 0; line-height:1.55; color:var(--uw-grey); }
+.partner-person .text-link { margin-top:8px; }
+
+@media(max-width:1100px) { .partner-people { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:860px) { .partner-people { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) {
+  .partner-resources { grid-template-columns:minmax(0,1fr); }
+  .partner-resource { padding:24px; }
+  .partner-resource dl > div { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:540px) {
+  .partner-people { grid-template-columns:repeat(2,minmax(0,1fr)); gap:40px 20px; }
+  .partner-person__name { font-size:1.35rem; }
+}
+/* The narrowest phones: one Polaroid to a row, so names keep their size. */
+@media(max-width:420px) { .partner-people { grid-template-columns:minmax(0,1fr); } .partner-person__polaroid { width:min(100%,240px); } }
+@media(prefers-reduced-motion:reduce) { .partner-person__polaroid { transition:none; } }
