@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import vm from 'node:vm'
 import { createHash, createHmac, randomUUID } from 'node:crypto'
 import { Readable } from 'node:stream'
@@ -348,6 +349,7 @@ assert(closedNext.body.includes('our next event: Founders Panel') && !closedNext
 const noTickets = context.attFollowUp_(db(), eventAt('workshop-1'), missedPerson, Date.parse('2026-11-08T15:05:00Z'), true, 'missed')
 assert(noTickets.body.includes('Start collecting tickets for $200') && noTickets.body.includes('gets you a free raffle ticket') && !noTickets.body.includes('Your tickets'), 'Someone with no tickets is not told to keep filling the jar')
 assert(yes.htmlBody.includes('<!--[if mso]><table role="presentation" width="560"'), 'Classic Outlook gets a fixed-width table')
+for (const mail of [yes, going, no, missedYes, missedNo, noTickets, closedNext]) for (const [, file] of mail.htmlBody.matchAll(/\/images\/email\/([\w.-]+)/g)) assert(existsSync(new URL(`../public/images/email/${file}`, import.meta.url)), `Every picture an email loads is in the site: ${file}`)
 assert(yes.body.includes('please don’t forward this email') && !yes.body.includes('signs you in for 48 hours'), 'The sign-up link is described as personal and single-use')
 // Retrying a follow-up from the dashboard ignores the time window; transactional email is sent ahead of follow-ups.
 const blocked = thanksFor('thanks-yes@example.invalid')[0]

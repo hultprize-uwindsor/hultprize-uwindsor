@@ -1,5 +1,6 @@
-// Run manually after changing scripts/email-art/thank-you-card.html or the raffle tickets. The GIF and PNG are
-// committed assets that the attendance thank-you email (google-apps-script/Attendance.gs) loads from the live site.
+// Run manually after changing a scene in scripts/email-art or the raffle tickets. The GIFs and PNG are committed
+// assets that the attendance follow-up emails (google-apps-script/Attendance.gs) load from the live site: the thank-you
+// card (thank-you-card.gif), the missed-you letter (missed-you-letter.gif) and the raffle tickets.
 // Needs ffmpeg on PATH, or FFMPEG=/path/to/ffmpeg.
 import { chromium } from 'playwright'
 import { execFileSync } from 'node:child_process'
@@ -12,9 +13,10 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { transformWithOxc } from 'vite'
 
 const OUT = 'public/images/email'
-// The card animation is 3.6s; the GIF plays once and rests on the open card. 1x, 12fps and no dithering keep it under
-// 1 MB: noise is what a GIF can't compress, and the email shows it at most 560px wide.
-const LENGTH = 3600, FPS = 12, SCALE = 1
+// Each scene and how long it plays, in ms: the card opens in 3.6s, and the letter has settled open by 3.75s. Each GIF
+// plays once and rests on its last frame. 1x, 12fps and no dithering keep each under 1 MB: noise is what a GIF can't
+// compress, and the email shows it at most 560px wide.
+const SCENES = [['thank-you-card', 3600], ['missed-you-letter', 3750]], FPS = 12, SCALE = 1
 // Same wording as the Ticket Jar post's picture in src/data/blog.ts.
 const TICKETS = { game: 'The Ticket Jar', prize: '$200', draw: 'Drawn Feb 4, 2027' }
 
@@ -24,19 +26,22 @@ const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? {
 try {
   await mkdir(OUT, { recursive: true })
 
-  // Hold every animation still and step its clock, so each frame lands exactly where the timeline says.
-  const page = await browser.newPage({ viewport: { width: 600, height: 420 }, deviceScaleFactor: SCALE })
-  await page.goto(pathToFileURL('scripts/email-art/thank-you-card.html').href)
-  await page.evaluate(() => document.fonts.ready)
-  const count = LENGTH * FPS / 1000
-  for (let frame = 0; frame <= count; frame++) {
-    await page.evaluate(time => document.getAnimations().forEach(animation => { animation.pause(); animation.currentTime = time }), frame * 1000 / FPS)
-    await page.screenshot({ path: join(frames, `${String(frame).padStart(3, '0')}.png`) })
+  for (const [name, length] of SCENES) {
+    // Hold every animation still and step its clock, so each frame lands exactly where the timeline says.
+    const page = await browser.newPage({ viewport: { width: 600, height: 420 }, deviceScaleFactor: SCALE })
+    await page.goto(pathToFileURL(`scripts/email-art/${name}.html`).href)
+    await page.evaluate(() => document.fonts.ready)
+    const count = length * FPS / 1000
+    for (let frame = 0; frame <= count; frame++) {
+      await page.evaluate(time => document.getAnimations().forEach(animation => { animation.pause(); animation.currentTime = time }), frame * 1000 / FPS)
+      await page.screenshot({ path: join(frames, `${name}-${String(frame).padStart(3, '0')}.png`) })
+    }
+    await page.close()
+    // One palette for the whole run, and only the changed rectangle re-encoded per frame, so still areas don't shimmer.
+    execFileSync(ffmpeg, ['-v', 'error', '-y', '-framerate', String(FPS), '-i', join(frames, `${name}-%03d.png`),
+      '-vf', 'split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];[b][p]paletteuse=dither=none:diff_mode=rectangle',
+      '-loop', '-1', `${OUT}/${name}.gif`])
   }
-  // One palette for the whole run, and only the changed rectangle re-encoded per frame, so still areas don't shimmer.
-  execFileSync(ffmpeg, ['-v', 'error', '-y', '-framerate', String(FPS), '-i', join(frames, '%03d.png'),
-    '-vf', 'split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];[b][p]paletteuse=dither=none:diff_mode=rectangle',
-    '-loop', '-1', `${OUT}/thank-you-card.gif`])
 
   // The blog's raffle tickets, rendered from the real component onto a transparent background.
   const source = (await readFile('src/components/RaffleTickets.tsx', 'utf8')).replace("import './RaffleTickets.css'\n", '')
@@ -63,7 +68,7 @@ try {
   })
   await tickets.screenshot({ path: `${OUT}/raffle-tickets.png`, clip, omitBackground: true })
 
-  for (const file of ['thank-you-card.gif', 'raffle-tickets.png']) console.log(`${OUT}/${file}: ${Math.round((await stat(`${OUT}/${file}`)).size / 1024)} KB`)
+  for (const file of [...SCENES.map(([name]) => `${name}.gif`), 'raffle-tickets.png']) console.log(`${OUT}/${file}: ${Math.round((await stat(`${OUT}/${file}`)).size / 1024)} KB`)
 } finally {
   await browser.close()
   await rm(frames, { recursive: true, force: true })
