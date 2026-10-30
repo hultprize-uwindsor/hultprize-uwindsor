@@ -238,7 +238,12 @@ const thanksPerson = email => db().attendees.find(row => row.email === email)
 const thanksFor = email => db().deliveries.filter(row => row.type === 'thanks' && row.attendeeId === thanksPerson(email)?.id)
 const info = db().events.find(event => event.id === 'info-session-1')
 assert.equal(context.attFollowUpAt_('thanks', info), Date.parse('2026-10-29T23:00:00Z'), '7 PM EDT on the day of a 5:30 PM finish')
-assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-11-13T23:30:00Z' }), Date.parse('2026-11-14T00:30:00Z'), 'An hour after a 7 PM finish')
+assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-11-14T00:00:00Z' }), Date.parse('2026-11-14T01:00:00Z'), 'An hour after a 7 PM finish (Founders Panel)')
+assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-10-30T04:00:00Z' }), Date.parse('2026-10-30T05:00:00Z'), 'An event ending at midnight still gets its card an hour later')
+assert.equal(context.attFollowUpAt_('missed', { endsAt: '2026-10-30T04:00:00Z' }), Date.parse('2026-10-30T14:00:00Z'), '...and its letter that same morning at 10')
+assert.equal(context.attFollowUpAt_('missed', { endsAt: '2027-03-14T04:30:00Z' }), Date.parse('2027-03-14T14:00:00Z'), '10 AM EDT after an 11:30 PM finish on the night the clocks go forward')
+assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-11-01T05:30:00Z' }), Date.parse('2026-11-01T06:30:00Z'), 'A 1:30 AM finish on the night the clocks go back: an hour later')
+assert.equal(context.attFollowUpAt_('missed', { endsAt: '2026-11-01T05:30:00Z' }), Date.parse('2026-11-01T15:00:00Z'), '...and 10 AM EST that morning')
 assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-11-07T17:20:00Z' }), Date.parse('2026-11-08T00:00:00Z'), '7 PM EST after a morning workshop')
 assert.equal(context.attFollowUpAt_('missed', info), Date.parse('2026-10-30T14:00:00Z'), 'Missed-you letters: 10 AM EDT the next morning')
 assert.equal(context.attFollowUpAt_('missed', { endsAt: '2026-10-31T23:00:00Z' }), Date.parse('2026-11-01T15:00:00Z'), '10 AM EST on the morning the clocks go back')
@@ -270,6 +275,7 @@ assert(!no.body.includes('Workshop 1') && !no.body.includes('Ticket Jar') && !no
 const later = { ...thanksFor('thanks-yes@example.invalid')[0] }
 assert.equal(context.attEmail_(model, later, Date.parse('2026-10-30T05:01:00Z')), null, 'Cards are not sent after the evening window')
 assert(context.attEmail_(model, { ...later, manual: true }, Date.parse('2026-10-30T15:00:00Z')), 'A manual catch-up send still goes out the next day')
+model.checkins.push({ id: 'yes-w2', registrationId: 'yes-w2-reg', attendeeId: thanksPerson('thanks-yes@example.invalid').id, eventId: 'workshop-2', checkedInAt: '2026-11-14T15:30:00Z' })
 const afterRaffle = context.attFollowUp_(model, model.events.find(event => event.id === 'workshop-2'), thanksPerson('thanks-yes@example.invalid'), Date.parse('2026-11-14T23:00:00Z'), true, 'thanks')
 assert(afterRaffle.body.includes('Keep filling the Ticket Jar') && afterRaffle.body.includes('Info Session #2'), 'Once the jar is open, later cards say keep collecting and name the next event')
 const finale = context.attFollowUp_(model, model.events.find(event => event.id === 'campus-grand-finale'), thanksPerson('thanks-yes@example.invalid'), Date.parse('2027-02-05T00:00:00Z'), true, 'thanks')
@@ -307,6 +313,54 @@ assert(!model.deliveries.some(row => row.key === 'missed:wait-w1'), 'A waitliste
 model.checkins.push({ id: 'came-back', registrationId: 'came-back-reg', attendeeId: away, eventId: 'founders-panel', checkedInAt: '2026-11-13T22:00:00Z' })
 context.attQueueFollowUps_(model, eventAt('workshop-2'), 'missed', Date.parse('2026-11-15T15:01:00Z'), false)
 assert(model.deliveries.some(row => row.key === 'missed:away-w2'), 'After coming back, the next miss gets a letter again')
+const nextMiss = changes => { const copy = db(); copy.registrations.push({ id: 'away-w1', attendeeId: away, eventId: 'workshop-1', status: 'confirmed', createdAt: '2026-10-20T00:00:00Z' }); changes(copy); context.attQueueFollowUps_(copy, eventAt('workshop-1'), 'missed', Date.parse('2026-11-08T15:01:00Z'), false); return copy.deliveries.some(row => row.key === 'missed:away-w1') }
+assert.equal(nextMiss(() => {}), false, 'Control: a second miss in a row gets no letter')
+assert.equal(nextMiss(copy => copy.checkins.push({ id: 'door-fix', registrationId: letter.registrationIds[0], attendeeId: away, eventId: 'info-session-1', checkedInAt: '2026-10-30T16:00:00Z' })), true, 'A check-in fixed after the letter means they came, so the next miss gets a letter')
+assert.equal(nextMiss(copy => Object.assign(copy.deliveries.find(row => row.id === letter.id), { status: 'failed', attempts: 5 })), true, 'A letter that never got through does not hold back the next one')
+// Events ending the same day are queued in start order, wherever they sit in the table, so a run still gets one letter.
+model = db()
+const early = { ...eventAt('workshop-2'), id: 'early-session', startsAt: '2026-11-14T12:00:00Z', endsAt: '2026-11-14T14:00:00Z' }
+model.events.push(early)
+const twice = thanksPerson('thanks-yes@example.invalid').id
+model.registrations.push({ id: 'twice-early', attendeeId: twice, eventId: 'early-session', status: 'confirmed', createdAt: '2026-10-20T00:00:00Z' }, { id: 'twice-w2', attendeeId: twice, eventId: 'workshop-2', status: 'confirmed', createdAt: '2026-10-20T00:00:00Z' })
+assert(model.events.findIndex(event => event.id === 'workshop-2') < model.events.findIndex(event => event.id === 'early-session'), 'Fixture: the later event comes first in the table')
+context.attMaintenance_(model, Date.parse('2026-11-15T15:01:00Z'))
+assert.deepEqual(model.deliveries.filter(row => row.type === 'missed' && row.attendeeId === twice).map(row => row.eventId), ['early-session'], 'One letter for two misses on the same day: the earlier event')
+// Cancelled events send nothing; maintenance stops queueing when the window closes.
+model = db()
+model.registrations.push({ id: 'gone-reg', attendeeId: twice, eventId: 'workshop-4', status: 'confirmed', createdAt: '2026-10-20T00:00:00Z' })
+model.checkins.push({ id: 'gone-in', registrationId: 'gone-reg', attendeeId: twice, eventId: 'workshop-4', checkedInAt: '2026-12-05T15:30:00Z' })
+context.attMaintenance_(model, Date.parse('2026-12-06T01:00:00Z')); context.attMaintenance_(model, Date.parse('2026-12-06T15:01:00Z'))
+assert(!model.deliveries.some(row => row.eventId === 'workshop-4' && ['thanks', 'missed'].includes(row.type)), 'A cancelled event gets no follow-ups')
+model = db()
+model.checkins.push({ id: 'late-in', registrationId: 'late-reg', attendeeId: twice, eventId: 'info-session-1', checkedInAt: '2026-10-30T04:00:00Z' })
+context.attMaintenance_(model, Date.parse('2026-10-30T05:01:00Z'))
+assert(!model.deliveries.some(row => row.key === 'thanks:late-reg'), 'No cards are queued once the six-hour window has closed')
+// The next event: each registration state gets its own line, and closed events aren't offered.
+const yesPerson = thanksPerson('thanks-yes@example.invalid'), stateLine = registration => { const copy = db(); copy.registrations.push({ id: 'state', attendeeId: yesPerson.id, eventId: 'workshop-1', createdAt: '2026-10-20T00:00:00Z', ...registration }); return context.attFollowUp_(copy, info, yesPerson, now, true, 'thanks').body }
+assert(stateLine({ status: 'offered', offerExpiresAt: '2026-10-31T14:00:00Z' }).includes('We’re holding a seat for you until'), 'A live seat offer is named as one')
+assert(stateLine({ status: 'waitlisted', offerExpired: true }).includes('Your seat offer for this one has expired'), 'An expired offer is named as one')
+assert(stateLine({ status: 'waitlisted' }).includes('You’re on the waitlist for this one'))
+model = db(); model.events.find(event => event.id === 'workshop-1').status = 'closed'
+const closedNext = context.attFollowUp_(model, info, yesPerson, now, true, 'thanks')
+assert(closedNext.body.includes('our next event: Founders Panel') && !closedNext.htmlBody.includes('add=workshop-1'), 'An event closed to registration is skipped for the next open one')
+// Ticket Jar wording follows whether the reader already has tickets.
+const noTickets = context.attFollowUp_(db(), eventAt('workshop-1'), missedPerson, Date.parse('2026-11-08T15:05:00Z'), true, 'missed')
+assert(noTickets.body.includes('Start collecting tickets for $200') && noTickets.body.includes('gets you a free raffle ticket') && !noTickets.body.includes('Your tickets'), 'Someone with no tickets is not told to keep filling the jar')
+assert(yes.htmlBody.includes('<!--[if mso]><table role="presentation" width="560"'), 'Classic Outlook gets a fixed-width table')
+assert(yes.body.includes('please don’t forward this email') && !yes.body.includes('signs you in for 48 hours'), 'The sign-up link is described as personal and single-use')
+// Retrying a follow-up from the dashboard ignores the time window; transactional email is sent ahead of follow-ups.
+const blocked = thanksFor('thanks-yes@example.invalid')[0]
+assert.equal(call('retryEmail', { deliveryId: blocked.id }, admin).ok, true)
+assert.equal(db().deliveries.find(row => row.id === blocked.id).manual, true, 'A dashboard retry marks the follow-up manual')
+model = db()
+const sinkSheet = { getLastRow: () => 0, getMaxRows: () => 100000, insertRowsAfter() {}, setFrozenRows() {}, getRange: () => ({ getValues: () => [[]], setValues() {}, clearContent() {} }) }
+model._ss = { getSheetByName: () => sinkSheet }
+const tester = model.attendees.find(row => row.email === 'mail@example.invalid')
+model.deliveries = [1, 2, 3].map(i => ({ id: `wave-${i}`, key: `wave-${i}`, type: 'thanks', attendeeId: tester.id, eventId: 'info-session-1', registrationIds: [`wave-reg-${i}`], status: 'pending', attempts: 0, nextAttemptAt: 0, manual: true }))
+  .concat([{ id: 'sign-in', key: 'sign-in', type: 'management', attendeeId: tester.id, eventId: '', registrationIds: [], status: 'pending', attempts: 0, nextAttemptAt: 0 }])
+context.attDeliver_(model, now, 1)
+assert.deepEqual(model.deliveries.filter(row => row.attempts).map(row => row.id), ['sign-in'], 'A sign-in link goes out ahead of a wave of follow-ups')
 
 // Editor helpers: a preview of all four follow-ups for the tester only, and a manual catch-up.
 const quiet = run => { const log = console.log; console.log = () => {}; try { run() } finally { console.log = log } }

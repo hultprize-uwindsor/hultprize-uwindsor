@@ -37,6 +37,7 @@ export default function ManageAttendancePage() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [addHint, setAddHint] = useState('')
   const [cancelTarget, setCancelTarget] = useState<AttendanceRegistration | null>(null)
   const [revision, setRevision] = useState(0)
   const bootstrap = useRef<Promise<ManageAttendanceResponse> | null>(null)
@@ -56,16 +57,22 @@ export default function ManageAttendancePage() {
       if (credential) {
         initialCredential = null
         bootstrap.current = attendanceApi<ManageAttendanceResponse>(credential.action, { token: credential.token }).then(result => result.attendee && result.registrations ? result : attendanceApi<ManageAttendanceResponse>('manage'))
+          // A management link already used in this browser still opens the page while that sign-in lasts.
+          .catch(failure => credential.action === 'exchange' ? attendanceApi<ManageAttendanceResponse>('manage').catch(() => { throw failure }) : Promise.reject(failure))
       } else bootstrap.current = attendanceApi<ManageAttendanceResponse>('manage')
     }
     bootstrap.current.then(result => {
       if (!active) return
       applySnapshot(result)
       if (credential?.action === 'acceptOffer') setMessage('Your offered seat is now confirmed. Your current registrations are shown below.')
-      const add = (credential?.add || []).filter(id => result.events.some(event => event.id === id && canSelectEvent(event)) && !result.registrations.some(registration => registration.eventId === id && registration.status !== 'cancelled'))
-      if (add.length) {
+      const wanted = credential?.add || []
+      const listed = wanted.filter(id => result.registrations.some(registration => registration.eventId === id && registration.status !== 'cancelled'))
+      const add = wanted.filter(id => !listed.includes(id) && result.events.some(event => event.id === id && canSelectEvent(event)))
+      if (wanted.length) {
         setSelected(add)
-        setMessage(`${add.length === 1 ? 'Your next event is' : 'These events are'} ticked under “Add another event”. Press “Add selected events” to save your spot.`)
+        setAddHint(add.length ? `${add.length === 1 ? 'Your next event is' : 'These events are'} ticked below. Press “Add selected events” to save your spot.`
+          : listed.length ? 'You’re already on the list for that event. You’ll find it under “Your registrations”.'
+          : 'Registration for that event has closed, but you can still add any event below.')
         jumpToAdd.current = true
       }
     }).catch(failure => {
@@ -106,7 +113,7 @@ export default function ManageAttendancePage() {
     try {
       const result = await attendanceApi<ManageAttendanceResponse>(action, body)
       applySnapshot(result)
-      if (action === 'addEvents') setSelected([])
+      if (action === 'addEvents') { setSelected([]); setAddHint('') }
       setCancelTarget(null)
       setMessage(successMessage)
     } catch (failure) {
@@ -125,6 +132,7 @@ export default function ManageAttendancePage() {
       setAccessibility('')
       setEmail('')
       setSelected([])
+      setAddHint('')
       setCancelTarget(null)
       setMessage('You’re signed out. Request a new secure email link whenever you need to manage your attendance.')
       bootstrap.current = null
@@ -158,6 +166,7 @@ export default function ManageAttendancePage() {
         </section>
         <section className="attendance-manage-section" aria-labelledby="add-an-event">
           <h2 id="add-an-event">Add another event</h2>
+          {addHint && <p className="attendance-notice attendance-notice--success" role="status">{addHint}</p>}
           {available.length ? <form onSubmit={event => { event.preventDefault(); if (!selected.length) { setError('Choose at least one event to add.'); return }; void changeAttendance('addEvents', { eventIds: selected }, 'Your events have been updated. Check each event’s confirmed or waitlisted status above.') }}>
             <EventSelection events={available} selected={selected} onChange={setSelected} disabled={busy} idPrefix="manage" />
             <p className="attendance-live-summary" aria-live="polite">{selected.length} event{selected.length === 1 ? '' : 's'} selected.</p>

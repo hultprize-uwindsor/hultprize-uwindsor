@@ -4,9 +4,12 @@ import 'lenis/dist/lenis.css'
 
 let scrolling: Lenis | undefined
 
-/** The same native-scroll engine used by the reference; no translated page wrapper. */
+/**
+ * The same native-scroll engine used by the reference; no translated page wrapper. Lenis caps a scroll at the page
+ * height it last measured (refreshed 250ms after a resize), so measure first: the page may have just grown.
+ */
 export function scrollPageTo(top: number, immediate = false) {
-  if (scrolling) { if (immediate) scrolling.resize(); scrolling.scrollTo(top, { immediate, force: true }) }
+  if (scrolling) { scrolling.resize(); scrolling.scrollTo(top, { immediate, force: true }) }
   else window.scrollTo({ top, behavior: immediate || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
 }
 

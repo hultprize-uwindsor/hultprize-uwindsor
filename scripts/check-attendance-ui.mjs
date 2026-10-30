@@ -39,7 +39,8 @@ try {
       registrations = payload.eventIds.map((eventId, index) => ({ id: `registration-${index}`, eventId, status: events.find(event => event.id === eventId).status === 'full' ? 'waitlisted' : 'confirmed' }))
       return respond({ ...snapshot(), saved: true, attendee: { firstName: attendee.firstName, lastName: attendee.lastName }, manageUrl: '/attend/manage' })
     }
-    if (payload.action === 'exchange') { authenticated = payload.token === 'synthetic-single-use-token'; return authenticated ? respond({ ok: true }) : respond({ ok: false, message: 'This link has expired. Please request a new email link.' }, 401) }
+    // Like the server, a used or expired link leaves an existing sign-in alone.
+    if (payload.action === 'exchange') { if (payload.token !== 'synthetic-single-use-token') return respond({ ok: false, message: 'This link has expired. Please request a new email link.' }, 401); authenticated = true; return respond({ ok: true }) }
     if (payload.action === 'acceptOffer') { authenticated = true; return respond(snapshot()) }
     if (payload.action === 'manage') return authenticated ? respond(snapshot()) : respond({ ok: false, message: 'Please verify your email.' }, 401)
     if (payload.action === 'cancel') { registrations = registrations.map(registration => registration.id === payload.registrationId ? { ...registration, status: 'cancelled' } : registration); return respond(snapshot()) }
@@ -145,15 +146,39 @@ try {
   // fresh load, as from an email, rather than a hash change on the page already open.
   await page.goto('about:blank')
   await page.goto(`${base}/attend/manage#token=synthetic-single-use-token&add=team-mixer`, { waitUntil: 'networkidle' })
-  await page.getByText('Your next event is ticked under “Add another event”.', { exact: false }).waitFor()
+  await page.locator('#add-an-event ~ [role=status]').getByText('Your next event is ticked below.', { exact: false }).waitFor()
   assert.equal(new URL(page.url()).hash, '', 'sign-up link credential stripped from URL')
   assert(await page.locator('#manage-team-mixer').isChecked(), 'next event preselected')
   assert.equal(await page.locator('.attendance-manage-section input[type=checkbox]:checked').count(), 1, 'only the named event is ticked')
   await page.getByRole('button', { name: 'Add selected events' }).click()
   await page.getByText('Your events have been updated. Check each event’s confirmed or waitlisted status above.').waitFor()
   assert(registrations.some(registration => registration.eventId === 'team-mixer' && registration.status === 'confirmed'))
+  assert.equal(await page.locator('#add-an-event ~ [role=status]').count(), 0, 'the hint goes once the event is added')
+  // Tapping the same, now used, button again in this browser still opens the page, and says they're already on the list.
+  await page.goto('about:blank')
+  await page.goto(`${base}/attend/manage#token=used-synthetic-token&add=team-mixer`, { waitUntil: 'networkidle' })
+  await page.getByText('You’re already on the list for that event.', { exact: false }).waitFor()
+  assert.equal(await page.locator('[role=alert]').count(), 0, 'no expired-link error while the sign-in lasts')
+  // An event that has closed since the email is explained rather than silently left unticked.
+  const finale = events.find(event => event.id === 'campus-grand-finale')
+  finale.status = 'closed'
+  await page.goto('about:blank')
+  await page.goto(`${base}/attend/manage#token=used-synthetic-token&add=campus-grand-finale`, { waitUntil: 'networkidle' })
+  await page.getByText('Registration for that event has closed', { exact: false }).waitFor()
+  assert.equal(await page.locator('.attendance-manage-section input[type=checkbox]:checked').count(), 0)
+  finale.status = 'open'
   await page.getByRole('button', { name: 'Sign out of attendance' }).click()
   await page.getByRole('heading', { name: 'A secure link, sent to you.' }).waitFor()
+  // On a phone with smooth scrolling on, the page lands on "Add another event" once it has loaded.
+  const phone = await browser.newPage({ viewport: { width: 390, height: 844 } })
+  await phone.routeWebSocket('**', socket => socket.close())
+  await phone.clock.setFixedTime(new Date('2026-10-22T16:00:00Z'))
+  await phone.route('**/api/attendance*', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(route.request().postDataJSON()?.action === 'exchange' ? { ok: true } : snapshot()) }))
+  registrations = registrations.filter(registration => registration.eventId !== 'team-mixer')
+  await phone.goto(`${base}/attend/manage#token=synthetic-single-use-token&add=team-mixer`, { waitUntil: 'networkidle' })
+  await phone.waitForFunction(() => { const heading = document.getElementById('add-an-event'); return heading && Math.abs(heading.getBoundingClientRect().top - 28) < 6 }, null, { timeout: 5000 })
+  assert(await phone.locator('#manage-team-mixer').isChecked())
+  await phone.close()
 
   // A sponsor receives only professional fields, and repeat submissions reveal no roster.
   verificationRequired = true
