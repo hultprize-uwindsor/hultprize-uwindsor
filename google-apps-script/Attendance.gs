@@ -4,6 +4,8 @@
  * ATTENDANCE_SHEET_ID, ATTENDANCE_SITE_URL, ATTENDANCE_REPLY_TO, ATTENDANCE_DISCORD_URL.
  * Run setupAttendance(), then installAttendanceTriggers(); deploy execute-as-owner,
  * Anyone access. All HTTP operations require the server's shared secret.
+ * Follow-ups (thank-you cards, missed-you letters): sendFollowUpTest() previews them; sendFollowUpsForLatestEvent()
+ * catches up a missed send. They are sent automatically only once ATTENDANCE_FOLLOW_UP_MODE is set to auto.
  * See docs/event-registration.md. Every mutation is serialised, journaled, then materialised.
  */
 var ATT_TABLES = ['attendees', 'events', 'registrations', 'consents', 'deliveries', 'checkins', 'tokens', 'rateLimits'];
@@ -11,6 +13,15 @@ var ATT_CATEGORIES = ['undergraduate', 'graduate', 'other-student', 'sponsor', '
 var ATT_CONSENT = 'I understand that Hult Prize at UWindsor will use my details to manage my event registrations and send essential event updates.';
 var ATT_MARKETING = 'Keep me updated about other Hult Prize at UWindsor events and opportunities.';
 var ATT_DAY = 86400000;
+// Follow-ups after each event: thank-you cards at 7 PM Windsor time that day (or an hour after it ends, if later)
+// and missed-you letters at 10 AM the next morning. Each is queued for six hours from then, so a late check-in still
+// counts but a long-past event never sends. Off until the ATTENDANCE_FOLLOW_UP_MODE script property is auto, so
+// pasting this file never emails attendees before a test.
+var ATT_THANKS_HOUR = 19;
+var ATT_MISSED_HOUR = 10;
+var ATT_FOLLOW_UP_WINDOW = 6 * 3600000;
+// The Ticket Jar runs from its first event to the draw at the finale (src/data/blog.ts, the-ticket-jar).
+var ATT_RAFFLE = { firstEventId: 'workshop-1', drawEventId: 'campus-grand-finale' };
 
 function attProps_() { return PropertiesService.getScriptProperties(); }
 function attJson_(value) { return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON); }
@@ -90,6 +101,50 @@ function setupAttendance() {
 function installAttendanceTriggers() {
   ScriptApp.getProjectTriggers().forEach(function(trigger) { if (trigger.getHandlerFunction() === 'attendanceMaintenance') ScriptApp.deleteTrigger(trigger); });
   ScriptApp.newTrigger('attendanceMaintenance').timeBased().everyMinutes(5).create();
+}
+function attLatestEvent_(db, now) { return attEvents_(db, now).filter(function(event) { return event.status !== 'cancelled' && Date.parse(event.endsAt) <= now; }).pop(); }
+/**
+ * Run from the Apps Script editor to preview the follow-ups for the latest event: a thank-you card and a missed-you
+ * letter, each with and without the optional-updates invite. Sent to the first ATTENDANCE_TEST_EMAILS address only.
+ * Nothing is queued.
+ */
+function sendFollowUpTest() {
+  var to = (attProps_().getProperty('ATTENDANCE_TEST_EMAILS') || '').split(',')[0].trim().toLowerCase();
+  if (!to) throw new Error('Add your email address to the ATTENDANCE_TEST_EMAILS script property first.');
+  var lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    var db = attLoad_(), now = Date.now(), event = attLatestEvent_(db, now) || attEvents_(db, now)[0];
+    // A registered tester gets a working sign-up button; otherwise it falls back to the public form.
+    var person = db.attendees.find(function(item) { return item.email === to; }) || { id: 'follow-up-test', firstName: 'friend', email: to };
+    ['thanks', 'missed'].forEach(function(type) {
+      [true, false].forEach(function(updates) {
+        var mail = attFollowUp_(db, event, person, now, updates, type);
+        MailApp.sendEmail({ to: to, name: 'Hult Prize at UWindsor', replyTo: attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com', subject: '[Test' + (updates ? '' : ', no updates consent') + '] ' + mail.subject, body: mail.body, htmlBody: mail.htmlBody });
+      });
+    });
+    attCommit_(db);
+    console.log('Sent four test follow-ups for ' + event.title + ' to ' + to + '.');
+  } finally { lock.releaseLock(); }
+}
+/**
+ * Run from the Apps Script editor when follow-ups were missed (for example, before this feature was installed).
+ * Queues everything already due for the most recent event that has ended: thank-you cards from 7 PM, missed-you
+ * letters from 10 AM the next morning. Anyone who already has one is skipped. The first 15 send now; maintenance
+ * sends the rest, 15 every five minutes.
+ */
+function sendFollowUpsForLatestEvent() {
+  var lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    var db = attLoad_(), now = Date.now(), event = attLatestEvent_(db, now);
+    if (!event) throw new Error('No event has ended yet.');
+    var report = ['thanks', 'missed'].map(function(type) {
+      var at = attFollowUpAt_(type, event), name = type === 'missed' ? 'missed-you letters' : 'thank-you cards';
+      if (now < at) return name + ' are not due until ' + Utilities.formatDate(new Date(at), 'America/Toronto', 'EEEE h:mm a z') + ' (run this again then, or let maintenance send them in auto mode)';
+      return attQueueFollowUps_(db, event, type, now, true) + ' ' + name + ' queued';
+    });
+    attCommit_(db); attDeliver_(db, now, 15);
+    console.log(event.title + ': ' + report.join('; ') + '. Check the organiser dashboard\'s Email delivery tab for progress. Emails left in today\'s MailApp quota: ' + MailApp.getRemainingDailyQuota() + '.');
+  } finally { lock.releaseLock(); }
 }
 function attText_(value, max, required) { if (typeof value !== 'string' || value.length > max || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) attError_('invalid_request'); value = value.trim(); if (required && !value) attError_('invalid_request'); return value; }
 function attValidatePerson_(input) {
@@ -277,7 +332,7 @@ function attHandle_(db, request, now) {
   if (action === 'retryEmail') {
     var delivery = db.deliveries.find(function(item) { return item.id === request.deliveryId; });
     if (!delivery) attError_('not_found');
-    if (delivery.status !== 'sent') { delivery.status = 'pending'; delivery.attempts = 0; delivery.nextAttemptAt = now; delivery.lastError = ''; }
+    if (delivery.status !== 'sent') { delivery.status = 'pending'; delivery.attempts = 0; delivery.nextAttemptAt = now; delivery.lastError = ''; if (delivery.type === 'thanks' || delivery.type === 'missed') delivery.manual = true; }
     return { ok: true };
   }
   if (action === 'sendUpdate') {
@@ -307,6 +362,7 @@ function attEventText_(event, registration) {
 function attEmail_(db, delivery, now) {
   var person = db.attendees.find(function(item) { return item.id === delivery.attendeeId; });
   if (!person || person.anonymizedAt || !person.email) return null;
+  if (delivery.type === 'thanks' || delivery.type === 'missed') return attFollowUpMail_(db, delivery, person, now);
   var registrations = db.registrations.filter(function(item) { return item.attendeeId === person.id && (delivery.registrationIds.length ? delivery.registrationIds.indexOf(item.id) >= 0 : !delivery.eventId || item.eventId === delivery.eventId); });
   var event = db.events.find(function(item) { return item.id === delivery.eventId; });
   if (delivery.type === 'reminder' && (!event || ['cancelled', 'completed'].indexOf(event.status) >= 0 || Date.parse(event.startsAt) <= now || Date.parse(event.startsAt) - now > ATT_DAY || delivery.eventStartsAt !== event.startsAt || !registrations.some(function(item) { return item.status === 'confirmed'; }))) return null;
@@ -314,8 +370,7 @@ function attEmail_(db, delivery, now) {
   var offered = registrations.find(function(item) { return item.status === 'offered' && Date.parse(item.offerExpiresAt) > now; });
   if (delivery.type === 'offer' && (!offered || !event || ['cancelled', 'closed', 'completed'].indexOf(attState_(db, event, now)) >= 0)) return null;
   if (delivery.type === 'offerExpired' && !registrations.some(function(item) { return item.status === 'waitlisted' && item.offerExpired; })) return null;
-  var site = attProps_().getProperty('ATTENDANCE_SITE_URL') || 'https://hultprizeuwindsor.ca';
-  if (!/^https:\/\/[a-zA-Z0-9.-]+(?::\d+)?$/.test(site)) attError_('unavailable');
+  var site = attSiteUrl_();
   var token = attIssueToken_(db, person.id, 'management', now), manage = site + '/attend/manage#token=' + token;
   var subject = 'Your Hult Prize at UWindsor events', introduction = 'Your event registrations are saved. Each event status is shown below.';
   if (delivery.type === 'confirmation') {
@@ -348,6 +403,150 @@ function attEmail_(db, delivery, now) {
   ]).filter(Boolean).join('\n\n');
   return { to: person.email, subject: subject, body: body, name: 'Hult Prize at UWindsor', replyTo: attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com' };
 }
+function attSiteUrl_() {
+  var site = attProps_().getProperty('ATTENDANCE_SITE_URL') || 'https://hultprizeuwindsor.ca';
+  if (!/^https:\/\/[a-zA-Z0-9.-]+(?::\d+)?$/.test(site)) attError_('unavailable');
+  return site;
+}
+function attHtml_(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+/** A whole hour on the Windsor calendar day of a moment. */
+function attWindsorHour_(value, hour) {
+  var day = new Date(value), zone = Utilities.formatDate(day, 'America/Toronto', 'Z');
+  return Date.parse(Utilities.formatDate(day, 'America/Toronto', 'yyyy-MM-dd') + 'T' + ('0' + hour).slice(-2) + ':00:00' + zone.slice(0, 3) + ':' + zone.slice(3));
+}
+/**
+ * When an event's follow-ups go out. Thank-you cards: 7 PM Windsor time that day, or an hour after the event ends if
+ * later. Missed-you letters: 10 AM the next morning, leaving the evening to record any check-in missed at the door.
+ */
+function attFollowUpAt_(type, event) {
+  var end = Date.parse(event.endsAt);
+  return type === 'missed' ? attWindsorHour_(end + ATT_DAY, ATT_MISSED_HOUR) : Math.max(end + 3600000, attWindsorHour_(end, ATT_THANKS_HOUR));
+}
+function attCheckedIn_(db, registrationId) { return db.checkins.some(function(checkin) { return checkin.registrationId === registrationId; }); }
+/** One missed-you letter per run of missed events: none if their last one was for an earlier event and they haven't come to anything since. */
+function attStillAway_(db, attendeeId, event) {
+  var start = function(id) { var item = db.events.find(function(candidate) { return candidate.id === id; }); return item ? Date.parse(item.startsAt) : NaN; };
+  var here = Date.parse(event.startsAt);
+  var last = db.deliveries.filter(function(delivery) { return delivery.type === 'missed' && delivery.attendeeId === attendeeId && delivery.status !== 'skipped' && start(delivery.eventId) < here; }).reduce(function(latest, delivery) { return Math.max(latest, start(delivery.eventId)); }, -Infinity);
+  return last > -Infinity && !db.checkins.some(function(checkin) { var at = start(checkin.eventId); return checkin.attendeeId === attendeeId && at > last && at < here; });
+}
+/**
+ * Thank-you cards go to everyone checked in, registered or walk-in. Missed-you letters go to confirmed registrations
+ * with no check-in; waitlisted and cancelled ones never had or gave up their seat. Manual sends skip the time window.
+ */
+function attQueueFollowUps_(db, event, type, now, manual) {
+  var targets = type === 'missed'
+    ? db.registrations.filter(function(registration) { return registration.eventId === event.id && registration.status === 'confirmed' && !attCheckedIn_(db, registration.id) && !attStillAway_(db, registration.attendeeId, event); }).map(function(registration) { return { attendeeId: registration.attendeeId, registrationId: registration.id }; })
+    : db.checkins.filter(function(checkin) { return checkin.eventId === event.id; });
+  var queued = 0;
+  targets.forEach(function(target) {
+    var key = type + ':' + target.registrationId;
+    if (db.deliveries.some(function(delivery) { return delivery.key === key; })) return;
+    attQueue_(db, type, target.attendeeId, event.id, key, now, [target.registrationId]);
+    if (manual) db.deliveries[db.deliveries.length - 1].manual = true;
+    queued += 1;
+  });
+  return queued;
+}
+/** The privacy notice promises that invitations to other events need the optional consent; the latest answer counts. */
+function attWantsUpdates_(db, attendeeId) {
+  var latest = db.consents.filter(function(consent) { return consent.attendeeId === attendeeId; }).sort(function(a, b) { return Date.parse(a.recordedAt) - Date.parse(b.recordedAt); }).pop();
+  return Boolean(latest && latest.marketingAccepted === true);
+}
+function attFollowUpMail_(db, delivery, person, now) {
+  var event = db.events.find(function(item) { return item.id === delivery.eventId; });
+  var registrationId = delivery.registrationIds[0], registration = db.registrations.find(function(item) { return item.id === registrationId; });
+  if (!event || event.status === 'cancelled') return null;
+  if (delivery.type === 'thanks' && !attCheckedIn_(db, registrationId)) return null;
+  // A check-in recorded since the letter was queued means they came after all.
+  if (delivery.type === 'missed' && (!registration || registration.status !== 'confirmed' || attCheckedIn_(db, registrationId))) return null;
+  if (!delivery.manual && now > attFollowUpAt_(delivery.type, event) + ATT_FOLLOW_UP_WINDOW) return null;
+  return Object.assign({ to: person.email, name: 'Hult Prize at UWindsor', replyTo: attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com' }, attFollowUp_(db, event, person, now, attWantsUpdates_(db, person.id), delivery.type));
+}
+/**
+ * The follow-up email: an animated picture over a short note, either a thank-you card (type 'thanks') or a
+ * missed-you letter ('missed'). With optional consent it also invites the reader to the next event (a one-click
+ * sign-up when they aren't registered yet) and explains the Ticket Jar raffle. Pictures are served from the site
+ * (public/images/email, made by scripts/generate-email-art.mjs).
+ */
+function attFollowUp_(db, event, person, now, updates, type) {
+  var site = attSiteUrl_(), when = function(value, pattern) { return Utilities.formatDate(new Date(value), 'America/Toronto', pattern); };
+  var copy = type === 'missed' ? {
+    subject: 'We missed you at ' + event.title + ' 💌', heading: 'We missed you at ' + event.title + '!',
+    opening: 'We’re sad you couldn’t make it to ' + event.title + ', but we know things come up. We hope everything’s okay.',
+    openingHtml: 'We’re sad you couldn’t make it, but we know things come up. We hope everything’s okay.',
+    note: 'Did you make it after all, and we missed you at the door? Just reply and let us know, and we’ll fix our list.',
+    invite: 'Come to the next one? We’d love to see you there:', going: 'You’re already signed up for this one, so your seat is waiting!',
+    closing: 'Hope to see you soon,', why: 'You’re getting this because you registered for ' + event.title,
+    picture: 'missed-you-letter.gif', alt: 'A letter slides out of an envelope and unfolds: We missed you!',
+  } : {
+    subject: 'Thank you for coming to ' + event.title + ' 💌', heading: 'Thank you for coming to ' + event.title + '!',
+    opening: 'Thank you for coming to ' + event.title + '. It meant a lot to have you there, and we hope you left with an idea or two worth chasing.',
+    openingHtml: 'It meant a lot to have you there, and we hope you left with an idea or two worth chasing.',
+    note: '', invite: 'We’d love to see you at our next event:', going: 'You’re already signed up, so we’ll see you there!',
+    closing: 'See you soon,', why: 'You’re getting this because you checked in at ' + event.title,
+    picture: 'thank-you-card.gif', alt: 'A thank-you card slides out of an envelope and opens: So glad you came!',
+  };
+  var events = attEvents_(db, now).filter(function(item) { return item.status !== 'cancelled'; });
+  var next = updates ? events.filter(function(item) { return item.id !== event.id && Date.parse(item.startsAt) > now; })[0] : null;
+  var first = events.find(function(item) { return item.id === ATT_RAFFLE.firstEventId; }), draw = events.find(function(item) { return item.id === ATT_RAFFLE.drawEventId; });
+  var raffle = updates && draw && draw.id !== event.id && Date.parse(draw.startsAt) > now;
+  var text = ['Hi ' + person.firstName + ',', copy.opening, copy.note];
+  var p = function(inner, style) { return '<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#33475b;' + (style || '') + '">' + inner + '</p>'; };
+  var h2 = function(inner) { return '<h2 style="margin:0 0 8px;font-size:21px;line-height:1.3;color:#002b51;">' + inner + '</h2>'; };
+  var a = function(href, label) { return '<a href="' + attHtml_(href) + '" style="color:#be125e;font-weight:600;text-decoration:underline;">' + attHtml_(label) + '</a>'; };
+  var box = function(colour, inner) { return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;"><tr><td style="background:' + colour + ';border-radius:16px;padding:22px 22px 8px;">' + inner + '</td></tr></table>'; };
+  var html = '<h1 style="margin:0 0 14px;font-size:27px;line-height:1.2;color:#002b51;">' + attHtml_(copy.heading) + '</h1>' + p('Hi ' + attHtml_(person.firstName) + ',') + p(attHtml_(copy.openingHtml)) + (copy.note ? p(attHtml_(copy.note), 'font-size:14px;color:#53616f;') : '');
+  if (next) {
+    var registration = db.registrations.find(function(item) { return item.attendeeId === person.id && item.eventId === next.id && item.status !== 'cancelled'; });
+    var day = when(next.startsAt, 'EEEE, MMMM d'), hours = when(next.startsAt, 'h:mm a') + '–' + when(next.endsAt, 'h:mm a z');
+    // The time never breaks across lines; on a phone it moves under the date as one piece.
+    var nextHtml = p(attHtml_(copy.invite), 'margin-bottom:6px;') + h2(attHtml_(next.title)) + p('<strong style="color:#002b51;">' + attHtml_(day) + ' · ' + attHtml_(hours).replace(/ /g, '&nbsp;') + '</strong><br>' + attHtml_(next.venue), 'margin-bottom:10px;') + (next.description ? p(attHtml_(next.description)) : '');
+    text.push(copy.invite + ' ' + next.title + '\n' + day + ' · ' + hours + '\n' + next.venue + (next.description ? '\n' + next.description : ''));
+    if (registration && registration.status === 'confirmed') {
+      nextHtml += p(attHtml_(copy.going) + ' ' + a(attCalendar_(next), 'Add to Google Calendar') + ' · ' + a(attOutlook_(next), 'Add to Outlook'));
+      text.push(copy.going + '\nAdd to Google Calendar: ' + attCalendar_(next) + '\nAdd to Outlook: ' + attOutlook_(next));
+    } else if (registration) {
+      nextHtml += p('You’re on the waitlist for this one. We’ll email you if a seat opens up.');
+      text.push('You’re on the waitlist for this one. We’ll email you if a seat opens up.');
+    } else {
+      // A one-click sign-up: the management link opens with the next event already ticked.
+      var known = db.attendees.some(function(item) { return item.id === person.id; });
+      var signUp = known ? site + '/attend/manage#token=' + attIssueToken_(db, person.id, 'management', now) + '&add=' + encodeURIComponent(next.id) : site + '/attend?events=' + encodeURIComponent(next.id);
+      var label = next.status === 'full' ? 'Join the waitlist' : 'Save my spot';
+      nextHtml += '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 12px;"><tr><td style="background:#da2381;border-radius:15px;"><a href="' + attHtml_(signUp) + '" style="display:inline-block;padding:13px 24px;font-size:16px;font-weight:600;line-height:1.5;color:#ffffff;text-decoration:none;">' + label + ' &rarr;</a></td></tr></table>'
+        + p('The button signs you in for 48 hours. After that, you can still sign up at ' + a(site + '/attend/manage', site.replace(/^https:\/\//, '') + '/attend/manage') + '.', 'font-size:13px;color:#53616f;');
+      text.push(label + ' (this link works for 48 hours):\n' + signUp + '\nAfter that, you can still sign up at ' + site + '/attend/manage');
+    }
+    html += box('#edf4f8', nextHtml);
+  }
+  if (raffle) {
+    var started = !first || Date.parse(event.startsAt) >= Date.parse(first.startsAt);
+    var opens = started ? 'Every event you come to gets you another free raffle ticket at check-in.' : 'The Ticket Jar opens at ' + (next && next.id === first.id ? 'our next event, ' + first.title : first.title + ' on ' + when(first.startsAt, 'MMMM d')) + '. From then on, every event you come to gets you a free raffle ticket at check-in.';
+    var jar = 'Your tickets stay in the jar until we draw one at the ' + draw.title + ' on ' + when(draw.startsAt, 'MMMM d, yyyy') + '. Its owner wins $200 cash, thanks to Grayfel Technologies Inc. The more events you come to, the better your odds.';
+    var heading = started ? 'Keep filling the Ticket Jar' : 'Start collecting tickets for $200';
+    html += box('#fff0f7', '<img src="' + site + '/images/email/raffle-tickets.png" width="250" alt="Raffle tickets for the Ticket Jar: $200, drawn February 4, 2027" style="display:block;width:250px;max-width:100%;height:auto;margin:0 auto 12px;border:0;">'
+      + h2(heading) + p(attHtml_(opens)) + p(attHtml_(jar)) + p(a(site + '/blog/the-ticket-jar', 'How the Ticket Jar works')));
+    text.push(heading + '\n' + opens + ' ' + jar + '\nHow the Ticket Jar works: ' + site + '/blog/the-ticket-jar');
+  }
+  html += p(attHtml_(copy.closing) + '<br>The Hult Prize at UWindsor team', 'margin:26px 0 0;');
+  text.push(copy.closing + '\nThe Hult Prize at UWindsor team');
+  var discord = attProps_().getProperty('ATTENDANCE_DISCORD_URL') || 'https://discord.gg/ybeQYQxcqZ';
+  var why = copy.why + (updates ? ' and said yes to hearing about our other events. To stop, just reply and let us know.' : '.');
+  var footer = (/^https:\/\//.test(discord) ? '<a href="' + attHtml_(discord) + '" style="color:#53616f;">Join our Discord</a> · ' : '') + '<a href="' + site + '" style="color:#53616f;">' + site.replace(/^https:\/\//, '') + '</a><br>Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.<br>' + attHtml_(why);
+  text.push((/^https:\/\//.test(discord) ? 'Join our Discord: ' + discord + '\n' : '') + 'Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.\n' + why);
+  var preview = type === 'missed' ? (next ? 'Sorry you couldn’t make it. Come to ' + next.title + '?' : 'Sorry you couldn’t make it to ' + event.title + '.') : (next ? 'A little thank-you card, and an invite to ' + next.title + '.' : 'A little thank-you card from the Hult Prize at UWindsor team.');
+  // Tables and inline styles, because Gmail and Outlook drop most stylesheets. The page colour matches the GIF's edge.
+  var htmlBody = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>' + attHtml_(copy.heading) + '</title></head>'
+    + '<body style="margin:0;padding:0;background:#fff0f7;"><div style="display:none;max-height:0;overflow:hidden;opacity:0;">' + attHtml_(preview) + '</div>'
+    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fff0f7;"><tr><td align="center" style="padding:16px 12px 36px;">'
+    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">'
+    + '<tr><td align="center"><img src="' + site + '/images/email/' + copy.picture + '" width="560" alt="' + attHtml_(copy.alt) + '" style="display:block;width:100%;max-width:560px;height:auto;border:0;"></td></tr>'
+    + '<tr><td style="background:#ffffff;border-radius:20px;padding:30px 24px 30px;">' + html + '</td></tr>'
+    + '<tr><td align="center" style="padding:22px 16px 0;font-size:12px;line-height:1.7;color:#53616f;">' + footer + '</td></tr>'
+    + '</table></td></tr></table></body></html>';
+  return { subject: copy.subject, body: text.filter(Boolean).join('\n\n'), htmlBody: htmlBody };
+}
 /** Tokens are saved as hashes before MailApp runs; raw links are never persisted. */
 function attDeliver_(db, now, limit) {
   var mode = attProps_().getProperty('ATTENDANCE_EMAIL_MODE') || 'disabled';
@@ -377,6 +576,12 @@ function attMaintenance_(db, now) {
     if (event.status === 'cancelled' || event.status === 'completed' || until <= 0 || until > ATT_DAY) return;
     db.registrations.filter(function(registration) { return registration.eventId === event.id && registration.status === 'confirmed'; }).forEach(function(registration) {
       attQueue_(db, 'reminder', registration.attendeeId, event.id, 'reminder:' + registration.id + ':' + event.startsAt, now, [registration.id]);
+    });
+  });
+  if (attProps_().getProperty('ATTENDANCE_FOLLOW_UP_MODE') === 'auto') db.events.forEach(function(event) {
+    ['thanks', 'missed'].forEach(function(type) {
+      var at = attFollowUpAt_(type, event);
+      if (event.status !== 'cancelled' && now >= at && now <= at + ATT_FOLLOW_UP_WINDOW) attQueueFollowUps_(db, event, type, now, false);
     });
   });
   db.tokens = db.tokens.filter(function(token) { return token.expiresAt > now && !token.usedAt; });

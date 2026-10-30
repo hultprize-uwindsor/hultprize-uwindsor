@@ -141,6 +141,20 @@ try {
   assert.equal(await page.locator('.attendance-registration').count(), 0, 'sign-out removes personal attendance from the page')
   assert.equal(authenticated, false)
 
+  // The thank-you email's sign-up button opens the page with its event already ticked. Leaving first makes this a
+  // fresh load, as from an email, rather than a hash change on the page already open.
+  await page.goto('about:blank')
+  await page.goto(`${base}/attend/manage#token=synthetic-single-use-token&add=team-mixer`, { waitUntil: 'networkidle' })
+  await page.getByText('Your next event is ticked under “Add another event”.', { exact: false }).waitFor()
+  assert.equal(new URL(page.url()).hash, '', 'sign-up link credential stripped from URL')
+  assert(await page.locator('#manage-team-mixer').isChecked(), 'next event preselected')
+  assert.equal(await page.locator('.attendance-manage-section input[type=checkbox]:checked').count(), 1, 'only the named event is ticked')
+  await page.getByRole('button', { name: 'Add selected events' }).click()
+  await page.getByText('Your events have been updated. Check each event’s confirmed or waitlisted status above.').waitFor()
+  assert(registrations.some(registration => registration.eventId === 'team-mixer' && registration.status === 'confirmed'))
+  await page.getByRole('button', { name: 'Sign out of attendance' }).click()
+  await page.getByRole('heading', { name: 'A secure link, sent to you.' }).waitFor()
+
   // A sponsor receives only professional fields, and repeat submissions reveal no roster.
   verificationRequired = true
   await page.goto(`${base}/attend?events=founders-panel`, { waitUntil: 'networkidle' })

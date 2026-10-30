@@ -33,7 +33,7 @@ The dedicated store includes attendees, events, event registrations, consent rec
 
 Google documents [web app deployment](https://developers.google.com/apps-script/guides/web), [script locks](https://developers.google.com/apps-script/reference/lock/lock-service), [installable triggers](https://developers.google.com/apps-script/guides/triggers/installable) and [service quotas](https://developers.google.com/apps-script/guides/services/quotas). This architecture suits the chapter's existing setup; sending limits and script execution limits still apply. Failed emails retain the registration and are visible for retry. Google MailApp accepting a send is not a guarantee of inbox delivery or a bounce webhook. MailApp has no idempotency key; a process failure between sending a message and recording the successful send may result in a duplicate email on retry, but cannot create a duplicate registration.
 
-Email wording is documented in [email templates](event-email-templates.md).
+Email wording is documented in [email templates](event-email-templates.md). The follow-up emails (thank-you cards and missed-you letters) load their pictures from the website, so deploy the site before pasting a new `Attendance.gs`. After pasting, save the project (triggers run the saved code) and create a new web app deployment version. Then run `sendFollowUpTest()` to check them in your own inbox, and set `ATTENDANCE_FOLLOW_UP_MODE=auto` to send them automatically.
 
 ## Security and privacy operations
 

@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from '../components/PageLink'
 import { PageLayout, Section } from '../components/PageParts'
+import { scrollPageTo } from '../components/useSmoothScroll'
 import { SITE } from '../data/site'
 import { AttendanceApiError, attendanceApi, canSelectEvent } from '../lib/attendance'
 import type { AttendanceRegistration, ManageAttendanceResponse } from '../lib/attendance'
 import { EventSelection, RegistrationCards } from './AttendPage'
 import './Attendance.css'
 
-type EmailCredential = { action: 'exchange' | 'acceptOffer'; token: string }
+type EmailCredential = { action: 'exchange' | 'acceptOffer'; token: string; add: string[] }
 
 function captureEmailCredential(): EmailCredential | null {
   if (typeof window === 'undefined' || !window.location.pathname.startsWith('/attend/manage')) return null
@@ -18,7 +19,9 @@ function captureEmailCredential(): EmailCredential | null {
   if (!token && !offer) return null
   // Bearer tokens only travel in the POST body; remove the fragment before rendering links.
   window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search)
-  return offer ? { action: 'acceptOffer', token: offer } : { action: 'exchange', token: token! }
+  // The thank-you email's sign-up button names the next event, to tick it in "Add another event".
+  const add = (hash.get('add') || '').split(',').filter(id => /^[a-zA-Z0-9_-]{1,100}$/.test(id)).slice(0, 30)
+  return offer ? { action: 'acceptOffer', token: offer, add: [] } : { action: 'exchange', token: token!, add }
 }
 
 let initialCredential = captureEmailCredential()
@@ -39,6 +42,7 @@ export default function ManageAttendancePage() {
   const bootstrap = useRef<Promise<ManageAttendanceResponse> | null>(null)
   const errorRef = useRef<HTMLDivElement>(null)
   const cancelRef = useRef<HTMLDivElement>(null)
+  const jumpToAdd = useRef(false)
 
   function applySnapshot(next: ManageAttendanceResponse) {
     setSnapshot(next)
@@ -58,6 +62,12 @@ export default function ManageAttendancePage() {
       if (!active) return
       applySnapshot(result)
       if (credential?.action === 'acceptOffer') setMessage('Your offered seat is now confirmed. Your current registrations are shown below.')
+      const add = (credential?.add || []).filter(id => result.events.some(event => event.id === id && canSelectEvent(event)) && !result.registrations.some(registration => registration.eventId === id && registration.status !== 'cancelled'))
+      if (add.length) {
+        setSelected(add)
+        setMessage(`${add.length === 1 ? 'Your next event is' : 'These events are'} ticked under “Add another event”. Press “Add selected events” to save your spot.`)
+        jumpToAdd.current = true
+      }
     }).catch(failure => {
       if (!active) return
       if (credential || !(failure instanceof AttendanceApiError) || failure.status !== 401) {
@@ -68,6 +78,12 @@ export default function ManageAttendancePage() {
   }, [credential, revision])
 
   useEffect(() => { if (error) errorRef.current?.focus() }, [error])
+  useEffect(() => {
+    if (!jumpToAdd.current || loading) return
+    jumpToAdd.current = false
+    const target = document.getElementById('add-an-event')
+    if (target) scrollPageTo(target.getBoundingClientRect().top + window.scrollY - 28)
+  }, [loading])
   useEffect(() => { if (cancelTarget) cancelRef.current?.focus() }, [cancelTarget])
 
   async function requestLink(event: FormEvent<HTMLFormElement>) {

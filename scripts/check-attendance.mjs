@@ -37,11 +37,13 @@ const context = vm.createContext({
     getUuid: randomUUID, DigestAlgorithm: { SHA_256: 'sha256' }, Charset: { UTF_8: 'utf8' },
     computeDigest: (_algorithm, value) => [...createHash('sha256').update(value).digest()],
     computeHmacSha256Signature: (value, secret) => [...createHmac('sha256', secret).update(value).digest()],
-    formatDate: (date, timeZone, pattern) => new Intl.DateTimeFormat('en-CA', { timeZone, ...(pattern.startsWith('EEEE') ? { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' } : pattern.startsWith('MMMM') ? { month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' } : { hour: 'numeric', minute: '2-digit', ...(pattern.includes('z') ? { timeZoneName: 'short' } : {}) }) }).format(date),
+    formatDate: (date, timeZone, pattern) => pattern === 'yyyy-MM-dd' ? new Intl.DateTimeFormat('en-CA', { timeZone }).format(date)
+      : pattern === 'Z' ? new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'longOffset' }).formatToParts(date).find(part => part.type === 'timeZoneName').value.replace(/^GMT([+-]\d\d):(\d\d)$/, '$1$2')
+      : new Intl.DateTimeFormat('en-CA', { timeZone, ...(pattern.startsWith('EEEE') ? { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' } : pattern.startsWith('MMMM') ? { month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' } : { hour: 'numeric', minute: '2-digit', ...(pattern.includes('z') ? { timeZoneName: 'short' } : {}) }) }).format(date),
   },
   SpreadsheetApp: { openById: () => spreadsheet, flush: () => {} },
   LockService: { getScriptLock: () => ({ waitLock: () => { assert(!lockHeld); lockHeld = true; lockUses++ }, tryLock: () => { if (lockHeld) return false; lockHeld = true; lockUses++; return true }, releaseLock: () => { lockHeld = false } }) },
-  MailApp: { sendEmail: mail => { if (mailFails) throw Error('Mock quota exceeded'); mailed.push(mail) } },
+  MailApp: { sendEmail: mail => { if (mailFails) throw Error('Mock quota exceeded'); mailed.push(mail) }, getRemainingDailyQuota: () => 100 },
   ContentService: { MimeType: { JSON: 'json' }, createTextOutput: text => ({ setMimeType: () => JSON.parse(text) }) },
 })
 vm.runInContext(source, context)
@@ -225,6 +227,108 @@ assert(call('sendUpdate', { eventId: 'workshop-5' }, admin).queued > 0)
 assert.equal(call('saveEvent', { event: { ...seed.find(event => event.id === 'workshop-4'), status: 'cancelled' } }, admin).ok, true)
 assert(db().registrations.filter(row => row.eventId === 'workshop-4').every(row => row.status === 'cancelled'))
 
+// Follow-ups. Thank-you cards: queued at 7 PM Windsor time for everyone checked in, with the invite and raffle only for consent.
+const beforeThanks = now
+assert.equal(call('saveEvent', { event: { ...seed[0], capacity: null } }, admin).ok, true)
+assert.equal(call('register', { ...submission('thanks-going@example.invalid', ['workshop-1']), marketingConsent: true }).saved, true)
+assert.equal(call('walkIn', submission('thanks-going@example.invalid'), admin).saved, true)
+assert.equal(call('walkIn', { ...submission('thanks-yes@example.invalid'), marketingConsent: true }, admin).saved, true)
+assert(db().registrations.some(row => row.eventId === 'info-session-1' && row.status === 'confirmed' && !db().checkins.some(checkin => checkin.registrationId === row.id)), 'Fixture has confirmed attendees who never checked in')
+const thanksPerson = email => db().attendees.find(row => row.email === email)
+const thanksFor = email => db().deliveries.filter(row => row.type === 'thanks' && row.attendeeId === thanksPerson(email)?.id)
+const info = db().events.find(event => event.id === 'info-session-1')
+assert.equal(context.attFollowUpAt_('thanks', info), Date.parse('2026-10-29T23:00:00Z'), '7 PM EDT on the day of a 5:30 PM finish')
+assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-11-13T23:30:00Z' }), Date.parse('2026-11-14T00:30:00Z'), 'An hour after a 7 PM finish')
+assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-11-07T17:20:00Z' }), Date.parse('2026-11-08T00:00:00Z'), '7 PM EST after a morning workshop')
+assert.equal(context.attFollowUpAt_('missed', info), Date.parse('2026-10-30T14:00:00Z'), 'Missed-you letters: 10 AM EDT the next morning')
+assert.equal(context.attFollowUpAt_('missed', { endsAt: '2026-10-31T23:00:00Z' }), Date.parse('2026-11-01T15:00:00Z'), '10 AM EST on the morning the clocks go back')
+assert.equal(context.attFollowUpAt_('missed', { endsAt: '2026-11-14T03:50:00Z' }), Date.parse('2026-11-14T15:00:00Z'), 'A night that ends at 10:50 PM gets its letter the next morning')
+now = Date.parse('2026-10-29T23:01:00Z'); context.attendanceMaintenance()
+assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, 0, 'Automatic follow-ups stay off until ATTENDANCE_FOLLOW_UP_MODE is auto')
+props.ATTENDANCE_FOLLOW_UP_MODE = 'auto'
+now = Date.parse('2026-10-29T22:59:00Z'); context.attendanceMaintenance()
+assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, 0, 'No cards before 7 PM')
+now = Date.parse('2026-10-29T23:01:00Z'); context.attendanceMaintenance()
+const checkedIn = db().checkins.filter(row => row.eventId === 'info-session-1')
+assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, checkedIn.length, 'One card per check-in, walk-ins included')
+assert(db().deliveries.filter(row => row.type === 'thanks').every(row => checkedIn.some(checkin => checkin.registrationId === row.registrationIds[0])), 'Only checked-in attendees get a card')
+context.attendanceMaintenance()
+assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, checkedIn.length, 'Thank-you uniqueness')
+model = db()
+const yes = context.attEmail_(model, thanksFor('thanks-yes@example.invalid')[0], now)
+assert.match(yes.subject, /^Thank you for coming to Info Session #1/)
+assert(yes.htmlBody.includes('https://hultprizeuwindsor.ca/images/email/thank-you-card.gif'))
+assert(yes.htmlBody.includes('Workshop 1: Problem, Insight &amp; Story') && !yes.htmlBody.includes('Insight & Story'), 'Event details are HTML-escaped')
+assert(/attend\/manage#token=[a-f0-9]{64}&amp;add=workshop-1/.test(yes.htmlBody), 'Unregistered attendees get a one-click sign-up for the next event')
+assert(yes.body.includes('Save my spot') && yes.body.includes('The Ticket Jar opens at our next event, Workshop 1'), 'Plain-text body carries the invite and raffle')
+assert(yes.htmlBody.includes('Start collecting tickets for $200') && yes.htmlBody.includes('raffle-tickets.png'))
+const going = context.attEmail_(model, thanksFor('thanks-going@example.invalid')[0], now)
+assert(going.body.includes('You’re already signed up') && !going.body.includes('Save my spot'), 'Registered attendees get calendar links instead of a sign-up button')
+const no = context.attEmail_(model, thanksFor('walk-in@example.invalid')[0], now)
+assert(no.body.includes('Thank you for coming to Info Session #1') && (no.htmlBody.split('<body')[1].match(/Thank you for coming to Info Session #1/g) || []).length === 1, 'The visible HTML names the event once, in its heading')
+assert(!no.body.includes('Workshop 1') && !no.body.includes('Ticket Jar') && !no.htmlBody.includes('#token='), 'Without optional consent: the thank-you only')
+const later = { ...thanksFor('thanks-yes@example.invalid')[0] }
+assert.equal(context.attEmail_(model, later, Date.parse('2026-10-30T05:01:00Z')), null, 'Cards are not sent after the evening window')
+assert(context.attEmail_(model, { ...later, manual: true }, Date.parse('2026-10-30T15:00:00Z')), 'A manual catch-up send still goes out the next day')
+const afterRaffle = context.attFollowUp_(model, model.events.find(event => event.id === 'workshop-2'), thanksPerson('thanks-yes@example.invalid'), Date.parse('2026-11-14T23:00:00Z'), true, 'thanks')
+assert(afterRaffle.body.includes('Keep filling the Ticket Jar') && afterRaffle.body.includes('Info Session #2'), 'Once the jar is open, later cards say keep collecting and name the next event')
+const finale = context.attFollowUp_(model, model.events.find(event => event.id === 'campus-grand-finale'), thanksPerson('thanks-yes@example.invalid'), Date.parse('2027-02-05T00:00:00Z'), true, 'thanks')
+assert(!finale.body.includes('Ticket Jar') && !finale.body.includes('next event'), 'After the finale there is no draw or next event to mention')
+// Missed-you letters: 10 AM the next morning, for confirmed registrations nobody checked in.
+const noShows = () => db().registrations.filter(row => row.eventId === 'info-session-1' && row.status === 'confirmed' && !db().checkins.some(checkin => checkin.registrationId === row.id))
+const missedLetters = () => db().deliveries.filter(row => row.type === 'missed')
+now = Date.parse('2026-10-30T13:59:00Z'); context.attendanceMaintenance()
+assert.equal(missedLetters().length, 0, 'No letters before 10 AM')
+now = Date.parse('2026-10-30T14:01:00Z'); context.attendanceMaintenance()
+assert.equal(missedLetters().length, noShows().length, 'One letter per confirmed registration with no check-in')
+assert(missedLetters().every(row => noShows().some(registration => registration.id === row.registrationIds[0])), 'Attendees, waitlisted and cancelled registrations get no letter')
+assert(db().registrations.some(row => row.eventId === 'info-session-1' && row.status === 'waitlisted'), 'Fixture includes waitlisted registrations')
+context.attendanceMaintenance()
+assert.equal(missedLetters().length, noShows().length, 'Missed-you uniqueness')
+model = db()
+const letter = missedLetters()[0], missedPerson = model.attendees.find(row => row.id === letter.attendeeId)
+const missedYes = context.attFollowUp_(model, info, missedPerson, now, true, 'missed'), missedNo = context.attEmail_(model, letter, now)
+assert.match(missedYes.subject, /^We missed you at Info Session #1/)
+assert(missedYes.htmlBody.includes('https://hultprizeuwindsor.ca/images/email/missed-you-letter.gif') && !missedYes.htmlBody.includes('thank-you-card.gif'))
+assert(missedYes.body.includes('couldn’t make it to Info Session #1') && missedYes.body.includes('we missed you at the door'), 'Kind note, and a way to correct a missed check-in')
+assert(missedYes.body.includes('Come to the next one? We’d love to see you there: Workshop 1') && missedYes.body.includes('The Ticket Jar opens at our next event'), 'With consent: the invite and the raffle')
+assert(!missedNo.body.includes('Workshop 1') && !missedNo.body.includes('Ticket Jar') && !missedNo.htmlBody.includes('#token='), 'Without consent: the note only')
+model.checkins.push({ id: 'late-door-fix', registrationId: letter.registrationIds[0], attendeeId: letter.attendeeId, eventId: 'info-session-1', checkedInAt: new Date(now).toISOString() })
+assert.equal(context.attEmail_(model, letter, now), null, 'A check-in recorded after queueing cancels the letter')
+assert.equal(context.attEmail_(db(), letter, Date.parse('2026-10-30T20:01:00Z')), null, 'Letters are not sent after the morning window')
+assert(context.attEmail_(db(), { ...letter, manual: true }, Date.parse('2026-10-31T12:00:00Z')), 'A manual catch-up still sends later')
+// One letter per run of missed events: none for the next miss, then one again after they come back.
+model = db()
+const away = letter.attendeeId, eventAt = id => model.events.find(event => event.id === id)
+model.registrations.push({ id: 'away-w1', attendeeId: away, eventId: 'workshop-1', status: 'confirmed', createdAt: '2026-10-20T00:00:00Z' }, { id: 'away-w2', attendeeId: away, eventId: 'workshop-2', status: 'confirmed', createdAt: '2026-10-20T00:00:00Z' }, { id: 'wait-w1', attendeeId: thanksPerson('thanks-yes@example.invalid').id, eventId: 'workshop-1', status: 'waitlisted', createdAt: '2026-10-20T00:00:00Z' })
+context.attQueueFollowUps_(model, eventAt('workshop-1'), 'missed', Date.parse('2026-11-08T15:01:00Z'), false)
+assert(!model.deliveries.some(row => row.key === 'missed:away-w1'), 'A second miss in a row gets no letter')
+assert(!model.deliveries.some(row => row.key === 'missed:wait-w1'), 'A waitlisted registration gets no letter')
+model.checkins.push({ id: 'came-back', registrationId: 'came-back-reg', attendeeId: away, eventId: 'founders-panel', checkedInAt: '2026-11-13T22:00:00Z' })
+context.attQueueFollowUps_(model, eventAt('workshop-2'), 'missed', Date.parse('2026-11-15T15:01:00Z'), false)
+assert(model.deliveries.some(row => row.key === 'missed:away-w2'), 'After coming back, the next miss gets a letter again')
+
+// Editor helpers: a preview of all four follow-ups for the tester only, and a manual catch-up.
+const quiet = run => { const log = console.log; console.log = () => {}; try { run() } finally { console.log = log } }
+const beforePreview = mailed.length
+quiet(() => context.sendFollowUpTest())
+const previews = mailed.slice(beforePreview)
+assert.deepEqual(previews.map(mail => mail.to), Array(4).fill('mail@example.invalid'), 'Previews go only to the first test address')
+assert.deepEqual(previews.map(mail => mail.subject.replace(/ 💌$/, '')), ['[Test] Thank you for coming to Info Session #1', '[Test, no updates consent] Thank you for coming to Info Session #1', '[Test] We missed you at Info Session #1', '[Test, no updates consent] We missed you at Info Session #1'])
+assert(previews[0].htmlBody.includes('Ticket Jar') && !previews[1].htmlBody.includes('Ticket Jar') && previews[2].htmlBody.includes('Ticket Jar') && !previews[3].htmlBody.includes('Ticket Jar'))
+assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, checkedIn.length, 'Previews queue nothing')
+const nextRegistration = db().registrations.find(row => row.attendeeId === thanksPerson('thanks-going@example.invalid').id && row.eventId === 'workshop-1')
+now = Date.parse('2026-11-07T15:30:00Z'); assert.equal(call('checkIn', { registrationId: nextRegistration.id }, admin).ok, true)
+now = Date.parse('2026-11-07T23:59:00Z'); quiet(() => context.sendFollowUpsForLatestEvent())
+assert.equal(db().deliveries.filter(row => row.eventId === 'workshop-1' && ['thanks', 'missed'].includes(row.type)).length, 0, 'A manual catch-up waits until each follow-up is due')
+now = Date.parse('2026-11-08T01:00:00Z'); quiet(() => context.sendFollowUpsForLatestEvent())
+const caughtUp = db().deliveries.filter(row => row.type === 'thanks' && row.eventId === 'workshop-1')
+assert.equal(caughtUp.length, 1, 'A manual catch-up queues the latest event that has ended')
+assert.equal(caughtUp[0].manual, true)
+assert.equal(db().deliveries.filter(row => row.type === 'missed' && row.eventId === 'workshop-1').length, 0, 'Missed-you letters for it are not due until 10 AM')
+now = beforeThanks
+delete props.ATTENDANCE_FOLLOW_UP_MODE
+
 const csv = rosterCsv({ events: seed, attendees: [{ id: 'a', firstName: '=HYPERLINK("malicious")', email: '+malicious@example.invalid', category: 'community', dietary: 'SECRET SUPPORT' }], registrations: [{ id: 'r', attendeeId: 'a', eventId: 'info-session-1', status: 'confirmed' }], checkins: [] })
 assert(csv.includes("'=HYPERLINK")); assert(!csv.includes('SECRET SUPPORT'))
 
@@ -271,4 +375,4 @@ assert(db().attendees.every(row => !row.email && !row.firstName && row.anonymize
 assert.equal(db().consents.length, 0); assert.equal(db().tokens.length, 0); assert.equal(db().deliveries.length, 0)
 assert.equal(sheets.get('journal').rows[1][0], '')
 assert.equal(lockHeld, false)
-console.log('Passed attendance validation, mixed selections, duplicate privacy, serialized capacity, lock rejection, FIFO reserved offers/expiry, single-use hashed tokens, ownership, support roles, journal recovery, email guard/failure/retry, DST/calendar content, reminders, walk-ins/check-ins, updates/cancellation, CSV safety, proxy auth/CSRF/configuration, and retention. Spreadsheet and MailApp are fully mocked; no live emails or services used.')
+console.log('Passed attendance validation, mixed selections, duplicate privacy, serialized capacity, lock rejection, FIFO reserved offers/expiry, single-use hashed tokens, ownership, support roles, journal recovery, email guard/failure/retry, DST/calendar content, reminders, thank-you cards and missed-you letters, walk-ins/check-ins, updates/cancellation, CSV safety, proxy auth/CSRF/configuration, and retention. Spreadsheet and MailApp are fully mocked; no live emails or services used.')
