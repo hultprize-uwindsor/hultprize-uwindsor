@@ -423,6 +423,26 @@ for (const file of ['thank-you-card.gif', 'missed-you-letter.gif']) art.update(r
 assert.equal(context.ATT_ART_VERSION, art.digest('hex').slice(0, 8), 'ATT_ART_VERSION in Attendance.gs is the fingerprint scripts/generate-email-art.mjs printed for the current GIFs')
 // Mail apps never restart a GIF that has stopped, so each follow-up picture loops forever (NETSCAPE2.0 loop count 0).
 for (const file of ['thank-you-card.gif', 'missed-you-letter.gif']) { const gif = readFileSync(new URL(`../public/images/email/${file}`, import.meta.url)), at = gif.indexOf('NETSCAPE2.0'); assert(at > 0 && gif.readUInt16LE(at + 13) === 0, `${file} loops forever`) }
+// The picture's place is never empty: a black box that needs no download, then the GIF's first frame, a small file of the
+// very same pixels, then the GIF. The GIF's height holds its place so the words don't jump when it lands.
+for (const [file, mail] of [['thank-you-card', yes], ['missed-you-letter', missedYes]]) {
+  // The black box sits exactly where the scene draws the envelope.
+  const scene = readFileSync(new URL(`../scripts/email-art/${file}.html`, import.meta.url), 'utf8'), [, left, top, envelopeWidth, envelopeHeight] = scene.match(/\.env \{ position: absolute; left: (\d+)px; top: (\d+)px; width: (\d+)px; height: (\d+)px;/).map(Number), [, sceneWidth, sceneHeight] = scene.match(/html, body \{ margin: 0; width: (\d+)px; height: (\d+)px;/).map(Number)
+  const percent = value => String(Number((value * 100).toFixed(2)))
+  assert(mail.htmlBody.includes(`background-image:linear-gradient(#2c2a2d,#2c2a2d);background-position:${percent(left / (sceneWidth - envelopeWidth))}% ${percent(top / (sceneHeight - envelopeHeight))}%;background-size:${percent(envelopeWidth / sceneWidth)}% ${percent(envelopeHeight / sceneHeight)}%;`), `${file} draws its black box exactly where the envelope sits`)
+  const gif = readFileSync(new URL(`../public/images/email/${file}.gif`, import.meta.url)), still = readFileSync(new URL(`../public/images/email/${file}-first-frame.gif`, import.meta.url))
+  assert(mail.htmlBody.includes(`background-image:url(https://hultprizeuwindsor.ca/images/email/${file}-first-frame.gif?v=${context.ATT_ART_VERSION});`), `${file} shows its first frame while the GIF loads`)
+  assert(mail.htmlBody.includes(`${file}.gif?v=${context.ATT_ART_VERSION}" width="560" height="${560 * gif.readUInt16LE(8) / gif.readUInt16LE(6)}"`), `${file} holds its place at the GIF's own proportions`)
+  assert(still.length < 80 * 1024 && still.readUInt16LE(6) === gif.readUInt16LE(6) && still.readUInt16LE(8) === gif.readUInt16LE(8) && gif.includes(still.subarray(13 + 768, still.length - 1)), `${file}-first-frame.gif is a small copy of the GIF's own first frame`)
+}
+assert(yes.htmlBody.includes('logo.png" width="240" height="43"'), 'The logo holds its place too')
+// Mail apps' image servers and browsers keep the pictures rather than checking back on every open. GIF addresses change
+// with the art (ATT_ART_VERSION), so they can be kept for a year; the PNGs keep one address, so only for a week.
+const pictureCache = source => JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8')).headers.find(rule => rule.source === source)?.headers.find(header => header.key === 'Cache-Control')?.value
+assert.equal(pictureCache('/images/email/(.*).gif'), 'public, max-age=31536000, immutable')
+assert.equal(pictureCache('/images/email/(.*).png'), 'public, max-age=604800')
+// Nobody should wait for the picture: each scene starts moving almost at once and is open within 2.75 seconds.
+for (const file of ['thank-you-card', 'missed-you-letter']) { const scene = readFileSync(new URL(`../scripts/email-art/${file}.html`, import.meta.url), 'utf8'); assert(Number(scene.match(/flap \d+ms cubic-bezier\([^)]*\) (\d+)ms/)[1]) <= 200 && Number(scene.match(/<meta name="length" content="(\d+)">/)[1]) <= 2750, `${file} opens without a long wait`) }
 // Retrying a follow-up from the dashboard ignores the time window; transactional email is sent ahead of follow-ups.
 const blocked = thanksFor('thanks-yes@example.invalid')[0]
 assert.equal(call('retryEmail', { deliveryId: blocked.id }, admin).ok, true)

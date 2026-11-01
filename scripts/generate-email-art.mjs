@@ -1,7 +1,7 @@
 // Run manually after changing a scene in scripts/email-art, the raffle tickets or an event lead. The GIFs and PNGs are
 // committed assets that the attendance follow-up emails (google-apps-script/Attendance.gs) load from the live site: the
-// thank-you card (thank-you-card.gif), the missed-you letter (missed-you-letter.gif), the raffle tickets and a Polaroid
-// of each event lead.
+// thank-you card (thank-you-card.gif), the missed-you letter (missed-you-letter.gif), each with a small file of its
+// first frame, the raffle tickets and a Polaroid of each event lead.
 // Needs ffmpeg on PATH, or FFMPEG=/path/to/ffmpeg. Name scenes (or raffle-tickets, or leads) to render only those, and
 // set OUT=dir to try a variant without touching the committed files.
 import { chromium } from 'playwright'
@@ -29,6 +29,19 @@ const TICKETS = { game: 'The Ticket Jar', prize: '$200', draw: 'Drawn Feb 4, 202
 const PEACHES = { photo: 'public/images/partners/people/sterling-peaches-madarang-cesario.webp', caption: 'Peaches' }
 const NEIL = { photo: 'public/images/partners/people/sterling-neil-cesario.webp', caption: 'Neil' }
 const LEADS = [{ picture: 'peaches-madarang-cesario.png', people: [PEACHES] }, { picture: 'peaches-and-neil-cesario.png', people: [NEIL, PEACHES] }]
+
+// A GIF of only the first frame, byte for byte: the file's header and palette, that frame's blocks and the end marker.
+// The loop block is left out. The email shows this behind the full GIF, because iPhones and Safari paint this small file
+// sooner than a big GIF's first frame. Being the same pixels, it can't flash when the GIF takes over.
+function firstFrame(gif) {
+  const table = packed => packed & 0x80 ? 3 * 2 ** ((packed & 7) + 1) : 0
+  const pastBlocks = at => { while (gif[at]) at += gif[at] + 1; return at + 1 }
+  const header = 13 + table(gif[10])
+  let at = header, start = header
+  while (gif[at] !== 0x2c) { if (gif[at + 1] === 0xf9) start = at; at = pastBlocks(at + 2) }
+  if (start === header) start = at
+  return Buffer.concat([gif.subarray(0, header), gif.subarray(start, pastBlocks(at + 10 + table(gif[at + 9]) + 1)), Buffer.from([0x3b])])
+}
 
 const names = process.argv.slice(2), scenes = names.length ? names.filter(name => !['raffle-tickets', 'leads'].includes(name)) : SCENES
 const ffmpeg = process.env.FFMPEG || 'ffmpeg'
@@ -62,7 +75,8 @@ try {
     execFileSync(ffmpeg, ['-v', 'error', '-y', '-framerate', String(FPS), '-i', join(frames, `${name}-%03d.png`),
       '-vf', `tpad=stop_mode=clone:stop_duration=${hold / 1000},split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];[b][p]paletteuse=dither=none:diff_mode=rectangle`,
       '-loop', '0', `${OUT}/${name}.gif`])
-    made.push(`${name}.gif`)
+    await writeFile(`${OUT}/${name}-first-frame.gif`, firstFrame(await readFile(`${OUT}/${name}.gif`)))
+    made.push(`${name}.gif`, `${name}-first-frame.gif`)
   }
 
   if (!names.length || names.includes('raffle-tickets')) {

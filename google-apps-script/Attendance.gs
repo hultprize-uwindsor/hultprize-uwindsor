@@ -25,7 +25,7 @@ var ATT_RAFFLE = { firstEventId: 'workshop-1', drawEventId: 'campus-grand-finale
 // The follow-up GIFs' fingerprint, which scripts/generate-email-art.mjs prints. The emails add it to each GIF's
 // address: mail apps cache pictures by address, so a changed GIF needs a new one or readers keep seeing the old.
 // scripts/check-attendance.mjs fails when it doesn't match the GIFs in public/images/email.
-var ATT_ART_VERSION = 'd2a54bb4';
+var ATT_ART_VERSION = 'bebd2483';
 // Who leads each event, and who joins them to open it. The follow-ups' invite to the event names them beside a picture
 // of their taped Polaroids, shown `width` px wide, which scripts/generate-email-art.mjs draws at twice that from their
 // partner-page photos (src/data/communityPartners.ts).
@@ -476,7 +476,7 @@ function attPage_(site, title, preview, content, footer, picture, head) {
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fff0f7;"><tr><td align="center" style="padding:16px 12px 36px;">'
     + '<!--[if mso]><table role="presentation" width="560" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->'
     + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">'
-    + '<tr><td align="left" style="padding:0 0 12px;"><a href="' + site + '"><img src="' + site + '/images/email/logo.png" width="240" alt="Hult Prize at UWindsor" style="display:block;width:240px;max-width:70%;height:auto;border:0;"></a></td></tr>'
+    + '<tr><td align="left" style="padding:0 0 12px;"><a href="' + site + '"><img src="' + site + '/images/email/logo.png" width="240" height="43" alt="Hult Prize at UWindsor" style="display:block;width:240px;max-width:70%;height:auto;border:0;"></a></td></tr>'
     + (picture || '')
     + '<tr><td style="background:#ffffff;border-radius:20px;padding:30px 24px 30px;">' + content + '</td></tr>'
     + '<tr><td align="center" style="padding:22px 16px 0;font-size:12px;line-height:1.7;color:#53616f;">' + footer + '</td></tr>'
@@ -562,14 +562,14 @@ function attFollowUp_(db, event, person, now, updates, type) {
     note: 'Did you make it after all, and we missed you at the door? Just reply and let us know, and we’ll fix our list.',
     invite: 'Come to the next one? We’d love to see you there:', going: 'You’re already signed up for this one, so your seat is waiting!',
     closing: 'Hope to see you soon,', why: 'You’re getting this because you registered for ' + event.title,
-    picture: 'missed-you-letter.gif', alt: 'A letter slides out of an envelope and unfolds: We missed you!',
+    picture: 'missed-you-letter', height: 560, envelope: 'background-position:50% 53.57%;background-size:68% 44%;', alt: 'A letter slides out of an envelope and unfolds: We missed you!',
   } : {
     subject: 'Thank you for coming to ' + event.title + ' 💌', heading: 'Thank you for coming to ' + event.title + '!',
     opening: 'Thank you for coming to ' + event.title + '. It meant a lot to have you there, and we hope you left with an idea or two worth chasing.',
     openingHtml: 'It meant a lot to have you there, and we hope you left with an idea or two worth chasing.',
     note: '', invite: 'We’d love to see you at our next event:', going: 'You’re already signed up, so we’ll see you there!',
     closing: 'See you soon,', why: 'You’re getting this because you checked in at ' + event.title,
-    picture: 'thank-you-card.gif', alt: 'A thank-you card slides out of an envelope and opens: So glad you came!',
+    picture: 'thank-you-card', height: 420, envelope: 'background-position:50% 65.22%;background-size:56.67% 48.89%;', alt: 'A thank-you card slides out of an envelope and opens: So glad you came!',
   };
   var events = attEvents_(db, now).filter(function(item) { return item.status !== 'cancelled'; });
   var listed = function(id) { return db.registrations.some(function(item) { return item.attendeeId === person.id && item.eventId === id && item.status !== 'cancelled'; }); };
@@ -647,7 +647,12 @@ function attFollowUp_(db, event, person, now, updates, type) {
   // A lead's words get the whole box on a phone, rather than the narrower column they need beside the picture on a
   // computer. The columns stack below a 572px screen: their 456px plus the 116px of padding around the box.
   var phone = lead ? '<style>@media only screen and (max-width:571px) { .lead-words { max-width:none !important; } }</style>' : '';
-  var picture = '<tr><td align="center"><img src="' + site + '/images/email/' + copy.picture + '?v=' + ATT_ART_VERSION + '" width="560" alt="' + attHtml_(copy.alt) + '" style="display:block;width:100%;max-width:560px;height:auto;border:0;"></td></tr>';
+  // The picture's place is never empty, however slowly the picture arrives. A black box where the envelope will be needs
+  // no download, so it shows as soon as the email opens, even while Gmail's image server fetches a new picture. Over it
+  // comes the GIF's first frame, a small file of its own, which an iPhone or Safari paints about 0.4 seconds sooner on 4G
+  // than the GIF's own. The GIF's height holds its place, so the words below never jump when it lands.
+  var art = site + '/images/email/' + copy.picture;
+  var picture = '<tr><td align="center" style="background-image:linear-gradient(#2c2a2d,#2c2a2d);' + copy.envelope + 'background-repeat:no-repeat;"><div style="background-image:url(' + art + '-first-frame.gif?v=' + ATT_ART_VERSION + ');background-position:center top;background-size:100% auto;background-repeat:no-repeat;"><img src="' + art + '.gif?v=' + ATT_ART_VERSION + '" width="560" height="' + copy.height + '" alt="' + attHtml_(copy.alt) + '" style="display:block;width:100%;max-width:560px;height:auto;border:0;"></div></td></tr>';
   return { subject: copy.subject, body: text.filter(Boolean).join('\n\n'), htmlBody: attPage_(site, copy.heading, preview, html, attFooter_(site, discord, why), picture, phone) };
 }
 /** Tokens are saved as hashes before MailApp runs; raw links are never persisted. */

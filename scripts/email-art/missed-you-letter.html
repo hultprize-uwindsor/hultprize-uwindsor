@@ -4,9 +4,10 @@
      engine, checked in Playwright) draws the 3D turns flat and shows the wrong side of the flap and the sheet, as it
      does on the thank-you card, so judge the fold in Chrome or in the GIF, never in a Safari preview. -->
 <html lang="en"><head><meta charset="utf-8"><title>Missed-you letter</title>
-<!-- For the generator: the letter has settled open by 3583ms, then rests for 4 seconds before the GIF loops back to the
-     sealed envelope. -->
-<meta name="length" content="3583"><meta name="hold" content="4000">
+<!-- For the generator: the letter has settled open by 2750ms, then rests for 4 seconds before the GIF loops back to the
+     sealed envelope. It starts moving almost at once and rises out by 600ms, because every moment on the sealed envelope
+     reads as a delay, and more so on a phone still downloading the GIF. -->
+<meta name="length" content="2750"><meta name="hold" content="4000">
 <style>
 @font-face { font-family: Caveat; src: url(../../public/fonts/caveat-variable.woff2) format('woff2'); font-weight: 400 700; }
 :root {
@@ -25,10 +26,10 @@ svg { display: block; overflow: visible; }
 /* The envelope, as on the thank-you card but drawn 1.2x and centred: flap side up, its three layers drop away together
    as the letter comes out. They fall 600px, far enough to take the open flap's tip out of the picture, and the loop
    comes back to this sealed envelope. */
-.env { position: absolute; left: 96px; top: 180px; width: 408px; height: 264px; animation: drop 500ms cubic-bezier(.55,0,.85,.35) 1750ms both; }
+.env { position: absolute; left: 96px; top: 180px; width: 408px; height: 264px; animation: drop 417ms cubic-bezier(.55,0,.85,.35) 1083ms both; }
 .env-back { z-index: 1; filter: drop-shadow(0 1px 1px rgb(20 8 16 / 40%)) drop-shadow(0 12px 17px rgb(70 20 45 / 20%)); }
 .env-pocket { z-index: 3; }
-.env-flap { z-index: 4; height: 158.4px; transform-origin: 50% 0; transform-style: preserve-3d; animation: flap 620ms cubic-bezier(.45,0,.3,1) 600ms both, drop-flap 500ms cubic-bezier(.55,0,.85,.35) 1750ms both; }
+.env-flap { z-index: 4; height: 158.4px; transform-origin: 50% 0; transform-style: preserve-3d; animation: flap 500ms cubic-bezier(.45,0,.3,1) 167ms both, drop-flap 417ms cubic-bezier(.55,0,.85,.35) 1083ms both; }
 .face { position: absolute; inset: 0; backface-visibility: hidden; }
 .face--inside { transform: rotateX(180deg); }
 @keyframes flap { 0% { transform: rotateX(0); z-index: 4; } 49% { z-index: 4; } 50% { z-index: 0; } 100% { transform: rotateX(180deg); z-index: 0; } }
@@ -39,7 +40,7 @@ svg { display: block; overflow: visible; }
 
 /* The letter, folded in half with the writing inside. Its box is the open sheet, drawn 280 x 362; the crease runs across
    the middle at 181px, and every turn below is about that line. */
-.letter-pos { position: absolute; z-index: 2; left: 160px; top: 101px; width: 280px; height: 362px; animation: rise 1600ms linear 1150ms both; }
+.letter-pos { position: absolute; z-index: 2; left: 160px; top: 101px; width: 280px; height: 362px; animation: rise 1280ms linear 583ms both; }
 /* Up out of the envelope until its lower edge reaches the point of the pocket's V, then down to where it will lie
    open, as one arc: the second stage starts just after the envelope starts to fall, and more slowly than the
    envelope, so the letter never sinks back into the pocket. */
@@ -51,21 +52,21 @@ svg { display: block; overflow: visible; }
 /* Meanwhile it comes forward and turns a little, the whole way through, so it never hangs still at the top: from .96x
    in the envelope to 1.4x open, where the writing is big enough to read on a phone. It stays narrower than the
    envelope until it is out. */
-.letter-tilt { position: absolute; inset: 0; transform-origin: 140px 181px; animation: forward 1600ms cubic-bezier(.4,0,.3,1) 1150ms both; }
+.letter-tilt { position: absolute; inset: 0; transform-origin: 140px 181px; animation: forward 1280ms cubic-bezier(.4,0,.3,1) 583ms both; }
 @keyframes forward { from { scale: .96; rotate: 0deg; } to { scale: 1.4; rotate: -2deg; } }
 /* The unfold is one number, --p, from 0 (folded) to 1 (open). It lifts the top half off the lower half by --a, which
    stops 3.5 degrees short of flat, as a creased sheet springs back a little. The light comes from the top of the
    picture, 50 degrees up, so --k (cos a + sin a / tan 50deg) is how squarely it falls on the back of the top half,
    against a sheet lying flat; the written side gets -k. The light on each face, the shade on the lower half and the
-   shadow on the table all come from --k, so they can never drift apart. The 2440ms start puts the frames either side
-   of edge-on at 85 and 112 degrees: the blank back is the thinner one, and the writing never turns up edge-on. The
-   1143ms run ends it on a frame, so the GIF's last frame is the letter fully open. */
+   shadow on the table all come from --k, so they can never drift apart. The 1606.67ms start, 60ms before a frame, puts
+   the frames either side of edge-on at 85 and 112 degrees: the blank back is the thinner one, and the writing never turns
+   up edge-on. The 1143ms run ends it on a frame, so the GIF's last frame is the letter fully open. */
 @property --p { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --a { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
 @property --k { syntax: '<number>'; inherits: true; initial-value: 1; }
 .letter { position: absolute; inset: 0; perspective: 1200px; perspective-origin: 50% 46%;
   --a: calc(var(--p) * 176.5deg); --k: calc(cos(var(--a)) + .84 * sin(var(--a)));
-  animation: unfold 1143ms cubic-bezier(.45,0,.35,1) 2440ms both; }
+  animation: unfold 1143ms cubic-bezier(.45,0,.35,1) 1606.67ms both; }
 @keyframes unfold { from { --p: 0; } to { --p: 1; } }
 .shadow { position: absolute; pointer-events: none; }
 /* The lower half and its shadow each get a layer of their own (translateZ), so Chrome doesn't redraw them a fraction of
@@ -89,7 +90,7 @@ svg { display: block; overflow: visible; }
 /* Each face's light: about a fifth of it comes straight from the lamp, the rest from the room. The back of the sheet
    tips toward the lamp as it lifts, so it brightens a touch before it dims; the written side comes round facing away,
    in its own shade, and brightens as it lands. Both shades are deepest at the crease, inside the fold. While the
-   written side's shade is deep (frames 36-39), it shows the paper's tooth, as raking light does, which also keeps the
+   written side's shade is deep (frames 26-29), it shows the paper's tooth, as raking light does, which also keeps the
    GIF's few warm greys from breaking it into stripes. Once the shade is faint it is plain again: grain that changes in
    every frame costs the GIF far more than it shows. */
 .dim-front--grain { opacity: calc(.26 * (1 - clamp(0, -1 * var(--k), 1)) * clamp(0, calc((var(--k) + .7) * 1000), 1)); }

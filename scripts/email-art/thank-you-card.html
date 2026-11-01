@@ -2,8 +2,10 @@
 <!-- The thank-you email's opening card. scripts/generate-email-art.mjs steps through these animations frame by frame
      and encodes public/images/email/thank-you-card.gif. Open this file in Chrome to watch it play. -->
 <html lang="en"><head><meta charset="utf-8"><title>Thank-you card</title>
-<!-- For the generator: the card is open and still by 3330ms, then rests for 4 seconds before the GIF loops. -->
-<meta name="length" content="3330"><meta name="hold" content="4000">
+<!-- For the generator: the card is open and still by 2333ms, then rests for 4 seconds before the GIF loops. It starts
+     moving almost at once and rises out by 600ms, because every moment on the sealed envelope reads as a delay, and more
+     so on a phone still downloading the GIF. -->
+<meta name="length" content="2333"><meta name="hold" content="4000">
 <style>
 @font-face { font-family: Caveat; src: url(../../public/fonts/caveat-variable.woff2) format('woff2'); font-weight: 400 700; }
 @font-face { font-family: 'Special Elite'; src: url(../../public/fonts/special-elite.woff2) format('woff2'); }
@@ -25,10 +27,10 @@ svg { display: block; overflow: visible; }
 /* The envelope, flap side up. Its three layers drop away together once the card is out, quickly, because every frame
    of textured paper on the move costs the GIF about 55 KB. The drop starts on a frame (one every 83.3ms at 12fps), so
    no frame is spent on a move too small to see. */
-.env { position: absolute; left: 130px; top: 150px; width: 340px; height: 220px; animation: drop 500ms cubic-bezier(.55,0,.85,.35) 1917ms both; }
+.env { position: absolute; left: 130px; top: 150px; width: 340px; height: 220px; animation: drop 417ms cubic-bezier(.55,0,.85,.35) 1167ms both; }
 .env-back { z-index: 1; filter: drop-shadow(0 1px 1px rgb(20 8 16 / 40%)) drop-shadow(0 10px 14px rgb(70 20 45 / 20%)); }
 .env-pocket { z-index: 3; }
-.env-flap { z-index: 4; height: 132px; transform-origin: 50% 0; transform-style: preserve-3d; animation: flap 620ms cubic-bezier(.45,0,.3,1) 600ms both, drop 500ms cubic-bezier(.55,0,.85,.35) 1917ms both; }
+.env-flap { z-index: 4; height: 132px; transform-origin: 50% 0; transform-style: preserve-3d; animation: flap 500ms cubic-bezier(.45,0,.3,1) 167ms both, drop 417ms cubic-bezier(.55,0,.85,.35) 1167ms both; }
 .face { position: absolute; inset: 0; backface-visibility: hidden; }
 .face--inside { transform: rotateX(180deg); }
 @keyframes flap { 0% { transform: rotateX(0); z-index: 4; } 49% { z-index: 4; } 50% { z-index: 0; } 100% { transform: rotateX(180deg); z-index: 0; } }
@@ -37,9 +39,9 @@ svg { display: block; overflow: visible; }
 
 /* The card: slides up out of the envelope, comes forward, then opens like a book. */
 .card-pos { position: absolute; z-index: 2; left: 200px; top: 55px; width: 200px; height: 270px;
-  animation: card 2180ms linear 1150ms both; }
-/* One timeline, so no stage's fill overrides another: rises out (1150ms), comes forward (2044ms), then slides right
-   and grows as it opens (2502-3330ms). The open card ends 1.34 times its size, spine on the centre line, filling about
+  animation: card 1750ms linear 583ms both; }
+/* One timeline, so no stage's fill overrides another: rises out (583ms), comes forward (1300ms), then slides right
+   and grows as it opens (1668-2333ms). The open card ends 1.34 times its size, spine on the centre line, filling about
    nine tenths of the width, so its writing is big enough to read on a phone. */
 @keyframes card {
   0% { translate: 0 71px; scale: .72; rotate: 0deg; animation-timing-function: cubic-bezier(.3,.1,.3,1); }
@@ -53,21 +55,21 @@ svg { display: block; overflow: visible; }
 /* The fold: a soft crease along the spine, and the open cover's shade falling across the page. The shade and the
    cover's dimming settle before the cover lands, so the last frames only redraw the card's edges and writing. */
 .inside::before { content: ''; position: absolute; z-index: 1; inset: 0; background: linear-gradient(90deg, rgb(70 40 30 / 16%), rgb(70 40 30 / 4%) 9%, transparent 22%); pointer-events: none; }
-.cover-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(90deg, rgb(50 20 30 / 34%), rgb(50 20 30 / 10%) 55%, transparent 90%); opacity: 0; animation: cast 830ms linear 2500ms both; }
+.cover-shade { position: absolute; z-index: 2; inset: 0; background: linear-gradient(90deg, rgb(50 20 30 / 34%), rgb(50 20 30 / 10%) 55%, transparent 90%); opacity: 0; animation: cast 667ms linear 1667ms both; }
 @keyframes cast { 0% { opacity: 0; } 35% { opacity: .9; } 65% { opacity: .3; } 85%, 100% { opacity: 0; } }
-.cover { position: absolute; inset: 0; z-index: 3; transform-origin: 0 50%; transform-style: preserve-3d; animation: open 830ms cubic-bezier(.45,0,.25,1) 2500ms both; }
+.cover { position: absolute; inset: 0; z-index: 3; transform-origin: 0 50%; transform-style: preserve-3d; animation: open 667ms cubic-bezier(.45,0,.25,1) 1667ms both; }
 @keyframes open { from { transform: rotateY(0); } to { transform: rotateY(-176deg); } }
 .cover .face { overflow: hidden; background: var(--card); }
 .cover .face--back { transform: rotateY(180deg); }
 .cover .face--back::before { content: ''; position: absolute; z-index: 1; inset: 0; background: linear-gradient(270deg, rgb(70 40 30 / 15%), rgb(70 40 30 / 3%) 9%, transparent 22%); }
 /* Light falls from the upper right, so each face dims as it turns away from it. */
 .dim { position: absolute; z-index: 2; inset: 0; background: rgb(40 20 30); pointer-events: none; }
-.face--front .dim { opacity: 0; animation: dim-front 830ms linear 2500ms both; }
-.face--back .dim { opacity: .3; animation: dim-back 830ms linear 2500ms both; }
+.face--front .dim { opacity: 0; animation: dim-front 667ms linear 1667ms both; }
+.face--back .dim { opacity: .3; animation: dim-back 667ms linear 1667ms both; }
 @keyframes dim-front { 0% { opacity: 0; } 50% { opacity: .28; } 100% { opacity: .28; } }
 @keyframes dim-back { 0% { opacity: .3; } 50% { opacity: .3; } 85%, 100% { opacity: 0; } }
 /* The open cover's shadow on the page, left of the spine. */
-.cover-drop { position: absolute; z-index: 0; top: 4px; left: -196px; width: 196px; height: 266px; box-shadow: 0 1px 1.5px rgb(60 25 5 / 26%), 0 12px 22px -4px rgb(90 30 40 / 20%); opacity: 0; animation: lay 250ms linear 3080ms both; }
+.cover-drop { position: absolute; z-index: 0; top: 4px; left: -196px; width: 196px; height: 266px; box-shadow: 0 1px 1.5px rgb(60 25 5 / 26%), 0 12px 22px -4px rgb(90 30 40 / 20%); opacity: 0; animation: lay 200ms linear 2133ms both; }
 @keyframes lay { to { opacity: 1; } }
 
 .hand { font-family: Caveat, cursive; color: var(--navy); }
