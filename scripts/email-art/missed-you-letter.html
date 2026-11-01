@@ -4,6 +4,9 @@
      engine, checked in Playwright) draws the 3D turns flat and shows the wrong side of the flap and the sheet, as it
      does on the thank-you card, so judge the fold in Chrome or in the GIF, never in a Safari preview. -->
 <html lang="en"><head><meta charset="utf-8"><title>Missed-you letter</title>
+<!-- For the generator: the letter has settled open by 3583ms, then rests for 4 seconds before the GIF loops back to the
+     sealed envelope. -->
+<meta name="length" content="3583"><meta name="hold" content="4000">
 <style>
 @font-face { font-family: Caveat; src: url(../../public/fonts/caveat-variable.woff2) format('woff2'); font-weight: 400 700; }
 :root {
@@ -13,54 +16,67 @@
   --navy: #002b51;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; width: 600px; height: 420px; overflow: hidden; background: var(--page); }
-.scene { position: relative; width: 600px; height: 420px; perspective: 900px; perspective-origin: 300px 170px; }
+/* Square, so the open letter can be drawn big enough to read where the email is narrowest: on a phone it shows the
+   picture about 343px wide. */
+html, body { margin: 0; width: 600px; height: 600px; overflow: hidden; background: var(--page); }
+.scene { position: relative; width: 600px; height: 600px; perspective: 1080px; perspective-origin: 300px 180px; }
 svg { display: block; overflow: visible; }
 
-/* The envelope, as on the thank-you card: flap side up, its three layers drop away together once the letter is out. */
-.env { position: absolute; left: 130px; top: 170px; width: 340px; height: 220px; animation: drop 600ms cubic-bezier(.55,0,.85,.35) 1900ms both; }
-.env-back { z-index: 1; filter: drop-shadow(0 1px 1px rgb(60 25 5 / 35%)) drop-shadow(0 10px 14px rgb(90 30 40 / 18%)); }
+/* The envelope, as on the thank-you card but drawn 1.2x and centred: flap side up, its three layers drop away together
+   as the letter comes out. They fall 600px, far enough to take the open flap's tip out of the picture, and the loop
+   comes back to this sealed envelope. */
+.env { position: absolute; left: 96px; top: 180px; width: 408px; height: 264px; animation: drop 500ms cubic-bezier(.55,0,.85,.35) 1750ms both; }
+.env-back { z-index: 1; filter: drop-shadow(0 1px 1px rgb(20 8 16 / 40%)) drop-shadow(0 12px 17px rgb(70 20 45 / 20%)); }
 .env-pocket { z-index: 3; }
-.env-flap { z-index: 4; height: 132px; transform-origin: 50% 0; transform-style: preserve-3d; animation: flap 620ms cubic-bezier(.45,0,.3,1) 600ms both, drop 600ms cubic-bezier(.55,0,.85,.35) 1900ms both; }
+.env-flap { z-index: 4; height: 158.4px; transform-origin: 50% 0; transform-style: preserve-3d; animation: flap 620ms cubic-bezier(.45,0,.3,1) 600ms both, drop-flap 500ms cubic-bezier(.55,0,.85,.35) 1750ms both; }
 .face { position: absolute; inset: 0; backface-visibility: hidden; }
 .face--inside { transform: rotateX(180deg); }
 @keyframes flap { 0% { transform: rotateX(0); z-index: 4; } 49% { z-index: 4; } 50% { z-index: 0; } 100% { transform: rotateX(180deg); z-index: 0; } }
-@keyframes drop { to { translate: 0 400px; rotate: 4deg; } }
+@keyframes drop { to { translate: 0 600px; rotate: 4deg; } }
+/* The flap tips about its hinge, not the envelope's middle, so it also moves across with the hinge as the envelope
+   tips: 132px (half the envelope's height) x sin 4deg. */
+@keyframes drop-flap { to { translate: 9.2px 600.3px; rotate: 4deg; } }
 
-/* The letter, folded in half with the writing inside. Its box is the open sheet; the crease runs across the middle at
-   181px, and every turn below is about that line. */
-.letter-pos { position: absolute; z-index: 2; left: 160px; top: 18px; width: 280px; height: 362px; animation: rise 1600ms linear 1150ms both; }
-/* Up out of the envelope, then down to where it will lie open, as one arc: the second stage starts as the envelope
-   falls, and always more slowly than the envelope, so the letter never sinks back into the pocket. */
+/* The letter, folded in half with the writing inside. Its box is the open sheet, drawn 280 x 362; the crease runs across
+   the middle at 181px, and every turn below is about that line. */
+.letter-pos { position: absolute; z-index: 2; left: 160px; top: 101px; width: 280px; height: 362px; animation: rise 1600ms linear 1150ms both; }
+/* Up out of the envelope until its lower edge reaches the point of the pocket's V, then down to where it will lie
+   open, as one arc: the second stage starts just after the envelope starts to fall, and more slowly than the
+   envelope, so the letter never sinks back into the pocket. */
 @keyframes rise {
-  0% { translate: 0 -7px; animation-timing-function: cubic-bezier(.3,.15,.45,1); }
-  44% { translate: 0 -74px; animation-timing-function: cubic-bezier(.5,0,.3,1); }
+  0% { translate: 0 -75.6px; animation-timing-function: cubic-bezier(.3,.15,.45,1); }
+  44% { translate: 0 -177.9px; animation-timing-function: cubic-bezier(.5,0,.3,1); }
   100% { translate: 0 0; }
 }
-/* Meanwhile it comes forward and turns a little, the whole way through, so it never hangs still at the top. */
+/* Meanwhile it comes forward and turns a little, the whole way through, so it never hangs still at the top: from .96x
+   in the envelope to 1.4x open, where the writing is big enough to read on a phone. It stays narrower than the
+   envelope until it is out. */
 .letter-tilt { position: absolute; inset: 0; transform-origin: 140px 181px; animation: forward 1600ms cubic-bezier(.4,0,.3,1) 1150ms both; }
-@keyframes forward { from { scale: .8; rotate: 0deg; } to { scale: 1; rotate: -2deg; } }
+@keyframes forward { from { scale: .96; rotate: 0deg; } to { scale: 1.4; rotate: -2deg; } }
 /* The unfold is one number, --p, from 0 (folded) to 1 (open). It lifts the top half off the lower half by --a, which
    stops 3.5 degrees short of flat, as a creased sheet springs back a little. The light comes from the top of the
    picture, 50 degrees up, so --k (cos a + sin a / tan 50deg) is how squarely it falls on the back of the top half,
    against a sheet lying flat; the written side gets -k. The light on each face, the shade on the lower half and the
    shadow on the table all come from --k, so they can never drift apart. The 2440ms start puts the frames either side
-   of edge-on at 80 and 107 degrees: the blank back is the thinner one, and the writing never turns up edge-on. */
+   of edge-on at 85 and 112 degrees: the blank back is the thinner one, and the writing never turns up edge-on. The
+   1143ms run ends it on a frame, so the GIF's last frame is the letter fully open. */
 @property --p { syntax: '<number>'; inherits: true; initial-value: 0; }
 @property --a { syntax: '<angle>'; inherits: true; initial-value: 0deg; }
 @property --k { syntax: '<number>'; inherits: true; initial-value: 1; }
 .letter { position: absolute; inset: 0; perspective: 1200px; perspective-origin: 50% 46%;
   --a: calc(var(--p) * 176.5deg); --k: calc(cos(var(--a)) + .84 * sin(var(--a)));
-  animation: unfold 1180ms cubic-bezier(.45,0,.35,1) 2440ms both; }
+  animation: unfold 1143ms cubic-bezier(.45,0,.35,1) 2440ms both; }
 @keyframes unfold { from { --p: 0; } to { --p: 1; } }
 .shadow { position: absolute; pointer-events: none; }
-.shadow--bottom { left: -40px; top: 140px; }
+/* The lower half and its shadow each get a layer of their own (translateZ), so Chrome doesn't redraw them a fraction of
+   a pixel off every time the top half moves: still pixels cost the GIF nothing, and those redraws cost it 150 KB. */
+.shadow--bottom { left: -40px; top: 140px; transform: translateZ(0); }
 /* The top half's shadow on the table: -k of its length, under the half itself until it lands, so only its soft edge
    shows. It firms up as the half comes down to the table. */
 .shadow--top { left: -40px; top: -40px; transform-origin: 180px 221px;
   scale: 1 clamp(0, calc(-1 * var(--k)), 1); opacity: clamp(0, calc(-1.1 * var(--k)), 1); }
 .half { position: absolute; left: 0; width: 280px; }
-.half--bottom { top: 180px; height: 182px; overflow: hidden; }
+.half--bottom { top: 180px; height: 182px; overflow: hidden; transform: translateZ(0); }
 /* While the top half leans over the lower half, its shadow reaches k x 181px down from the crease: past the bottom
    edge at first, then back to the crease as the half leans away past the light. */
 .fold-shade { position: absolute; left: 0; right: 0; top: 1px;
@@ -72,12 +88,27 @@ svg { display: block; overflow: visible; }
 .half--top .face--back { transform: rotateX(180deg); }
 /* Each face's light: about a fifth of it comes straight from the lamp, the rest from the room. The back of the sheet
    tips toward the lamp as it lifts, so it brightens a touch before it dims; the written side comes round facing away,
-   in its own shade, and brightens as it lands. Both shades are deepest at the crease, inside the fold. */
-.dim-front { opacity: calc(.26 * (1 - clamp(0, -1 * var(--k), 1))); }
+   in its own shade, and brightens as it lands. Both shades are deepest at the crease, inside the fold. While the
+   written side's shade is deep (frames 36-39), it shows the paper's tooth, as raking light does, which also keeps the
+   GIF's few warm greys from breaking it into stripes. Once the shade is faint it is plain again: grain that changes in
+   every frame costs the GIF far more than it shows. */
+.dim-front--grain { opacity: calc(.26 * (1 - clamp(0, -1 * var(--k), 1)) * clamp(0, calc((var(--k) + .7) * 1000), 1)); }
+.dim-front--flat { opacity: calc(.26 * (1 - clamp(0, -1 * var(--k), 1)) * clamp(0, calc((-.7 - var(--k)) * 1000), 1)); }
 .dim-back { opacity: calc(.26 * clamp(0, 1 - var(--k), 1)); }
 .lit-back { opacity: calc(.65 * clamp(0, var(--k) - 1, 1)); }
 /* The deckle's hairline shadow on the lower half, only while the sheet lies folded. */
 .edge-shadow { opacity: calc(.24 * clamp(0, calc(1 - var(--p) / .05), 1)); }
+/* The written side's clouding and light. The lower half has them all along: it is hidden under the top half until the
+   unfold and keeps still once it shows, so they cost little there, and nothing on it flickers as it comes to rest. The
+   top half moves until the last frame, so they come up on it once its shade has nearly gone (k below -.92, the last two
+   frames): the GIF has only a few darker creams, and under the shade they would break the clouding into blotches. Only
+   on the solid sheet, so the fringe past the deckle stays as see-through as before. */
+.rest--top { opacity: clamp(0, calc(-100 * (var(--k) + .92)), 1); }
+/* The paper's tooth comes in where the paper keeps still from then on: on the lower half as the fold's shade leaves it
+   (k below -.3), and on the top half as it lands. It is as much lighter as darker, so the paper's tone doesn't change
+   when it comes in. */
+.tooth--low { opacity: clamp(0, calc(-100 * (var(--k) + .3)), 1); }
+.tooth--top { opacity: clamp(0, calc((var(--p) - .999) * 1000), 1); }
 
 .hand { font-family: Caveat, cursive; color: var(--navy); }
 </style></head>
@@ -90,26 +121,38 @@ svg { display: block; overflow: visible; }
         <path d="M11 15.2c-3.4-2.3-5-4-5-5.7 0-1.4 1-2.4 2.3-2.4.9 0 1.8.5 2.7 1.5.9-1 1.8-1.5 2.7-1.5 1.3 0 2.3 1 2.3 2.4 0 1.7-1.6 3.4-5 5.7z" fill="#fff" fill-opacity=".85" />
         <circle cx="0" cy="0" r="1.4" fill="#fff" fill-opacity=".7" /><circle cx="22" cy="22" r="1.4" fill="#fff" fill-opacity=".7" />
       </pattern>
-      <filter id="kraft" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-        <!-- Dark flecks over a cloudy pulp, as on brown kraft stock. Finer fibres would cost the GIF far more than they show at 1x. -->
-        <feTurbulence type="fractalNoise" baseFrequency=".6" numOctaves="1" seed="13" result="specks" />
-        <feColorMatrix in="specks" values="0 0 0 0 .22 0 0 0 0 .13 0 0 0 0 .05 0 0 0 -26 7.2" result="flecks" />
-        <feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="4" result="clouds" />
-        <feColorMatrix in="clouds" values="0 0 0 0 .3 0 0 0 0 .18 0 0 0 0 .07 0 0 0 .42 -.12" result="mottle" />
-        <feComposite in="flecks" in2="SourceAlpha" operator="in" result="k" />
-        <feComposite in="mottle" in2="SourceAlpha" operator="in" result="m" />
-        <feMerge><feMergeNode in="SourceGraphic" /><feMergeNode in="m" /><feMergeNode in="k" /></feMerge>
+      <!-- Matte black stock, a soft near-black rather than #000, with pale fibres lying mostly along the grain. They bunch
+           and thin out in soft patches, as the pulp settled unevenly: that is the paper's mottling, and it costs the GIF
+           no more than the fibres do. A clouded tone or a gradient (which Chrome dithers) would cost it far more in every
+           frame of the drop. Its light comes from flat shades and lit edges instead of a lighting filter, as Chrome draws
+           those black on the flap's flipped inside. Its id isn't "paper", which is the writing paper's filter below. -->
+      <filter id="black-paper" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency=".2 .7" numOctaves="2" seed="13" />
+        <feColorMatrix values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1" result="fine" />
+        <feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="4" />
+        <feColorMatrix values="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1" result="broad" />
+        <feComposite in="fine" in2="broad" operator="arithmetic" k2="1" k3=".25" k4="-.125" />
+        <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 -16 0 0 0 5.4" />
+        <feComponentTransfer><feFuncA type="linear" slope=".06" /></feComponentTransfer>
+        <feComposite in2="SourceAlpha" operator="in" result="fibres" />
+        <feMerge><feMergeNode in="SourceGraphic" /><feMergeNode in="fibres" /></feMerge>
       </filter>
+      <!-- White gel pen for the note on the envelope: it goes on a little unevenly, so its density varies, but it stays
+           solid enough to read on a phone. -->
+      <filter id="gel" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="5" /><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.5 0 0 0 1.9" /><feComposite in="SourceGraphic" operator="in" /></filter>
       <filter id="lift" x="-10%" y="-10%" width="120%" height="140%" color-interpolation-filters="sRGB">
-        <feGaussianBlur in="SourceAlpha" stdDeviation="1" /><feOffset dy="1.2" result="near" /><feFlood flood-color="#3c1905" flood-opacity=".35" /><feComposite in2="near" operator="in" result="nearShadow" />
+        <feGaussianBlur in="SourceAlpha" stdDeviation="1" /><feOffset dy="1.2" result="near" /><feFlood flood-color="#000" flood-opacity=".55" /><feComposite in2="near" operator="in" result="nearShadow" />
         <feMerge><feMergeNode in="nearShadow" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
-      <!-- The wax seal is the Hult Prize mark, 56 x 38 around its centre: a dark panel rounded at its top right,
-           beside a purple-to-red panel scooped out at its right (traced from public/images/logos/Hult Prize logo 3.png).
-           The scoop's needle tip is cut short, as wax can't hold a point. -->
-      <path id="mark-dark" d="M-28 -19A19.67 32 0 0 1 -8.9 13V19H-28Z" />
+      <!-- The wax seal is the Hult Prize mark, 56 x 38 around its centre: a panel rounded at its top right, beside a
+           purple-to-red panel scooped out at its right (traced from public/images/logos/Hult Prize logo 3.png). The
+           logo's rounded panel is dark and would be lost on black paper, so it is pale pearl wax here, as the logo's
+           version for dark backgrounds turns it white. The scoop's needle tip is cut short, as wax can't hold a point. -->
+      <path id="mark-pale" d="M-28 -19A19.67 32 0 0 1 -8.9 13V19H-28Z" />
       <path id="mark-bright" d="M-7.7 -19H26.6A19.68 32 0 0 0 8.32 13V19H-7.7Z" />
       <linearGradient id="wax-ombre" x1="0" y1="-20" x2="0" y2="20" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4b2a84" /><stop offset=".5" stop-color="#d0207f" /><stop offset="1" stop-color="#ee2f4f" /></linearGradient>
+      <!-- Pearl wax: warm white where it faces the light, lilac grey where it turns away. -->
+      <radialGradient id="wax-pearl" cx="-22" cy="-12" r="34" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f6f0f3" /><stop offset=".45" stop-color="#dcd2db" /><stop offset="1" stop-color="#a99cb0" /></radialGradient>
       <filter id="wax-edge" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".07" numOctaves="2" seed="11" /><feDisplacementMap in="SourceGraphic" scale="2.2" /></filter>
       <!-- Glossy wax: its height is the blurred shape plus faint ripples, lit from the upper left, over a contact
            shadow and a soft one. -->
@@ -124,27 +167,59 @@ svg { display: block; overflow: visible; }
         <feSpecularLighting in="height" surfaceScale="1.9" specularConstant=".7" specularExponent="16" lighting-color="#fff" result="spec"><feDistantLight azimuth="235" elevation="40" /></feSpecularLighting>
         <feComposite in="spec" in2="SourceAlpha" operator="in" result="gloss" />
         <feComposite in="lit" in2="gloss" operator="arithmetic" k2="1" k3=".6" result="wax" />
-        <feGaussianBlur in="SourceAlpha" stdDeviation=".8" result="nb" /><feOffset in="nb" dy="1" result="no" /><feFlood flood-color="#3c1905" flood-opacity=".45" /><feComposite in2="no" operator="in" result="near" />
-        <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="fb" /><feOffset in="fb" dy="2.4" result="fo" /><feFlood flood-color="#3c1905" flood-opacity=".25" /><feComposite in2="fo" operator="in" result="far" />
+        <feGaussianBlur in="SourceAlpha" stdDeviation=".8" result="nb" /><feOffset in="nb" dy="1" result="no" /><feFlood flood-color="#000" flood-opacity=".6" /><feComposite in2="no" operator="in" result="near" />
+        <feGaussianBlur in="SourceAlpha" stdDeviation="2.2" result="fb" /><feOffset in="fb" dy="2.4" result="fo" /><feFlood flood-color="#000" flood-opacity=".35" /><feComposite in2="fo" operator="in" result="far" />
         <feMerge><feMergeNode in="far" /><feMergeNode in="near" /><feMergeNode in="wax" /></feMerge>
       </filter>
-      <filter id="ink" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="5" /><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -10 0 0 0 8.2" /><feComposite in="SourceGraphic" operator="in" /></filter>
+      <!-- Ink that went on a little unevenly: its density varies, but it never breaks up into holes, so the writing
+           stays solid. -->
+      <filter id="ink" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="5" /><feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.2 0 0 0 1.75" /><feComposite in="SourceGraphic" operator="in" /></filter>
 
-      <!-- Writing paper: a faint grain and the soft clouding of cotton stock, multiplied into the sheet and kept inside its
-           outline. Both are fixed to the sheet, so they move with it and never shimmer. -->
+      <!-- Writing paper: the soft clouding of cotton stock, multiplied into the sheet and kept inside its outline. It is
+           fixed to the sheet, so it never shimmers. -->
       <filter id="paper" filterUnits="userSpaceOnUse" x="-4" y="-4" width="288" height="372" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="3" result="noise" />
-        <feColorMatrix in="noise" values="0 0 0 0 .35 0 0 0 0 .27 0 0 0 0 .2 0 0 0 .07 -.014" result="grain" />
         <feTurbulence type="fractalNoise" baseFrequency=".014" numOctaves="2" seed="6" result="clouds" />
         <feColorMatrix in="clouds" values="0 0 0 0 .55 0 0 0 0 .42 0 0 0 0 .3 0 0 0 .09 -.03" result="mottle" />
-        <feMerge result="texture"><feMergeNode in="mottle" /><feMergeNode in="grain" /></feMerge>
-        <feComposite in="texture" in2="SourceAlpha" operator="in" result="textureIn" />
-        <feBlend in="textureIn" in2="SourceGraphic" mode="multiply" />
+        <feComposite in="mottle" in2="SourceAlpha" operator="in" result="mottleIn" />
+        <feBlend in="mottleIn" in2="SourceGraphic" mode="multiply" />
       </filter>
-      <!-- Cream stock, the light falling off a touch from the top left across the sheet. The back's is turned to match the
-           folded note, whose top is the crease. -->
+      <!-- Cream stock, the light falling off a touch from the top left across the sheet. A pattern that slides with the
+           sheet costs the GIF in every frame it moves, so while the top half turns, its written side is the plain cream
+           (#fdf8ef) that the clouded, shaded stock averages out to (until .rest--top), and the back of the sheet has
+           the clouding alone. -->
       <linearGradient id="paper-front" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="280" y2="362"><stop offset="0" stop-color="#fffcf5" /><stop offset="1" stop-color="#fcf7ed" /></linearGradient>
-      <linearGradient id="paper-back" gradientUnits="userSpaceOnUse" x1="0" y1="181" x2="280" y2="-181"><stop offset="0" stop-color="#fffcf5" /><stop offset="1" stop-color="#fcf7ed" /></linearGradient>
+      <!-- The back's clouding is grey rather than brown, so the red, green and blue steps of its faint shading fall
+           together; in brown they fall apart into thin rings, like wood grain, with no tooth to break them up. The back
+           is on show from frame 10 to frame 35, moving from frame 14, and what costs the GIF is the edges between
+           shades moving with it. So the clouding has three flat shades: the paper, and 2 and 4 levels darker (Chrome
+           keeps alpha in 255ths, rounded down, so .0082 and .0161 are 2/255 and 4/255). They are far enough apart that
+           the GIF's palette never merges two of them, so the contrast holds from one render to the next. The colour
+           matrix stretches the noise so the cuts fall halfway between its 8-bit steps, at 118.5 and 151.5 of 255: about
+           38% of the sheet keeps the paper's shade, 36% is a step darker and 25% two. The clouds are half again as wide
+           as they are tall, like the grain of a sheet: the GIF is coded row by row and the sheet moves mostly up and
+           down, so fewer edges cross each row. -->
+      <filter id="backcloud" filterUnits="userSpaceOnUse" x="-4" y="-4" width="288" height="372" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency=".008 .012" numOctaves="2" seed="1" result="clouds" />
+        <feColorMatrix in="clouds" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.5758 -.86364" />
+        <feComponentTransfer result="mottle"><feFuncA type="discrete" tableValues="0 .0082 .0161" /></feComponentTransfer>
+        <feComposite in="mottle" in2="SourceAlpha" operator="in" result="mottleIn" />
+        <feBlend in="mottleIn" in2="SourceGraphic" mode="multiply" />
+      </filter>
+      <!-- The paper's tooth: a fine grain, half of it a touch darker and half a touch lighter, so it adds texture without
+           changing the tone. It also breaks up the bands the GIF's palette would draw in the clouding. -->
+      <filter id="tooth" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="3" result="n" />
+        <feColorMatrix in="n" values="0 0 0 0 .35 0 0 0 0 .27 0 0 0 0 .2 .07 0 0 0 -.035" result="dark" />
+        <feColorMatrix in="n" values="0 0 0 0 1 0 0 0 0 .99 0 0 0 0 .97 -3 0 0 0 1.5" result="light" />
+        <feMerge><feMergeNode in="dark" /><feMergeNode in="light" /></feMerge>
+        <feComposite in2="SourceAlpha" operator="in" />
+      </filter>
+      <!-- Raking light picks out the tooth on the turning half: its shade's strength varies with a fine grain. -->
+      <filter id="shade-grain" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" />
+        <feColorMatrix values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0" result="n" />
+        <feComposite in="SourceGraphic" in2="n" operator="arithmetic" k1=".5" k2=".75" />
+      </filter>
       <!-- The deckle: the sheet's top edge pushed about by noise, with a thinner, see-through fringe just past it. -->
       <filter id="deckle" x="-.05" y="-.8" width="1.1" height="2.6">
         <feTurbulence type="fractalNoise" baseFrequency=".03 .08" numOctaves="4" seed="9" result="n" />
@@ -166,6 +241,9 @@ svg { display: block; overflow: visible; }
         <rect x="-14" y="4.6" width="308" height="22" fill-opacity=".5" filter="url(#fray)" clip-path="url(#sheet-sides)" />
         <use href="#top-sheet-solid" />
       </g>
+      <!-- The top half's shades go on through one mask of it, so where the deckle strip overlaps the sheet it isn't
+           shaded twice. -->
+      <mask id="top-sheet-mask" maskUnits="userSpaceOnUse" x="-20" y="-20" width="320" height="221"><use href="#top-sheet" fill="#fff" /></mask>
       <!-- The sheet's shadow on the table, shadow only: a tight contact shadow and a soft lift shadow, as on the card. -->
       <filter id="sheet-shadow" filterUnits="userSpaceOnUse" x="-40" y="-40" width="360" height="450" color-interpolation-filters="sRGB">
         <feGaussianBlur in="SourceAlpha" stdDeviation=".75" /><feOffset dy="1" result="near" />
@@ -182,33 +260,36 @@ svg { display: block; overflow: visible; }
       <linearGradient id="crease-below" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55" /><stop offset=".18" stop-color="#fff" stop-opacity=".3" /><stop offset="1" stop-color="#fff" stop-opacity="0" /></linearGradient>
 
       <!-- Everything written on the sheet, in the open sheet's coordinates (280 x 362, crease at y 181). Each half shows
-           its own part of this one drawing, so the writing lines up exactly across the crease. -->
-      <g id="ink-art" filter="url(#ink)">
-        <text x="30" y="92" font-family="Caveat, cursive" font-size="54" font-weight="700" fill="#c01d6f" transform="rotate(-3 30 92)">We missed</text>
-        <text x="92" y="141" font-family="Caveat, cursive" font-size="54" font-weight="700" fill="#c01d6f" transform="rotate(-3 92 141)">you!</text>
-        <path d="M86 157c22-5 52-8 84-6" fill="none" stroke="#c01d6f" stroke-width="2.6" stroke-linecap="round" />
+           its own part of this one drawing, so the writing lines up exactly across the crease. The heading is in marker;
+           the note and the signature are in solid pen, heavy enough to read at phone size. -->
+      <g id="ink-art">
+        <g filter="url(#ink)">
+          <text x="30" y="92" font-family="Caveat, cursive" font-size="54" font-weight="700" fill="#c01d6f" transform="rotate(-3 30 92)">We missed</text>
+          <text x="92" y="141" font-family="Caveat, cursive" font-size="54" font-weight="700" fill="#c01d6f" transform="rotate(-3 92 141)">you!</text>
+          <path d="M86 157c22-5 52-8 84-6" fill="none" stroke="#c01d6f" stroke-width="2.6" stroke-linecap="round" />
+        </g>
         <!-- A small rain cloud, a bit glum, raining one heart. -->
-        <g transform="translate(192 92) rotate(-4)" fill="none" stroke="#002b51" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <g transform="translate(192 92) rotate(-4)" fill="none" stroke="#002b51" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M6.5 30.4C1.5 30.4-.8 25.6 1.6 21.8c1.9-3 5.8-3.6 8.4-2.1-.4-7.4 5.6-12.2 12-10.8 3-6.6 13.2-8.4 18.4-1.8 5-2.6 11.8 1 11.6 7.4 5 1.4 6.4 6.8 4 10.6-1.6 3.4-5 5.2-9 5-13 .6-28 .8-41.2.2" />
-          <circle cx="20" cy="20.5" r="1.1" fill="#002b51" /><circle cx="33" cy="19.6" r="1.1" fill="#002b51" />
+          <circle cx="20" cy="20.5" r="1.3" fill="#002b51" /><circle cx="33" cy="19.6" r="1.3" fill="#002b51" />
           <path d="M21.4 27.4c2.8-2.8 7.4-3 10.2-.4" />
           <path d="M13.5 37.5l-2 5.6M44.5 37l-2 5.6" />
           <path d="M28.6 47.4c-3.2-2.1-4.7-3.8-4.7-5.3 0-1.3 1-2.3 2.1-2.3.9 0 1.8.5 2.6 1.4.8-.9 1.7-1.4 2.6-1.4 1.2 0 2.1 1 2.1 2.3 0 1.5-1.5 3.2-4.7 5.3z" fill="#c01d6f" stroke="none" />
         </g>
-        <text x="30" y="219" font-family="Caveat, cursive" font-size="26" fill="#002b51" transform="rotate(-1.2 30 219)">Sorry you couldn't</text>
-        <text x="30" y="251" font-family="Caveat, cursive" font-size="26" fill="#002b51" transform="rotate(-.8 30 251)">make it this time.</text>
-        <text x="30" y="283" font-family="Caveat, cursive" font-size="26" fill="#002b51" transform="rotate(-1.4 30 283)">Hope to see you next time!</text>
-        <text x="236" y="329" text-anchor="end" font-family="Caveat, cursive" font-size="23" font-weight="500" fill="#002b51" transform="rotate(-2 236 329)">Hult Prize at UWindsor</text>
+        <text x="30" y="219" font-family="Caveat, cursive" font-size="26" font-weight="600" fill="#002b51" transform="rotate(-1.2 30 219)">Sorry you couldn't</text>
+        <text x="30" y="251" font-family="Caveat, cursive" font-size="26" font-weight="600" fill="#002b51" transform="rotate(-.8 30 251)">make it this time.</text>
+        <text x="30" y="283" font-family="Caveat, cursive" font-size="26" font-weight="600" fill="#002b51" transform="rotate(-1.4 30 283)">Hope to see you next time!</text>
+        <text x="236" y="329" text-anchor="end" font-family="Caveat, cursive" font-size="23" font-weight="600" fill="#002b51" transform="rotate(-2 236 329)">Hult Prize at UWindsor</text>
         <path d="M248 326.5c-4.3-2.9-6.4-5.2-6.4-7.2 0-1.8 1.3-3.1 2.9-3.1 1.2 0 2.4.7 3.5 1.9 1.1-1.2 2.3-1.9 3.5-1.9 1.6 0 2.9 1.3 2.9 3.1 0 2-2.1 4.3-6.4 7.2z" fill="#c01d6f" />
       </g>
     </defs>
   </svg>
 
   <!-- Inside of the envelope: lined, seen through the open V. -->
-  <svg class="env env-back" viewBox="0 0 340 220" width="340" height="220">
-    <rect width="340" height="220" rx="3" fill="#a77d55" filter="url(#kraft)" />
+  <svg class="env env-back" viewBox="0 0 340 220" width="408" height="264">
+    <rect width="340" height="220" rx="3" fill="#1e1d1f" filter="url(#black-paper)" />
     <path d="M6 4H334L170 124Z" fill="url(#liner)" />
-    <path d="M6 4H334L170 124Z" fill="#3c1905" fill-opacity=".14" />
+    <path d="M6 4H334L170 124Z" fill="#100c0f" fill-opacity=".12" />
   </svg>
 
   <div class="letter-pos"><div class="letter-tilt">
@@ -218,7 +299,9 @@ svg { display: block; overflow: visible; }
       <!-- Lower half: the rest of the letter. It never moves against the sheet. -->
       <div class="half half--bottom">
         <svg viewBox="0 180 280 182" width="280" height="182">
+          <rect x="0" y="180" width="280" height="182" fill="#fdf8ef" />
           <rect x="0" y="180" width="280" height="182" fill="url(#paper-front)" filter="url(#paper)" />
+          <rect class="tooth--low" x="0" y="180" width="280" height="182" filter="url(#tooth)" />
           <use href="#ink-art" />
           <!-- The crease, from the written side: a valley, so the lower lip catches the light. -->
           <rect x="0" y="181" width="280" height="7" fill="url(#crease-below)" />
@@ -229,53 +312,72 @@ svg { display: block; overflow: visible; }
       <div class="half half--top">
         <div class="face face--front">
           <svg viewBox="0 0 280 181" width="280" height="181">
-            <use href="#top-sheet" fill="url(#paper-front)" filter="url(#paper)" />
+            <use href="#top-sheet" fill="#fdf8ef" />
+            <use class="rest--top" href="#top-sheet-solid" fill="url(#paper-front)" filter="url(#paper)" />
+            <use class="tooth--top" href="#top-sheet-solid" filter="url(#tooth)" />
             <use href="#ink-art" clip-path="url(#upper)" />
             <rect x="0" y="171" width="280" height="10" fill="url(#crease-above)" />
             <rect x="0" y="180.3" width="280" height=".7" fill="#5a3723" fill-opacity=".13" />
-            <use class="dim-front" href="#top-sheet" fill="url(#turn-shade)" />
+            <rect class="dim-front--grain" x="-20" y="-20" width="320" height="201" fill="url(#turn-shade)" filter="url(#shade-grain)" mask="url(#top-sheet-mask)" />
+            <rect class="dim-front--flat" x="-20" y="-20" width="320" height="201" fill="url(#turn-shade)" mask="url(#top-sheet-mask)" />
           </svg>
         </div>
-        <!-- The back of the sheet: heavy stationery, so nothing shows through. -->
+        <!-- The back of the sheet: heavy stationery, so nothing shows through. It is only ever seen moving, so it has the
+             clouding but no tooth or light. -->
         <div class="face face--back">
           <svg viewBox="0 0 280 181" width="280" height="181" style="transform:scaleY(-1)">
             <use class="edge-shadow" href="#top-sheet" fill="#3c1905" filter="url(#soft)" transform="translate(0 -1.2)" />
-            <use href="#top-sheet" fill="url(#paper-back)" filter="url(#paper)" />
+            <use href="#top-sheet" fill="#fdf8ef" />
+            <use href="#top-sheet-solid" fill="#fdf8ef" filter="url(#backcloud)" />
             <!-- The folded edge is rounded over: it catches the light, then turns away at the very edge. -->
             <rect x="0" y="172" width="280" height="9" fill="url(#fold-round)" />
             <use class="lit-back" href="#top-sheet" fill="#fff" />
-            <use class="dim-back" href="#top-sheet" fill="url(#turn-shade)" />
+            <rect class="dim-back" x="-20" y="-20" width="320" height="201" fill="url(#turn-shade)" mask="url(#top-sheet-mask)" />
           </svg>
         </div>
       </div>
     </div>
   </div></div>
 
-  <!-- Front of the pocket: side flaps meeting under the bottom flap, with a note for the reader. -->
-  <svg class="env env-pocket" viewBox="0 0 340 220" width="340" height="220">
-    <path d="M0 3Q0 0 3 0L170 122 337 0Q340 0 340 3V217Q340 220 337 220H3Q0 220 0 217Z" fill="#c69b70" filter="url(#kraft)" />
-    <path d="M1 219L158 138Q170 131 182 138L339 219" fill="none" stroke="#3c1905" stroke-opacity=".28" stroke-width="1.2" />
-    <path d="M1 220.6L158 139.6Q170 132.6 182 139.6L339 220.6" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1" />
-    <path d="M0 220L158 138Q170 131 182 138L340 220Z" fill="#fff" fill-opacity=".05" />
-    <path d="M2 2L170 124 338 2" fill="none" stroke="#3c1905" stroke-opacity=".25" stroke-width="1" />
-    <g filter="url(#ink)"><text class="hand" x="250" y="196" text-anchor="middle" font-size="27" fill="#002b51" transform="rotate(-6 250 196)">for you</text>
-    <path d="M296 186.5c-3.6-2.4-5.3-4.3-5.3-6 0-1.5 1.1-2.6 2.4-2.6 1 0 2 .6 2.9 1.6.9-1 1.9-1.6 2.9-1.6 1.3 0 2.4 1.1 2.4 2.6 0 1.7-1.7 3.6-5.3 6z" fill="#c01d6f" transform="rotate(-6 250 196)" /></g>
+  <!-- Front of the pocket: side flaps meeting under the bottom flap, with a note for the reader in white gel pen and a
+       heart in pink. The light comes from the upper left: the bottom flap and the left fold catch it, and the right flap,
+       turned away from it, is a touch darker. The bottom flap's edge catches it too, above a dark line where it lies on
+       the side flaps, and so do the cut edges of the V, more on the left. Each edge is lit in flat shades: a gradient
+       there made Chrome draw the falling envelope a little differently from one run to the next, so the GIF changed
+       every time it was made. -->
+  <svg class="env env-pocket" viewBox="0 0 340 220" width="408" height="264">
+    <path d="M0 3Q0 0 3 0L170 122 337 0Q340 0 340 3V217Q340 220 337 220H3Q0 220 0 217Z" fill="#29272a" filter="url(#black-paper)" />
+    <path d="M170 122L337 0Q340 0 340 3V220L182 138Q176 134.5 170 134.5Z" fill="#000" fill-opacity=".06" />
+    <path d="M0 220L158 138Q170 131 182 138L340 220Z" fill="#fff" fill-opacity=".015" />
+    <path d="M.7 4V216" fill="none" stroke="#fff" stroke-opacity=".06" stroke-width="1.2" />
+    <path d="M1 219L158 138Q170 131 182 138L339 219" fill="none" stroke="#000" stroke-opacity=".45" stroke-width="1.2" />
+    <path d="M1 220.6L158 139.6Q164 136.1 170 136.1" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="1" />
+    <path d="M170 136.1Q176 136.1 182 139.6L339 220.6" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1" />
+    <path d="M1.5 1.2L170 123.2" fill="none" stroke="#fff" stroke-opacity=".11" stroke-width=".9" />
+    <path d="M170 123.2L338.5 1.2" fill="none" stroke="#fff" stroke-opacity=".06" stroke-width=".9" />
+    <g filter="url(#gel)"><text class="hand" x="250" y="196" text-anchor="middle" font-size="27" font-weight="600" fill="#f4efe7" transform="rotate(-6 250 196)">for you</text>
+    <path d="M296 186.5c-3.6-2.4-5.3-4.3-5.3-6 0-1.5 1.1-2.6 2.4-2.6 1 0 2 .6 2.9 1.6.9-1 1.9-1.6 2.9-1.6 1.3 0 2.4 1.1 2.4 2.6 0 1.7-1.7 3.6-5.3 6z" fill="#f2559f" transform="rotate(-6 250 196)" /></g>
   </svg>
 
-  <!-- Top flap: kraft outside with the wax seal, liner inside. -->
+  <!-- Top flap: black paper outside with the wax seal, liner inside. -->
   <div class="env env-flap">
     <div class="face face--outside">
-      <svg viewBox="0 0 340 132" width="340" height="132">
-        <g filter="url(#lift)"><path d="M2 0H338L182 121Q170 129 158 121Z" fill="#d2a87d" filter="url(#kraft)" /></g>
+      <svg viewBox="0 0 340 132" width="408" height="158.4">
+        <!-- Lit from the upper left like the seal, so a touch lighter than the pocket, with light along its fold and its
+             cut edges, more on the left. -->
+        <g filter="url(#lift)"><path d="M2 0H338L182 121Q170 129 158 121Z" fill="#2f2d30" filter="url(#black-paper)" />
+          <path d="M3 .9H337" stroke="#fff" stroke-opacity=".07" stroke-width="1.6" />
+          <path d="M3.2 0L158.3 120.3Q164 124.2 170 124.2" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="1.2" />
+          <path d="M170 124.2Q176 124.2 181.7 120.3L336.8 0" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="1.2" /></g>
         <!-- The wax seal, pressed on slightly crooked where the flap's tip meets the pocket. -->
         <g transform="translate(170 113) rotate(-4) scale(1.1)"><g filter="url(#wax-light)"><g filter="url(#wax-edge)" stroke-width="3" stroke-linejoin="round">
-          <use href="#mark-dark" fill="#2b0a1f" stroke="#2b0a1f" /><use href="#mark-bright" fill="url(#wax-ombre)" stroke="url(#wax-ombre)" />
+          <use href="#mark-pale" fill="url(#wax-pearl)" stroke="url(#wax-pearl)" /><use href="#mark-bright" fill="url(#wax-ombre)" stroke="url(#wax-ombre)" />
         </g></g></g>
       </svg>
     </div>
     <div class="face face--inside">
-      <svg viewBox="0 0 340 132" width="340" height="132" style="transform:scaleY(-1)">
-        <path d="M2 0H338L182 121Q170 129 158 121Z" fill="#a77d55" filter="url(#kraft)" />
+      <svg viewBox="0 0 340 132" width="408" height="158.4" style="transform:scaleY(-1)">
+        <path d="M2 0H338L182 121Q170 129 158 121Z" fill="#29272a" filter="url(#black-paper)" />
         <path d="M8 0H332L178 116Q170 121 162 116Z" fill="url(#liner)" />
       </svg>
     </div>

@@ -22,6 +22,21 @@ var ATT_MISSED_HOUR = 10;
 var ATT_FOLLOW_UP_WINDOW = 6 * 3600000;
 // The Ticket Jar runs from its first event to the draw at the finale (src/data/blog.ts, the-ticket-jar).
 var ATT_RAFFLE = { firstEventId: 'workshop-1', drawEventId: 'campus-grand-finale' };
+// The follow-up GIFs' fingerprint, which scripts/generate-email-art.mjs prints. The emails add it to each GIF's
+// address: mail apps cache pictures by address, so a changed GIF needs a new one or readers keep seeing the old.
+// scripts/check-attendance.mjs fails when it doesn't match the GIFs in public/images/email.
+var ATT_ART_VERSION = 'd2a54bb4';
+// Who leads each event, and who joins them to open it. The follow-ups' invite to the event names them beside a picture
+// of their taped Polaroids, shown `width` px wide, which scripts/generate-email-art.mjs draws at twice that from their
+// partner-page photos (src/data/communityPartners.ts).
+var ATT_PEACHES = { name: 'Peaches Madarang-Cesario', title: 'Chief Operating Officer at Sterling' };
+var ATT_EVENT_LEADS = [
+  { eventId: 'workshop-1', lead: ATT_PEACHES, picture: 'peaches-madarang-cesario.png', width: 140 },
+  { eventId: 'workshop-2', lead: ATT_PEACHES, opener: { name: 'Neil Cesario', title: 'Director and Chief Information Security Officer at Sterling' }, picture: 'peaches-and-neil-cesario.png', width: 236 },
+  { eventId: 'workshop-3', lead: ATT_PEACHES, picture: 'peaches-madarang-cesario.png', width: 140 },
+  { eventId: 'workshop-4', lead: ATT_PEACHES, picture: 'peaches-madarang-cesario.png', width: 140 },
+  { eventId: 'workshop-5', lead: ATT_PEACHES, picture: 'peaches-madarang-cesario.png', width: 140 }
+];
 
 function attProps_() { return PropertiesService.getScriptProperties(); }
 function attJson_(value) { return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON); }
@@ -359,6 +374,16 @@ function attEventText_(event, registration) {
   var start = Utilities.formatDate(new Date(event.startsAt), 'America/Toronto', 'EEEE, MMMM d, yyyy'), from = Utilities.formatDate(new Date(event.startsAt), 'America/Toronto', 'h:mm a'), to = Utilities.formatDate(new Date(event.endsAt), 'America/Toronto', 'h:mm a z');
   return [event.title, 'Status: ' + registration.status, start + ', ' + from + '-' + to + ' (Windsor local time)', event.venue, event.preparation ? 'Prepare: ' + event.preparation : '', 'Free · Drinks and snacks provided.', registration.status === 'confirmed' ? 'Add to Google Calendar: ' + attCalendar_(event) + '\nAdd to Outlook: ' + attOutlook_(event) : ''].filter(Boolean).join('\n');
 }
+/** The same event in a notice's HTML: its status is a sentence rather than a label, and its links have names. */
+function attEventHtml_(event, registration, top) {
+  var when = function(value, pattern) { return Utilities.formatDate(new Date(value), 'America/Toronto', pattern); };
+  var status = { confirmed: 'You’re confirmed.', waitlisted: 'You’re on the waitlist, without a reserved seat.', offered: 'A seat is being held for you.', cancelled: 'Your attendance is cancelled.' }[registration.status] || '';
+  var calendars = registration.status === 'confirmed' ? ' ' + attA_(attCalendar_(event), 'Add to Google Calendar') + ' · ' + attA_(attOutlook_(event), 'Add to Outlook') : '';
+  return attBox_('#edf4f8', attH2_(attHtml_(event.title))
+    + attP_(attWhen_(when(event.startsAt, 'EEEE, MMMM d, yyyy'), when(event.startsAt, 'h:mm a') + '-' + when(event.endsAt, 'h:mm a z')) + '<br>' + attHtml_(event.venue) + (registration.status === 'cancelled' ? '' : '<br>Free · Drinks and snacks provided.'), 'margin-bottom:10px;')
+    + (event.preparation ? attP_('Prepare: ' + attHtml_(event.preparation)) : '')
+    + attP_(attHtml_(status) + calendars), top);
+}
 function attEmail_(db, delivery, now) {
   var person = db.attendees.find(function(item) { return item.id === delivery.attendeeId; });
   if (!person || person.anonymizedAt || !person.email) return null;
@@ -372,26 +397,33 @@ function attEmail_(db, delivery, now) {
   if (delivery.type === 'offerExpired' && !registrations.some(function(item) { return item.status === 'waitlisted' && item.offerExpired; })) return null;
   var site = attSiteUrl_();
   var token = attIssueToken_(db, person.id, 'management', now), manage = site + '/attend/manage#token=' + token;
-  var subject = 'Your Hult Prize at UWindsor events', introduction = 'Your event registrations are saved. Each event status is shown below.';
+  // The HTML's heading replaces a first sentence that would only repeat it (introductionHtml), and the text keeps it.
+  var subject = 'Your Hult Prize at UWindsor events', heading = 'Your events', introduction = 'Your event registrations are saved. Each event status is shown below.', introductionHtml = '';
   if (delivery.type === 'confirmation') {
     var mixed = registrations.some(function(item) { return item.status !== 'confirmed'; });
     subject = mixed ? 'Your confirmed events and waitlist requests' : 'You’re registered! Hult Prize at UWindsor';
-    introduction = mixed ? 'Your selections are saved. Confirmed events reserve your attendance; waitlisted events do not reserve a seat. Each status is shown below.' : 'You’re registered! Here are the events you’ve signed up for. You can update or cancel your attendance using the secure link below.';
+    heading = mixed ? 'Your selections are saved' : 'You’re registered!';
+    introductionHtml = mixed ? 'Confirmed events reserve your attendance; waitlisted events do not reserve a seat. Each status is shown below.' : 'Here are the events you’ve signed up for. You can update or cancel your attendance using the secure link below.';
+    introduction = heading + (mixed ? '. ' : ' ') + introductionHtml;
   }
-  if (delivery.type === 'management') { subject = 'Your secure attendance management link'; introduction = 'Use the secure link below to view your registrations, add events, update support details or cancel individual events. If you did not request this email, no action is required.'; }
-  if (delivery.type === 'reminder') { subject = 'Reminder: ' + event.title; introduction = 'We look forward to seeing you. Your attendance is confirmed. If you can no longer attend, please cancel using the secure link below.'; }
-  if (delivery.type === 'cancellation') { subject = 'Your event attendance has been cancelled'; introduction = 'Your cancellation is recorded for the event below. Your other event registrations remain available through your secure management link.'; }
-  if (delivery.type === 'eventCancelled') { subject = 'Event cancelled: ' + event.title; introduction = 'The organisers have cancelled this event. Your registration is cancelled and no attendance reminder will be sent for it.'; }
-  if (delivery.type === 'update') { subject = 'Event update: ' + event.title; introduction = 'The organisers have updated this event. Please review the current date, time and venue below. Your attendance status is shown separately.'; }
-  if (delivery.type === 'offerExpired') { subject = 'Your seat offer has expired'; introduction = 'Your seat offer expired before it was accepted. You remain on the waitlist without a reserved seat. Contact the organising team if you would still like to attend.'; }
-  var offerText = '';
+  if (delivery.type === 'management') { subject = 'Your secure attendance management link'; heading = 'Your secure link'; introduction = 'Use the secure link below to view your registrations, add events, update support details or cancel individual events. If you did not request this email, no action is required.'; }
+  if (delivery.type === 'reminder') { subject = 'Reminder: ' + event.title; heading = 'See you soon!'; introduction = 'We look forward to seeing you. Your attendance is confirmed. If you can no longer attend, please cancel using the secure link below.'; }
+  if (delivery.type === 'cancellation') { subject = 'Your event attendance has been cancelled'; heading = 'Your attendance has been cancelled'; introduction = 'Your cancellation is recorded for the event below. Your other event registrations remain available through your secure management link.'; }
+  if (delivery.type === 'eventCancelled') { subject = 'Event cancelled: ' + event.title; heading = 'Event cancelled'; introduction = 'The organisers have cancelled this event. Your registration is cancelled and no attendance reminder will be sent for it.'; }
+  if (delivery.type === 'update') { subject = 'Event update: ' + event.title; heading = 'Event update'; introduction = 'The organisers have updated this event. Please review the current date, time and venue below. Your attendance status is shown separately.'; }
+  if (delivery.type === 'offerExpired') { subject = 'Your seat offer has expired'; heading = subject; introductionHtml = 'You remain on the waitlist without a reserved seat. Contact the organising team if you would still like to attend.'; introduction = 'Your seat offer expired before it was accepted. ' + introductionHtml; }
+  var offerText = '', offerHtml = '';
   if (delivery.type === 'offer') {
     subject = 'A seat is available: ' + event.title;
+    heading = 'A seat is available!';
     introduction = 'A seat is reserved for you temporarily. You are not confirmed until you accept this offer.';
     var offerToken = attIssueToken_(db, person.id, 'offer', now, offered.id, Date.parse(offered.offerExpiresAt));
-    offerText = 'Accept by ' + Utilities.formatDate(new Date(offered.offerExpiresAt), 'America/Toronto', 'MMMM d, h:mm a z') + ':\n' + site + '/attend/manage#offer=' + offerToken;
+    var offerDeadline = Utilities.formatDate(new Date(offered.offerExpiresAt), 'America/Toronto', 'MMMM d, h:mm a z'), offerUrl = site + '/attend/manage#offer=' + offerToken;
+    offerText = 'Accept by ' + offerDeadline + ':\n' + offerUrl;
+    offerHtml = attP_(attStrong_('Accept by ' + attHtml_(offerDeadline) + '.'), 'margin:20px 0 8px;') + attButton_(offerUrl, 'Accept my seat');
   }
-  var details = delivery.type === 'management' ? [] : registrations.map(function(registration) { var current = db.events.find(function(item) { return item.id === registration.eventId; }); return current ? attEventText_(current, registration) : ''; }).filter(Boolean);
+  var shown = delivery.type === 'management' ? [] : registrations.map(function(registration) { return { registration: registration, event: db.events.find(function(item) { return item.id === registration.eventId; }) }; }).filter(function(item) { return item.event; });
+  var details = shown.map(function(item) { return attEventText_(item.event, item.registration); });
   var discord = attProps_().getProperty('ATTENDANCE_DISCORD_URL') || 'https://discord.gg/ybeQYQxcqZ';
   var body = ['Hi ' + person.firstName + ',', introduction].concat(details).concat([
     offerText, 'Manage attendance (secure link, expires in 48 hours and can be used once):\n' + manage,
@@ -401,7 +433,16 @@ function attEmail_(db, delivery, now) {
     discord && /^https:\/\//.test(discord) ? 'Join our Discord: ' + discord : '',
     'Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.\nThe global US$1 million seed investment prize.'
   ]).filter(Boolean).join('\n\n');
-  return { to: person.email, subject: subject, body: body, name: 'Hult Prize at UWindsor', replyTo: attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com' };
+  // The body above is the plain-text copy, where an address can't be hidden. Mail apps show this instead: named links,
+  // one button per email (accepting a seat if one is offered, otherwise the secure link), and the short site address in
+  // the small print, as a longer one can't wrap and would widen the email on a small phone.
+  var content = attH1_(attHtml_(heading)) + attP_('Hi ' + attHtml_(person.firstName) + ',') + attP_(attHtml_(introductionHtml || introduction))
+    + shown.map(function(item, index) { return attEventHtml_(item.event, item.registration, index ? 12 : 20); }).join('') + offerHtml
+    + (offerHtml ? attP_(attA_(manage, 'Manage my attendance'), 'margin:18px 0 6px;') : attButton_(manage, 'Manage my attendance', 22))
+    + attP_('This link is just for you. It works once, within 48 hours, so please don’t forward this email. After you open it, this browser can manage your attendance for 7 days. You can request another link at ' + attA_(site + '/attend/manage', site.replace(/^https:\/\//, '')) + ' whenever you need one.', 'font-size:13px;color:#53616f;')
+    + attBox_('#fff0f7', attP_(attStrong_('Bring your team.') + ' Each person should ' + attA_(site + '/attend', 'register separately') + '. Each attendee counts as one person, even when attending multiple events.', 'font-size:15px;')
+      + attP_(attStrong_('Want to pitch in the competition?') + ' Event attendance registration does not register your team to compete or reserve a pitching slot. ' + attA_('https://www.hultprize.org/register', 'Complete competition registration') + ' separately by ' + attStrong_('<span style="display:inline-block;">November 20, 2026.</span>'), 'font-size:15px;'), 22);
+  return { to: person.email, subject: subject, body: body, htmlBody: attPage_(site, heading, introductionHtml || introduction, content, attFooter_(site, discord, 'The global US$1 million seed investment prize.')), name: 'Hult Prize at UWindsor', replyTo: attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com' };
 }
 function attSiteUrl_() {
   var site = attProps_().getProperty('ATTENDANCE_SITE_URL') || 'https://hultprizeuwindsor.ca';
@@ -409,6 +450,38 @@ function attSiteUrl_() {
   return site;
 }
 function attHtml_(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+// The pieces of the designed emails: the follow-ups (attFollowUp_) and the notices (attEmail_).
+function attP_(inner, style) { return '<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#33475b;' + (style || '') + '">' + inner + '</p>'; }
+function attH1_(inner) { return '<h1 style="margin:0 0 14px;font-size:27px;line-height:1.2;color:#002b51;">' + inner + '</h1>'; }
+function attH2_(inner) { return '<h2 style="margin:0 0 8px;font-size:21px;line-height:1.3;color:#002b51;">' + inner + '</h2>'; }
+function attA_(href, label) { return '<a href="' + attHtml_(href) + '" style="color:#be125e;font-weight:600;text-decoration:underline;">' + attHtml_(label) + '</a>'; }
+function attStrong_(inner) { return '<strong style="color:#002b51;">' + inner + '</strong>'; }
+// The time never breaks across lines; on a phone it moves under the date as one piece. Non-breaking spaces alone
+// aren't enough, as browsers may break after the hyphen. Inline-block holds it together rather than white-space,
+// which the Gmail app ignores for non-Google accounts.
+function attWhen_(day, hours) { return attStrong_(attHtml_(day) + ' · <span style="display:inline-block;">' + attHtml_(hours).replace(/ /g, '&nbsp;') + '</span>'); }
+function attBox_(colour, inner, top) { return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:' + (top || 26) + 'px 0 0;"><tr><td style="background:' + colour + ';border-radius:16px;padding:22px 22px 8px;">' + inner + '</td></tr></table>'; }
+// Classic Outlook ignores padding on a link, so it gets the same padding on the cell, in a property only it reads.
+function attButton_(href, label, top) { return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:' + (top || 4) + 'px 0 12px;"><tr><td style="background:#da2381;border-radius:15px;mso-padding-alt:13px 24px;"><a href="' + attHtml_(href) + '" style="display:inline-block;padding:13px 24px;font-size:16px;font-weight:600;line-height:1.5;color:#ffffff;text-decoration:none;">' + label + ' &rarr;</a></td></tr></table>'; }
+function attFooter_(site, discord, last) { return (/^https:\/\//.test(discord) ? '<a href="' + attHtml_(discord) + '" style="color:#53616f;">Join our Discord</a> · ' : '') + '<a href="' + site + '" style="color:#53616f;">' + site.replace(/^https:\/\//, '') + '</a><br>Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.<br>' + attHtml_(last); }
+/**
+ * The page around a designed email. Tables and inline styles, because Gmail and Outlook drop most stylesheets. The page
+ * colour matches the GIF's edge, and the chapter's logo sits above the rest at the top left, as on the website. The
+ * logo's pink background is part of the picture, so it stays readable when a phone darkens the email. `picture` is an
+ * optional table row under the logo, and `head` an optional style block.
+ */
+function attPage_(site, title, preview, content, footer, picture, head) {
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>' + attHtml_(title) + '</title>' + (head || '') + '</head>'
+    + '<body style="margin:0;padding:0;background:#fff0f7;"><div style="display:none;max-height:0;overflow:hidden;opacity:0;">' + attHtml_(preview) + '</div>'
+    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fff0f7;"><tr><td align="center" style="padding:16px 12px 36px;">'
+    + '<!--[if mso]><table role="presentation" width="560" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->'
+    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">'
+    + '<tr><td align="left" style="padding:0 0 12px;"><a href="' + site + '"><img src="' + site + '/images/email/logo.png" width="240" alt="Hult Prize at UWindsor" style="display:block;width:240px;max-width:70%;height:auto;border:0;"></a></td></tr>'
+    + (picture || '')
+    + '<tr><td style="background:#ffffff;border-radius:20px;padding:30px 24px 30px;">' + content + '</td></tr>'
+    + '<tr><td align="center" style="padding:22px 16px 0;font-size:12px;line-height:1.7;color:#53616f;">' + footer + '</td></tr>'
+    + '</table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>';
+}
 /** A whole hour of Windsor time, `days` after the Windsor calendar date of a moment, at that hour's own UTC offset. */
 function attWindsorHour_(value, hour, days) {
   var date = Utilities.formatDate(new Date(value), 'America/Toronto', 'yyyy-MM-dd').split('-').map(Number);
@@ -505,17 +578,30 @@ function attFollowUp_(db, event, person, now, updates, type) {
   var first = events.find(function(item) { return item.id === ATT_RAFFLE.firstEventId; }), draw = events.find(function(item) { return item.id === ATT_RAFFLE.drawEventId; });
   var raffle = updates && draw && draw.id !== event.id && Date.parse(draw.startsAt) > now;
   var text = ['Hi ' + person.firstName + ',', copy.opening, copy.note];
-  var p = function(inner, style) { return '<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:#33475b;' + (style || '') + '">' + inner + '</p>'; };
-  var h2 = function(inner) { return '<h2 style="margin:0 0 8px;font-size:21px;line-height:1.3;color:#002b51;">' + inner + '</h2>'; };
-  var a = function(href, label) { return '<a href="' + attHtml_(href) + '" style="color:#be125e;font-weight:600;text-decoration:underline;">' + attHtml_(label) + '</a>'; };
-  var box = function(colour, inner) { return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;"><tr><td style="background:' + colour + ';border-radius:16px;padding:22px 22px 8px;">' + inner + '</td></tr></table>'; };
-  var html = '<h1 style="margin:0 0 14px;font-size:27px;line-height:1.2;color:#002b51;">' + attHtml_(copy.heading) + '</h1>' + p('Hi ' + attHtml_(person.firstName) + ',') + p(attHtml_(copy.openingHtml)) + (copy.note ? p(attHtml_(copy.note), 'font-size:14px;color:#53616f;') : '');
+  var p = attP_, h2 = attH2_, a = attA_, box = attBox_;
+  var html = attH1_(attHtml_(copy.heading)) + p('Hi ' + attHtml_(person.firstName) + ',') + p(attHtml_(copy.openingHtml)) + (copy.note ? p(attHtml_(copy.note), 'font-size:14px;color:#53616f;') : '');
   if (next) {
     var registration = db.registrations.find(function(item) { return item.attendeeId === person.id && item.eventId === next.id && item.status !== 'cancelled'; });
-    var day = when(next.startsAt, 'EEEE, MMMM d'), hours = when(next.startsAt, 'h:mm a') + '–' + when(next.endsAt, 'h:mm a z');
-    // The time never breaks across lines; on a phone it moves under the date as one piece.
-    var nextHtml = p(attHtml_(copy.invite), 'margin-bottom:6px;') + h2(attHtml_(next.title)) + p('<strong style="color:#002b51;">' + attHtml_(day) + ' · ' + attHtml_(hours).replace(/ /g, '&nbsp;') + '</strong><br>' + attHtml_(next.venue), 'margin-bottom:10px;') + (next.description ? p(attHtml_(next.description)) : '');
-    text.push(copy.invite + ' ' + next.title + '\n' + day + ' · ' + hours + '\n' + next.venue + (next.description ? '\n' + next.description : ''));
+    var day = when(next.startsAt, 'EEEE, MMMM d'), hours = when(next.startsAt, 'h:mm a') + '-' + when(next.endsAt, 'h:mm a z');
+    var nextHtml = p(attHtml_(copy.invite), 'margin-bottom:6px;') + h2(attHtml_(next.title)) + p(attWhen_(day, hours) + '<br>' + attHtml_(next.venue), 'margin-bottom:10px;') + (next.description ? p(attHtml_(next.description)) : '');
+    var lead = ATT_EVENT_LEADS.find(function(item) { return item.eventId === next.id; });
+    // "Led by Name, Title." and, if someone joins them to open it, "Name, Title, joins First to open it." Names are in
+    // bold in the email, where a hyphenated one is held together the same way as the time, with the comma after it, so
+    // no line starts with one.
+    var credit = function(person, html) { return html ? attStrong_(attHtml_(person.name + ',').replace(/\S+-\S+/g, '<span style="display:inline-block;">$&</span>')) + ' ' + attHtml_(person.title) : person.name + ', ' + person.title; };
+    var leadLine = function(html) { var joins = ', joins ' + lead.lead.name.split(' ')[0] + ' to open it.'; return 'Led by ' + credit(lead.lead, html) + '.' + (lead.opener ? ' ' + credit(lead.opener, html) + (html ? attHtml_(joins) : joins) : ''); };
+    // The words sit beside the Polaroids on a computer, the two columns filling 456px of the box's 468, and under them
+    // on a phone, where side by side would squeeze them; there the head's style lets them use the whole box, in the
+    // mail apps that read it. Both columns shrink with the box, so a picture that fails to load can't widen the email.
+    // Classic Outlook ignores inline-block, so it always shows the words under the picture, across the whole box: in a
+    // narrower table cell it would break a hyphenated name at its hyphen, as Windows display scaling enlarges the words
+    // but not the cell. The picture's alt is empty because the names are beside it.
+    if (lead) {
+      var column = lead.width + 16, words = 456 - column;
+      nextHtml += '<div style="margin:0 0 14px;font-size:0;"><div style="display:inline-block;width:100%;max-width:' + column + 'px;vertical-align:middle;"><img src="' + site + '/images/email/' + lead.picture + '" width="' + lead.width + '" alt="" style="display:block;width:100%;max-width:' + lead.width + 'px;height:auto;border:0;"></div>'
+        + '<div style="display:inline-block;width:100%;max-width:' + words + 'px;vertical-align:middle;" class="lead-words">' + p(leadLine(true), 'margin:0;') + '</div></div>';
+    }
+    text.push(copy.invite + ' ' + next.title + '\n' + day + ' · ' + hours + '\n' + next.venue + (next.description ? '\n' + next.description : '') + (lead ? '\n' + leadLine(false) : ''));
     if (registration && registration.status === 'confirmed') {
       nextHtml += p(attHtml_(copy.going) + ' ' + a(attCalendar_(next), 'Add to Google Calendar') + ' · ' + a(attOutlook_(next), 'Add to Outlook'));
       text.push(copy.going + '\nAdd to Google Calendar: ' + attCalendar_(next) + '\nAdd to Outlook: ' + attOutlook_(next));
@@ -530,8 +616,10 @@ function attFollowUp_(db, event, person, now, updates, type) {
       var known = db.attendees.some(function(item) { return item.id === person.id; });
       var signUp = known ? site + '/attend/manage#token=' + attIssueToken_(db, person.id, 'management', now) + '&add=' + encodeURIComponent(next.id) : site + '/attend?events=' + encodeURIComponent(next.id);
       var label = next.status === 'full' ? 'Join the waitlist' : 'Save my spot';
-      nextHtml += '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0 12px;"><tr><td style="background:#da2381;border-radius:15px;"><a href="' + attHtml_(signUp) + '" style="display:inline-block;padding:13px 24px;font-size:16px;font-weight:600;line-height:1.5;color:#ffffff;text-decoration:none;">' + label + ' &rarr;</a></td></tr></table>'
-        + p('This button is just for you. It works once, within 48 hours, so please don’t forward this email. After that, you can still sign up at ' + a(site + '/attend/manage', site.replace(/^https:\/\//, '') + '/attend/manage') + '.', 'font-size:13px;color:#53616f;');
+      // The fallback link reads as just the site's address: the full path can't wrap, so it would widen the email on
+      // a 320px phone.
+      nextHtml += attButton_(signUp, label)
+        + p('This button is just for you. It works once, within 48 hours, so please don’t forward this email. After that, you can still sign up at ' + a(site + '/attend/manage', site.replace(/^https:\/\//, '')) + '.', 'font-size:13px;color:#53616f;');
       text.push(label + ' (this link is just for you: it works once, within 48 hours, so please don’t forward this email):\n' + signUp + '\nAfter that, you can still sign up at ' + site + '/attend/manage');
     }
     html += box('#edf4f8', nextHtml);
@@ -542,9 +630,11 @@ function attFollowUp_(db, event, person, now, updates, type) {
     var holding = started && db.checkins.some(function(checkin) { var at = db.events.find(function(item) { return item.id === checkin.eventId; }); return checkin.attendeeId === person.id && at && (!first || Date.parse(at.startsAt) >= Date.parse(first.startsAt)); });
     var opens = !started ? 'The Ticket Jar opens at ' + (next && next.id === first.id ? 'our next event, ' + first.title : first.title + ' on ' + when(first.startsAt, 'MMMM d')) + '. From then on, every event you come to gets you a free raffle ticket at check-in.'
       : 'Every event you come to gets you ' + (holding ? 'another' : 'a') + ' free raffle ticket at check-in.';
-    var jar = (holding ? 'Your tickets stay' : 'Every ticket stays') + ' in the jar until we draw one at the ' + draw.title + ' on ' + when(draw.startsAt, 'MMMM d, yyyy') + '. Its owner wins $200 cash, thanks to Grayfel Technologies Inc. The more events you come to, the better your odds.';
+    var jar = (holding ? 'Your tickets stay' : 'Every ticket stays') + ' in the jar until we draw one at the ' + draw.title + ' on ' + when(draw.startsAt, 'MMMM d, yyyy') + '. Its owner wins $200 cash, thanks to Grayfel Technologies Inc. The more events you come to, the better your chance at winning the $200. May the odds be EVER in your favour.';
     var heading = holding ? 'Keep filling the Ticket Jar' : 'Start collecting tickets for $200';
-    html += box('#fff0f7', '<img src="' + site + '/images/email/raffle-tickets.png" width="250" alt="Raffle tickets for the Ticket Jar: $200, drawn February 4, 2027" style="display:block;width:250px;max-width:100%;height:auto;margin:0 auto 12px;border:0;">'
+    // Fluid up to its own width, like the GIF: a fixed 250px width would widen the email on a small phone whenever the
+    // picture doesn't load.
+    html += box('#fff0f7', '<img src="' + site + '/images/email/raffle-tickets.png" width="250" alt="Raffle tickets for the Ticket Jar: $200, drawn February 4, 2027" style="display:block;width:100%;max-width:250px;height:auto;margin:0 auto 12px;border:0;">'
       + h2(heading) + p(attHtml_(opens)) + p(attHtml_(jar)) + p(a(site + '/blog/the-ticket-jar', 'How the Ticket Jar works')));
     text.push(heading + '\n' + opens + ' ' + jar + '\nHow the Ticket Jar works: ' + site + '/blog/the-ticket-jar');
   }
@@ -552,20 +642,13 @@ function attFollowUp_(db, event, person, now, updates, type) {
   text.push(copy.closing + '\nThe Hult Prize at UWindsor team');
   var discord = attProps_().getProperty('ATTENDANCE_DISCORD_URL') || 'https://discord.gg/ybeQYQxcqZ';
   var why = copy.why + (updates ? ' and said yes to hearing about our other events. To stop, just reply and let us know.' : '.');
-  var footer = (/^https:\/\//.test(discord) ? '<a href="' + attHtml_(discord) + '" style="color:#53616f;">Join our Discord</a> · ' : '') + '<a href="' + site + '" style="color:#53616f;">' + site.replace(/^https:\/\//, '') + '</a><br>Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.<br>' + attHtml_(why);
   text.push((/^https:\/\//.test(discord) ? 'Join our Discord: ' + discord + '\n' : '') + 'Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.\n' + why);
   var preview = type === 'missed' ? (next ? 'Sorry you couldn’t make it. Come to ' + next.title + '?' : 'Sorry you couldn’t make it to ' + event.title + '.') : (next ? 'A little thank-you card, and an invite to ' + next.title + '.' : 'A little thank-you card from the Hult Prize at UWindsor team.');
-  // Tables and inline styles, because Gmail and Outlook drop most stylesheets. The page colour matches the GIF's edge.
-  var htmlBody = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"><title>' + attHtml_(copy.heading) + '</title></head>'
-    + '<body style="margin:0;padding:0;background:#fff0f7;"><div style="display:none;max-height:0;overflow:hidden;opacity:0;">' + attHtml_(preview) + '</div>'
-    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#fff0f7;"><tr><td align="center" style="padding:16px 12px 36px;">'
-    + '<!--[if mso]><table role="presentation" width="560" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->'
-    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">'
-    + '<tr><td align="center"><img src="' + site + '/images/email/' + copy.picture + '" width="560" alt="' + attHtml_(copy.alt) + '" style="display:block;width:100%;max-width:560px;height:auto;border:0;"></td></tr>'
-    + '<tr><td style="background:#ffffff;border-radius:20px;padding:30px 24px 30px;">' + html + '</td></tr>'
-    + '<tr><td align="center" style="padding:22px 16px 0;font-size:12px;line-height:1.7;color:#53616f;">' + footer + '</td></tr>'
-    + '</table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>';
-  return { subject: copy.subject, body: text.filter(Boolean).join('\n\n'), htmlBody: htmlBody };
+  // A lead's words get the whole box on a phone, rather than the narrower column they need beside the picture on a
+  // computer. The columns stack below a 572px screen: their 456px plus the 116px of padding around the box.
+  var phone = lead ? '<style>@media only screen and (max-width:571px) { .lead-words { max-width:none !important; } }</style>' : '';
+  var picture = '<tr><td align="center"><img src="' + site + '/images/email/' + copy.picture + '?v=' + ATT_ART_VERSION + '" width="560" alt="' + attHtml_(copy.alt) + '" style="display:block;width:100%;max-width:560px;height:auto;border:0;"></td></tr>';
+  return { subject: copy.subject, body: text.filter(Boolean).join('\n\n'), htmlBody: attPage_(site, copy.heading, preview, html, attFooter_(site, discord, why), picture, phone) };
 }
 /** Tokens are saved as hashes before MailApp runs; raw links are never persisted. */
 function attDeliver_(db, now, limit) {

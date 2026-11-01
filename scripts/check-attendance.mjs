@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { createHash, createHmac, randomUUID } from 'node:crypto'
 import { Readable } from 'node:stream'
@@ -170,6 +170,33 @@ assert(confirmation.body.includes('4:30') && confirmation.body.includes('10:00')
 assert(confirmation.body.includes('20261029T203000Z/20261029T213000Z'))
 assert(confirmation.body.includes('20261107T150000Z/20261107T172000Z'))
 assert(!JSON.stringify(db().deliveries).includes('#token='))
+// Notices also have an HTML version: the logo and colours, named links rather than long addresses, and one button.
+const noticeReader = db().attendees.find(row => row.email === 'mail@example.invalid').id
+const noticeMail = (type, changes = {}, at = now, edit = () => {}) => {
+  const copy = db(), registration = copy.registrations.find(row => row.attendeeId === noticeReader && row.eventId === 'workshop-1'), event = copy.events.find(row => row.id === 'workshop-1')
+  Object.assign(registration, changes); edit(copy)
+  return context.attEmail_(copy, { type, attendeeId: noticeReader, eventId: type === 'management' ? '' : event.id, registrationIds: type === 'management' ? [] : [registration.id], eventStartsAt: event.startsAt }, at)
+}
+const confirmationFor = change => { const copy = db(), registrationIds = change(copy); return context.attEmail_(copy, { type: 'confirmation', attendeeId: noticeReader, eventId: '', registrationIds }, now) }
+const mixedNotice = confirmationFor(copy => { const [one, two] = copy.registrations.filter(row => row.attendeeId === noticeReader); two.status = 'waitlisted'; return [one.id, two.id] })
+const noticeMails = { confirmation, mixedNotice, management: noticeMail('management'), reminder: noticeMail('reminder', {}, Date.parse('2026-11-07T14:00:00Z')), update: noticeMail('update'), cancellation: noticeMail('cancellation', { status: 'cancelled' }), eventCancelled: noticeMail('eventCancelled', { status: 'cancelled' }), offer: noticeMail('offer', { status: 'offered', offerExpiresAt: new Date(now + 3600000).toISOString() }), offerExpired: noticeMail('offerExpired', { status: 'waitlisted', offerExpired: true }) }
+const shownWords = html => html.replace(/<head>[\s\S]*<\/head>/, '').replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, ' ')
+for (const [type, mail] of Object.entries(noticeMails)) {
+  assert(/<td align="left"[^>]*><a href="https:\/\/hultprizeuwindsor\.ca"><img src="https:\/\/hultprizeuwindsor\.ca\/images\/email\/logo\.png"/.test(mail.htmlBody), `The logo is at the top left: ${type}`)
+  assert(!/https?:\/\/|#token=/.test(shownWords(mail.htmlBody)), `Readers see names, not addresses: ${type}`)
+  assert.equal(mail.htmlBody.split('background:#da2381').length, 2, `One button per notice: ${type}`)
+  assert(mail.htmlBody.includes(`#token=${mail.body.match(/#token=([a-f0-9]{64})/)[1]}"`), `The HTML carries the same secure link as the plain-text copy: ${type}`)
+  for (const words of ['register separately', 'https://www.hultprize.org/register"', 'November 20, 2026', 'Join our Discord', 'mso-padding-alt:13px 24px']) assert(mail.htmlBody.includes(words), `${words}: ${type}`)
+  assert(!/[–—]/.test(mail.subject + mail.body + mail.htmlBody), `No en or em dashes: ${type}`)
+}
+assert(confirmation.htmlBody.includes('20261107T150000Z/20261107T172000Z') && confirmation.htmlBody.includes('You’re confirmed.') && !confirmation.htmlBody.includes('Status:'), 'Calendar links sit behind names, and a status is a sentence rather than a label')
+assert(mixedNotice.htmlBody.includes('You’re on the waitlist, without a reserved seat.') && mixedNotice.htmlBody.split('Add to Google Calendar').length === 2, 'Only the confirmed event of a mixed selection has calendar links')
+for (const mail of [noticeMails.cancellation, noticeMails.eventCancelled]) assert(mail.htmlBody.includes('Your attendance is cancelled.') && !mail.htmlBody.includes('Drinks and snacks') && !mail.htmlBody.includes('Add to Google Calendar'), 'A cancelled registration has no refreshments note and no calendar links')
+assert(new RegExp(`<a href="[^"]*#offer=${noticeMails.offer.body.match(/#offer=([a-f0-9]{64})/)[1]}"[^>]*>Accept my seat`).test(noticeMails.offer.htmlBody) && noticeMails.offer.htmlBody.includes('>Manage my attendance</a>') && /Accept by [^<]+\./.test(noticeMails.offer.htmlBody), 'Accepting the seat is the button, with its deadline, and managing attendance is a link')
+assert(confirmation.body.includes('You’re registered! Here are the events') && mixedNotice.body.includes('Your selections are saved. Confirmed events') && noticeMails.offerExpired.body.includes('Your seat offer expired before it was accepted. You remain') && !shownWords(noticeMails.offerExpired.htmlBody).includes('expired before'), 'The plain-text copy keeps the sentence the HTML heading replaces')
+const hostileNotice = noticeMail('update', {}, now, copy => { copy.attendees.find(row => row.id === noticeReader).firstName = '<img src=x onerror=alert(1)>'; copy.events.find(row => row.id === 'workshop-1').venue = '<b>Hall</b> & "Co"' })
+assert(hostileNotice.htmlBody.includes('Hi &lt;img src=x') && !hostileNotice.htmlBody.includes('<img src=x') && hostileNotice.htmlBody.includes('&lt;b&gt;Hall&lt;/b&gt; &amp; &quot;Co&quot;'), 'Names and event details are escaped in the HTML')
+assert(confirmationFor(copy => seed.map(event => { copy.registrations.push({ id: `all-${event.id}`, attendeeId: noticeReader, eventId: event.id, status: 'confirmed' }); return `all-${event.id}` })).htmlBody.length < 102 * 1024, 'Someone registered for every event stays under the 102 KB where Gmail clips an email')
 call('requestLink', { email: 'mail@example.invalid' })
 const firstManagement = mailed.filter(mail => mail.to === 'mail@example.invalid' && mail.subject.includes('secure attendance management'))
 assert.equal(firstManagement.length, 1)
@@ -351,6 +378,51 @@ assert(noTickets.body.includes('Start collecting tickets for $200') && noTickets
 assert(yes.htmlBody.includes('<!--[if mso]><table role="presentation" width="560"'), 'Classic Outlook gets a fixed-width table')
 for (const mail of [yes, going, no, missedYes, missedNo, noTickets, closedNext]) for (const [, file] of mail.htmlBody.matchAll(/\/images\/email\/([\w.-]+)/g)) assert(existsSync(new URL(`../public/images/email/${file}`, import.meta.url)), `Every picture an email loads is in the site: ${file}`)
 assert(yes.body.includes('please don’t forward this email') && !yes.body.includes('signs you in for 48 hours'), 'The sign-up link is described as personal and single-use')
+// Hyphens, never en or em dashes, in anything people read.
+for (const mail of [yes, going, no, missedYes, missedNo, noTickets, closedNext]) assert(!/[–—]/.test(mail.subject + mail.body + mail.htmlBody), `No en or em dashes: ${mail.subject}`)
+assert(/(?:[ap]\.m\.|[AP]M)-\d{1,2}:\d{2}/.test(yes.body), 'The next event’s time range uses a hyphen')
+assert(/ · <span style="display:inline-block;">[^<]*(?:[ap]\.m\.|[AP]M)-\d[^<]*<\/span><\/strong><br>/.test(yes.htmlBody), 'The time range is held together, so a phone never splits it at the hyphen, even in the Gmail app with a non-Google account')
+assert(yes.htmlBody.includes('alt="Raffle tickets for the Ticket Jar: $200, drawn February 4, 2027" style="display:block;width:100%;max-width:250px;'), 'The raffle tickets shrink with their box, so a picture that fails to load can’t widen the email on a small phone')
+assert(yes.body.includes('The more events you come to, the better your chance at winning the $200. May the odds be EVER in your favour.'), 'The raffle line ends with the new wish')
+for (const mail of [yes, missedNo]) assert(/<td align="left"[^>]*><a href="https:\/\/hultprizeuwindsor\.ca"><img src="https:\/\/hultprizeuwindsor\.ca\/images\/email\/logo\.png"/.test(mail.htmlBody) && mail.htmlBody.indexOf('logo.png') < mail.htmlBody.indexOf('.gif'), 'The chapter logo sits at the top left, above the picture')
+assert(/you can still sign up at <a href="https:\/\/hultprizeuwindsor\.ca\/attend\/manage"[^>]*>hultprizeuwindsor\.ca<\/a>\./.test(yes.htmlBody), 'The fallback link reads as the short site address, which never widens the email on a small phone')
+assert(yes.htmlBody.includes(`thank-you-card.gif?v=${context.ATT_ART_VERSION}"`) && missedYes.htmlBody.includes(`missed-you-letter.gif?v=${context.ATT_ART_VERSION}"`), 'The GIF addresses carry the art version, so mail apps fetch a changed picture')
+// The invite to Workshop 1 says who leads it, beside their Polaroid, after the event's description and before the sign-up.
+for (const mail of [yes, going, missedYes]) assert(mail.htmlBody.includes('<img src="https://hultprizeuwindsor.ca/images/email/peaches-madarang-cesario.png" width="140" alt=""') && mail.htmlBody.includes('Led by <strong style="color:#002b51;">Peaches <span style="display:inline-block;">Madarang-Cesario,</span></strong> Chief Operating Officer at Sterling.') && mail.body.includes('in partnership with Sterling Cybersecurity and Advisory Group.\nLed by Peaches Madarang-Cesario, Chief Operating Officer at Sterling.'), `The invite to Workshop 1 names Peaches Madarang-Cesario as its lead, with the Polaroid: ${mail.subject}`)
+assert(yes.htmlBody.indexOf('Explore the problem') < yes.htmlBody.indexOf('peaches-madarang-cesario.png') && yes.htmlBody.indexOf('Led by') < yes.htmlBody.indexOf('Save my spot'), 'The lead comes after the description and before the sign-up button')
+assert(/<div style="margin:0 0 14px;font-size:0;"><div style="display:inline-block;width:100%;max-width:156px;[^"]*"><img[^>]*peaches[^>]*style="display:block;width:100%;max-width:140px;[^>]*><\/div><div style="display:inline-block;width:100%;max-width:300px;[^"]*" class="lead-words">/.test(yes.htmlBody), 'The Polaroid and its words are inline-block columns, which sit side by side where there is room and stack on a phone and in Outlook, with no Outlook table whose narrow cell would break the hyphenated name')
+assert(!closedNext.body.includes('Led by') && !closedNext.htmlBody.includes('peaches'), 'An event with no named lead says nothing about one')
+assert(!no.body.includes('Led by') && !missedNo.htmlBody.includes('peaches'), 'Without consent there is no invite, so no lead')
+// Peaches leads every workshop. Neil Cesario joins Peaches to open Workshop 2, so its invite (in the Founders Panel's
+// follow-ups) shows both Polaroids in one wider picture, with the words in a narrower column beside it.
+assert(seed.filter(event => event.group === 'workshops').every(event => context.ATT_EVENT_LEADS.some(lead => lead.eventId === event.id && lead.lead === context.ATT_PEACHES)), 'Peaches leads every workshop')
+const toWorkshop2 = context.attFollowUp_(db(), db().events.find(event => event.id === 'founders-panel'), yesPerson, Date.parse('2026-11-14T01:00:00Z'), true, 'thanks')
+assert(toWorkshop2.body.includes('our next event: Workshop 2: Solution, Business Model & Impact') && toWorkshop2.body.includes('in partnership with Sterling Cybersecurity and Advisory Group.\nLed by Peaches Madarang-Cesario, Chief Operating Officer at Sterling. Neil Cesario, Director and Chief Information Security Officer at Sterling, joins Peaches to open it.\n'), 'The invite to Workshop 2 says Peaches leads it and Neil Cesario joins Peaches to open it')
+assert(toWorkshop2.htmlBody.includes('Led by <strong style="color:#002b51;">Peaches <span style="display:inline-block;">Madarang-Cesario,</span></strong> Chief Operating Officer at Sterling. <strong style="color:#002b51;">Neil Cesario,</strong> Director and Chief Information Security Officer at Sterling, joins Peaches to open it.</p>'), 'The email bolds both names')
+assert(/<div style="margin:0 0 14px;font-size:0;"><div style="display:inline-block;width:100%;max-width:252px;[^"]*"><img src="https:\/\/hultprizeuwindsor\.ca\/images\/email\/peaches-and-neil-cesario\.png" width="236" alt="" style="display:block;width:100%;max-width:236px;[^>]*><\/div><div style="display:inline-block;width:100%;max-width:204px;[^"]*" class="lead-words">/.test(toWorkshop2.htmlBody) && !toWorkshop2.htmlBody.includes('peaches-madarang-cesario.png'), 'Workshop 2 shows the picture of both Polaroids, its columns sized to fit')
+// Stacked on a phone, the words under the picture use the whole box, in the mail apps that read the head's style.
+const phoneStyle = '</title><style>@media only screen and (max-width:571px) { .lead-words { max-width:none !important; } }</style></head>'
+for (const mail of [yes, toWorkshop2]) assert(mail.htmlBody.includes(phoneStyle) && mail.htmlBody.split('class="lead-words"').length === 2, `A lead's words widen to the whole box on a phone: ${mail.subject}`)
+assert(!no.htmlBody.includes('<style') && !closedNext.htmlBody.includes('<style'), 'An email with no lead has no style block')
+assert(context.ATT_EVENT_LEADS.filter(lead => lead.eventId !== 'workshop-2').every(lead => !lead.opener && lead.picture === 'peaches-madarang-cesario.png' && lead.width === 140), 'Every workshop but Workshop 2 names Peaches alone, with the single Peaches Polaroid')
+const toWorkshop3 = context.attFollowUp_(db(), db().events.find(event => event.id === 'team-mixer'), yesPerson, Date.parse('2026-11-18T01:00:00Z'), true, 'thanks')
+assert(toWorkshop3.body.includes('our next event: Workshop 3') && toWorkshop3.body.includes('\nLed by Peaches Madarang-Cesario, Chief Operating Officer at Sterling.\n') && toWorkshop3.htmlBody.includes('peaches-madarang-cesario.png" width="140"') && !toWorkshop3.body.includes('Neil'), 'Later workshops name Peaches alone')
+for (const mail of [toWorkshop2, toWorkshop3]) assert(!/[–—]/.test(mail.subject + mail.body + mail.htmlBody), `No en or em dashes: ${mail.subject}`)
+// Each picture is drawn at twice the width the email shows it, so it stays sharp on phones.
+for (const lead of context.ATT_EVENT_LEADS) {
+  const picture = new URL(`../public/images/email/${lead.picture}`, import.meta.url)
+  assert(seed.some(event => event.id === lead.eventId) && existsSync(picture), `ATT_EVENT_LEADS names a real event and its picture is in public/images/email: ${lead.eventId}`)
+  assert.equal(readFileSync(picture).readUInt32BE(16), 2 * lead.width, `${lead.picture} is drawn at twice the width ATT_EVENT_LEADS shows it at`)
+}
+// Names and titles are typed into Attendance.gs by hand, so check them against their partner page.
+const partners = readFileSync(new URL('../src/data/communityPartners.ts', import.meta.url), 'utf8')
+for (const person of context.ATT_EVENT_LEADS.flatMap(lead => [lead.lead, lead.opener]).filter(Boolean)) assert(partners.includes(`name: '${person.name}', title: '${person.title.split(' at ')[0]}'`), `${person.name}'s name and title match their partner page in src/data/communityPartners.ts`)
+// The GIF addresses change whenever the GIFs do, so no mail app can keep showing an old one it cached.
+const art = createHash('sha256')
+for (const file of ['thank-you-card.gif', 'missed-you-letter.gif']) art.update(readFileSync(new URL(`../public/images/email/${file}`, import.meta.url)))
+assert.equal(context.ATT_ART_VERSION, art.digest('hex').slice(0, 8), 'ATT_ART_VERSION in Attendance.gs is the fingerprint scripts/generate-email-art.mjs printed for the current GIFs')
+// Mail apps never restart a GIF that has stopped, so each follow-up picture loops forever (NETSCAPE2.0 loop count 0).
+for (const file of ['thank-you-card.gif', 'missed-you-letter.gif']) { const gif = readFileSync(new URL(`../public/images/email/${file}`, import.meta.url)), at = gif.indexOf('NETSCAPE2.0'); assert(at > 0 && gif.readUInt16LE(at + 13) === 0, `${file} loops forever`) }
 // Retrying a follow-up from the dashboard ignores the time window; transactional email is sent ahead of follow-ups.
 const blocked = thanksFor('thanks-yes@example.invalid')[0]
 assert.equal(call('retryEmail', { deliveryId: blocked.id }, admin).ok, true)
