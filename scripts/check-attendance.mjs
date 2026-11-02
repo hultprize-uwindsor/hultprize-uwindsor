@@ -391,7 +391,7 @@ assert(yes.htmlBody.includes(`thank-you-card.gif?v=${context.ATT_ART_VERSION}"`)
 for (const mail of [yes, going, missedYes]) assert(mail.htmlBody.includes('<img src="https://hultprizeuwindsor.ca/images/email/peaches-madarang-cesario.png" width="140" alt=""') && mail.htmlBody.includes('Led by <strong style="color:#002b51;">Peaches <span style="display:inline-block;">Madarang-Cesario,</span></strong> Chief Operating Officer at Sterling.') && mail.body.includes('in partnership with Sterling Cybersecurity and Advisory Group.\nLed by Peaches Madarang-Cesario, Chief Operating Officer at Sterling.'), `The invite to Workshop 1 names Peaches Madarang-Cesario as its lead, with the Polaroid: ${mail.subject}`)
 assert(yes.htmlBody.indexOf('Explore the problem') < yes.htmlBody.indexOf('peaches-madarang-cesario.png') && yes.htmlBody.indexOf('Led by') < yes.htmlBody.indexOf('Save my spot'), 'The lead comes after the description and before the sign-up button')
 assert(/<div style="margin:0 0 14px;font-size:0;"><div style="display:inline-block;width:100%;max-width:156px;[^"]*"><img[^>]*peaches[^>]*style="display:block;width:100%;max-width:140px;[^>]*><\/div><div style="display:inline-block;width:100%;max-width:300px;[^"]*" class="lead-words">/.test(yes.htmlBody), 'The Polaroid and its words are inline-block columns, which sit side by side where there is room and stack on a phone and in Outlook, with no Outlook table whose narrow cell would break the hyphenated name')
-assert(!closedNext.body.includes('Led by') && !closedNext.htmlBody.includes('peaches'), 'An event with no named lead says nothing about one')
+assert(!closedNext.body.includes('Led by') && !closedNext.htmlBody.includes('images/email/peaches'), 'An event with no named lead says nothing about one')
 assert(!no.body.includes('Led by') && !missedNo.htmlBody.includes('peaches'), 'Without consent there is no invite, so no lead')
 // Peaches leads every workshop. Neil Cesario joins Peaches to open Workshop 2, so its invite (in the Founders Panel's
 // follow-ups) shows both Polaroids in one wider picture, with the words in a narrower column beside it.
@@ -399,7 +399,7 @@ assert(seed.filter(event => event.group === 'workshops').every(event => context.
 const toWorkshop2 = context.attFollowUp_(db(), db().events.find(event => event.id === 'founders-panel'), yesPerson, Date.parse('2026-11-14T01:00:00Z'), true, 'thanks')
 assert(toWorkshop2.body.includes('our next event: Workshop 2: Solution, Business Model & Impact') && toWorkshop2.body.includes('in partnership with Sterling Cybersecurity and Advisory Group.\nLed by Peaches Madarang-Cesario, Chief Operating Officer at Sterling. Neil Cesario, Director and Chief Information Security Officer at Sterling, joins Peaches to open it.\n'), 'The invite to Workshop 2 says Peaches leads it and Neil Cesario joins Peaches to open it')
 assert(toWorkshop2.htmlBody.includes('Led by <strong style="color:#002b51;">Peaches <span style="display:inline-block;">Madarang-Cesario,</span></strong> Chief Operating Officer at Sterling. <strong style="color:#002b51;">Neil Cesario,</strong> Director and Chief Information Security Officer at Sterling, joins Peaches to open it.</p>'), 'The email bolds both names')
-assert(/<div style="margin:0 0 14px;font-size:0;"><div style="display:inline-block;width:100%;max-width:252px;[^"]*"><img src="https:\/\/hultprizeuwindsor\.ca\/images\/email\/peaches-and-neil-cesario\.png" width="236" alt="" style="display:block;width:100%;max-width:236px;[^>]*><\/div><div style="display:inline-block;width:100%;max-width:204px;[^"]*" class="lead-words">/.test(toWorkshop2.htmlBody) && !toWorkshop2.htmlBody.includes('peaches-madarang-cesario.png'), 'Workshop 2 shows the picture of both Polaroids, its columns sized to fit')
+assert(/<div style="margin:0 0 14px;font-size:0;"><div style="display:inline-block;width:100%;max-width:252px;[^"]*"><img src="https:\/\/hultprizeuwindsor\.ca\/images\/email\/peaches-and-neil-cesario\.png" width="236" alt="" style="display:block;width:100%;max-width:236px;[^>]*><\/div><div style="display:inline-block;width:100%;max-width:204px;[^"]*" class="lead-words">/.test(toWorkshop2.htmlBody) && !toWorkshop2.htmlBody.includes('images/email/peaches-madarang-cesario.png'), 'Workshop 2 shows the picture of both Polaroids, its columns sized to fit')
 // Stacked on a phone, the words under the picture use the whole box, in the mail apps that read the head's style.
 const phoneStyle = '</title><style>@media only screen and (max-width:571px) { .lead-words { max-width:none !important; } }</style></head>'
 for (const mail of [yes, toWorkshop2]) assert(mail.htmlBody.includes(phoneStyle) && mail.htmlBody.split('class="lead-words"').length === 2, `A lead's words widen to the whole box on a phone: ${mail.subject}`)
@@ -465,6 +465,90 @@ assert.deepEqual(previews.map(mail => mail.to), Array(4).fill('mail@example.inva
 assert.deepEqual(previews.map(mail => mail.subject.replace(/ 💌$/, '')), ['[Test] Thank you for coming to Info Session #1', '[Test, no updates consent] Thank you for coming to Info Session #1', '[Test] We missed you at Info Session #1', '[Test, no updates consent] We missed you at Info Session #1'])
 assert(previews[0].htmlBody.includes('Ticket Jar') && !previews[1].htmlBody.includes('Ticket Jar') && previews[2].htmlBody.includes('Ticket Jar') && !previews[3].htmlBody.includes('Ticket Jar'))
 assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, checkedIn.length, 'Previews queue nothing')
+// Every event still to come: its reminder, card and letter as they'll look on the day, to the tester only, saving nothing.
+const sheetRows = () => JSON.stringify([...sheets].map(([name, sheet]) => [name, sheet.rows]))
+const stillToCome = context.attEvents_(db(), now).filter(event => !['cancelled', 'completed'].includes(event.status) && Date.parse(event.startsAt) > now)
+assert(stillToCome.length >= 5 && stillToCome.at(-1).id === 'campus-grand-finale', 'Fixture: several events are still to come, up to the finale')
+const beforeEvery = mailed.length, rowsBeforeEvery = sheetRows(), sendForReal = context.MailApp.sendEmail
+context.MailApp.sendEmail = mail => { assert.equal(lockHeld, false, 'The lock is not held while sending, so attendees are not turned away as busy'); sendForReal(mail) }
+quiet(() => context.sendEveryEventTest())
+context.MailApp.sendEmail = sendForReal
+const everyEvent = mailed.slice(beforeEvery)
+assert.equal(sheetRows(), rowsBeforeEvery, 'The every-event test saves nothing: no tokens, deliveries or test reader')
+assert.deepEqual([...new Set(everyEvent.map(mail => mail.to))], ['mail@example.invalid'], 'It goes only to the first test address')
+assert(everyEvent.every(mail => !mail.cc && !mail.bcc), 'Nobody else is copied')
+assert.equal(everyEvent.length, stillToCome.length * 3, 'Three emails for each event still to come')
+stillToCome.forEach((event, index) => {
+  const [reminderTest, cardTest, letterTest] = everyEvent.slice(index * 3, index * 3 + 3), total = everyEvent.length
+  // Each email invites to whatever hasn't started by the moment it really goes out.
+  const nextAfter = type => stillToCome.find(item => item.id !== event.id && Date.parse(item.startsAt) > context.attFollowUpAt_(type, event))
+  const cardNext = nextAfter('thanks'), letterNext = nextAfter('missed')
+  assert(reminderTest.subject === `[Test ${index * 3 + 1}/${total}] Reminder: ${event.title}` && reminderTest.htmlBody.includes('See you soon!') && reminderTest.htmlBody.includes(event.title.replace(/&/g, '&amp;')), `The reminder for ${event.id}`)
+  assert(cardTest.subject.startsWith(`[Test ${index * 3 + 2}/${total}] Thank you for coming to ${event.title}`) && letterTest.subject.startsWith(`[Test ${index * 3 + 3}/${total}] We missed you at ${event.title}`), `The card and letter for ${event.id}, in order`)
+  if (cardNext) {
+    assert(cardTest.body.includes(`our next event: ${cardNext.title}`) && letterTest.body.includes(`We’d love to see you there: ${letterNext.title}`), `${event.id} invites to what comes next when each email goes out`)
+    assert(cardTest.body.includes('Keep filling the Ticket Jar') && letterTest.body.includes('Start collecting tickets'), `Someone who came to ${event.id} has tickets, and someone who missed it doesn't`)
+    assert(cardTest.htmlBody.includes(`/attend?events=${cardNext.id}`) && !cardTest.htmlBody.includes('#token='), 'The sign-up button opens the public form, as no real reader is behind it')
+  } else assert(!/next event|Ticket Jar/.test(cardTest.body + letterTest.body), 'The finale invites to nothing and has no raffle section')
+})
+// The Founders Panel's card goes the evening before Workshop 2, so it invites to it. Its letter goes at 10 AM as Workshop 2
+// starts, too late to invite to it, so it invites to the event after.
+const foundersMails = everyEvent.filter(mail => /(Thank you for coming to|We missed you at) Founders Panel/.test(mail.subject))
+assert(foundersMails[0].body.includes('our next event: Workshop 2') && foundersMails[1].body.includes('see you there: Info Session #2'), 'The Founders Panel card invites to Workshop 2, and its letter to Info Session #2')
+for (const mail of everyEvent) {
+  assert(!/[–—]/.test(mail.subject + mail.body + mail.htmlBody), `No en or em dashes: ${mail.subject}`)
+  for (const [, file] of mail.htmlBody.matchAll(/\/images\/email\/([\w.-]+)/g)) assert(existsSync(new URL(`../public/images/email/${file}`, import.meta.url)), `The picture is in the site: ${file}`)
+}
+// The Founders Panel's speakers show in everything about it: the invite to it, its notices and its own card and letter.
+const panel = context.ATT_EVENT_PANELS.find(item => item.eventId === 'founders-panel')
+assert.equal(panel.speakers.map(speaker => speaker.name).join(', '), 'Tal Czudner, Eunice Ajayi, Gregory Odiase, Umar Azhar, Ameen Fadel, Jordan Goure, Uzair Syed, Peaches Madarang-Cesario', 'All eight speakers, in speaking order')
+const escaped = text => text.replace(/&/g, '&amp;')
+const showsPanel = mail => mail.htmlBody.split('images/email/panel-').length === 9 && panel.speakers.every(speaker => mail.htmlBody.includes(`<img src="https://hultprizeuwindsor.ca/images/email/${speaker.picture}" width="112" height="163" alt=""`) && mail.htmlBody.includes(`>${speaker.name}</strong>`) && mail.htmlBody.includes(`>${escaped(speaker.role)}</p>`) && mail.body.includes(`${speaker.name}, ${speaker.role}`))
+const noPanel = mail => !mail.htmlBody.includes('images/email/panel-') && !mail.body.includes('Tal Czudner')
+const panelNotice = (type, changes = {}, at = now) => {
+  const copy = db(), event = copy.events.find(row => row.id === 'founders-panel')
+  copy.registrations.push({ id: 'panel-notice', attendeeId: noticeReader, eventId: event.id, status: 'confirmed', ...changes })
+  return context.attEmail_(copy, { type, attendeeId: noticeReader, eventId: type === 'confirmation' ? '' : event.id, registrationIds: ['panel-notice'], eventStartsAt: event.startsAt }, at)
+}
+const panelReminder = panelNotice('reminder', {}, Date.parse('2026-11-12T23:00:00Z')), panelOffer = panelNotice('offer', { status: 'offered', offerExpiresAt: '2026-11-12T00:00:00Z' })
+for (const mail of [panelReminder, panelOffer, panelNotice('confirmation'), panelNotice('update')]) assert(showsPanel(mail) && mail.body.includes('Meet the Founders Panel:\nTal Czudner, CEO, Windsor-Detroit Tunnel\nEunice Ajayi, Founder, FieldNote AI'), `A notice about the panel shows its speakers: ${mail.subject}`)
+assert(panelReminder.htmlBody.indexOf('Manage my attendance') < panelReminder.htmlBody.indexOf('panel-tal-czudner') && panelReminder.htmlBody.indexOf('panel-peaches') < panelReminder.htmlBody.indexOf('Bring your team'), 'A notice keeps its button above the speakers')
+assert(panelOffer.htmlBody.indexOf('Accept my seat') < panelOffer.htmlBody.indexOf('panel-tal-czudner'), 'The speakers never push accepting a seat out of sight')
+for (const mail of [panelNotice('cancellation', { status: 'cancelled' }), panelNotice('eventCancelled', { status: 'cancelled' })]) assert(noPanel(mail), 'A cancelled registration is not shown who it will miss')
+for (const [type, mail] of Object.entries(noticeMails)) assert(noPanel(mail), `A notice about another event has no speakers: ${type}`)
+assert(showsPanel(closedNext) && closedNext.body.includes('Meet the Founders Panel:\nTal Czudner') && closedNext.htmlBody.indexOf('Hear from founders') < closedNext.htmlBody.indexOf('panel-tal-czudner') && closedNext.htmlBody.indexOf('panel-peaches') < closedNext.htmlBody.indexOf('background:#da2381'), 'The invite to the panel shows its speakers after the description and before the sign-up')
+const isAboutPanel = mail => /(Thank you for coming to|We missed you at) (Workshop 1|Founders Panel)|Reminder: Founders Panel/.test(mail.subject)
+assert.equal(everyEvent.filter(isAboutPanel).length, 5, 'Fixture: the panel is what Workshop 1\'s card and letter invite to, and has a reminder, card and letter of its own')
+for (const mail of everyEvent) assert(isAboutPanel(mail) ? showsPanel(mail) : noPanel(mail), `Only the emails about the panel show its speakers: ${mail.subject}`)
+assert(foundersMails[0].htmlBody.includes('Thank you to our panel') && foundersMails[0].body.includes('Thank you to our panel:\nTal Czudner') && foundersMails[1].htmlBody.includes('Here’s who you missed') && foundersMails[1].body.includes('Here’s who you missed:\nTal Czudner'), 'The panel\'s own card thanks them, and its letter says who was missed')
+const panelEvent = db().events.find(event => event.id === 'founders-panel'), noUpdates = type => context.attFollowUp_(db(), panelEvent, yesPerson, context.attFollowUpAt_(type, panelEvent), false, type)
+for (const mail of [noUpdates('thanks'), noUpdates('missed')]) assert(showsPanel(mail) && !mail.body.includes('next event') && !mail.body.includes('see you there'), 'The panel\'s own card and letter show its speakers without the updates consent, with no invite')
+assert(noPanel(context.attFollowUp_(db(), db().events.find(event => event.id === 'workshop-1'), yesPerson, Date.parse('2026-11-08T00:05:00Z'), false, 'thanks')), 'Without the updates consent there is no invite to the panel, so no speakers')
+// Every designed email ends with every supporter's logo, above the small print. They're pictures, not links.
+const designed = [...Object.values(noticeMails), panelReminder, yes, no, missedYes, missedNo, ...everyEvent]
+for (const mail of designed) {
+  for (const supporter of context.ATT_SUPPORTERS) assert.equal(mail.htmlBody.split(`<img src="https://hultprizeuwindsor.ca/images/email/${supporter.picture}" width="125" height="60" alt="${supporter.name}"`).length, 2, `${supporter.name}'s logo is in: ${mail.subject}`)
+  assert(mail.htmlBody.indexOf('Supported by') > mail.htmlBody.indexOf('</h1>') && mail.htmlBody.indexOf('supporter-city-of-windsor') < mail.htmlBody.lastIndexOf('One idea. Four minutes.'), `The logos sit under the email and above the small print: ${mail.subject}`)
+  assert(!/<a [^>]*>\s*<img[^>]*supporter-/.test(mail.htmlBody), `The logos aren't links, as each outside address can count against an email with spam filters: ${mail.subject}`)
+  assert(mail.body.includes(`Supported by ${context.ATT_SUPPORTERS.map(supporter => supporter.name).join(', ')}.`), `The plain-text copy names them: ${mail.subject}`)
+  assert(!/[–—]/.test(mail.subject + mail.body + mail.htmlBody), `No en or em dashes: ${mail.subject}`)
+  assert(Buffer.byteLength(mail.htmlBody) < 102 * 1024, `Stays under the 102 KB where Gmail clips an email, which would hide the logos: ${mail.subject}`)
+  // Classic Outlook's table of the same pieces must be whole, or it could swallow the rest of the email.
+  const outlook = [...mail.htmlBody.matchAll(/<!--\[if mso\]>(.*?)<!\[endif\]-->/g)].map(match => match[1]).join('')
+  for (const tag of ['table', 'tr', 'td']) assert.equal(outlook.split(`<${tag}`).length, outlook.split(`</${tag}>`).length, `Classic Outlook's <${tag}>s all close: ${mail.subject}`)
+}
+// The website's Supported by strip (PartnerStrip) names no one the emails leave out.
+const siteEntries = [...readFileSync(new URL('../src/data/partners.ts', import.meta.url), 'utf8').matchAll(/\{ name: '([^']+)'[^\n]*\}/g)].filter(entry => !entry[0].includes('individual: true')).map(entry => ({ name: entry[1], logo: entry[0].match(/logo: '([^']+)'/)?.[1] }))
+for (const partner of siteEntries.filter((partner, index, all) => !partner.logo || all.findIndex(other => other.logo === partner.logo) === index)) assert(context.ATT_SUPPORTERS.some(supporter => supporter.name.includes(partner.name)), `${partner.name} is on the site's strip, so its logo is in the emails too`)
+// Each picture is drawn at twice the size the email shows it, and kept small, as several load at once.
+const pictureFile = name => readFileSync(new URL(`../public/images/email/${name}`, import.meta.url))
+for (const speaker of panel.speakers) { const file = pictureFile(speaker.picture); assert(file.readUInt32BE(16) === 224 && file.readUInt32BE(20) === 326 && file.length < 100 * 1024, `${speaker.picture} is 224 x 326 and under 100 KB`) }
+for (const supporter of context.ATT_SUPPORTERS) { const file = pictureFile(supporter.picture); assert(file.readUInt32BE(16) === 250 && file.readUInt32BE(20) === 120 && file.length < 10 * 1024, `${supporter.picture} is 250 x 120 and under 10 KB`) }
+const quotaForReal = context.MailApp.getRemainingDailyQuota, mailedBeforeGuard = mailed.length
+context.MailApp.getRemainingDailyQuota = () => everyEvent.length + 19
+assert.throws(() => context.sendEveryEventTest(), /left in today's MailApp quota/, 'It keeps some of the day\'s quota back for real attendees')
+context.MailApp.getRemainingDailyQuota = quotaForReal
+assert.equal(mailed.length, mailedBeforeGuard, 'Stopped by the quota check, it sends nothing at all')
 const nextRegistration = db().registrations.find(row => row.attendeeId === thanksPerson('thanks-going@example.invalid').id && row.eventId === 'workshop-1')
 now = Date.parse('2026-11-07T15:30:00Z'); assert.equal(call('checkIn', { registrationId: nextRegistration.id }, admin).ok, true)
 now = Date.parse('2026-11-07T23:59:00Z'); quiet(() => context.sendFollowUpsForLatestEvent())

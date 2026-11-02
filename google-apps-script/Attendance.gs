@@ -4,8 +4,9 @@
  * ATTENDANCE_SHEET_ID, ATTENDANCE_SITE_URL, ATTENDANCE_REPLY_TO, ATTENDANCE_DISCORD_URL.
  * Run setupAttendance(), then installAttendanceTriggers(); deploy execute-as-owner,
  * Anyone access. All HTTP operations require the server's shared secret.
- * Follow-ups (thank-you cards, missed-you letters): sendFollowUpTest() previews them; sendFollowUpsForLatestEvent()
- * catches up a missed send. They are sent automatically only once ATTENDANCE_FOLLOW_UP_MODE is set to auto.
+ * Follow-ups (thank-you cards, missed-you letters): sendFollowUpTest() previews them, sendEveryEventTest() previews every
+ * event still to come, and sendFollowUpsForLatestEvent() catches up a missed send. They are sent automatically only once
+ * ATTENDANCE_FOLLOW_UP_MODE is set to auto.
  * See docs/event-registration.md. Every mutation is serialised, journaled, then materialised.
  */
 var ATT_TABLES = ['attendees', 'events', 'registrations', 'consents', 'deliveries', 'checkins', 'tokens', 'rateLimits'];
@@ -36,6 +37,40 @@ var ATT_EVENT_LEADS = [
   { eventId: 'workshop-3', lead: ATT_PEACHES, picture: 'peaches-madarang-cesario.png', width: 140 },
   { eventId: 'workshop-4', lead: ATT_PEACHES, picture: 'peaches-madarang-cesario.png', width: 140 },
   { eventId: 'workshop-5', lead: ATT_PEACHES, picture: 'peaches-madarang-cesario.png', width: 140 }
+];
+// Who speaks at an event, in speaking order, each on a taped Polaroid that scripts/generate-email-art.mjs draws at twice
+// the size shown. Everything the event sends shows them: the invite to it, its notices (unless cancelled), and its card
+// and letter, whatever the reader said about updates, as they came for this event.
+var ATT_EVENT_PANELS = [
+  { eventId: 'founders-panel', heading: 'Meet the Founders Panel', speakers: [
+    { name: 'Tal Czudner', role: 'CEO, Windsor-Detroit Tunnel', picture: 'panel-tal-czudner.png' },
+    { name: 'Eunice Ajayi', role: 'Founder, FieldNote AI', picture: 'panel-eunice-ajayi.png' },
+    { name: 'Gregory Odiase', role: 'Founding Engineer, Nox Metals', picture: 'panel-gregory-odiase.png' },
+    { name: 'Umar Azhar', role: 'Co-founder & CTO, Hypercare', picture: 'panel-umar-azhar.png' },
+    { name: 'Ameen Fadel', role: 'Co-founder, Cedar Valley', picture: 'panel-ameen-fadel.png' },
+    { name: 'Jordan Goure', role: 'Co-founder & CEO, Picsume', picture: 'panel-jordan-goure.png' },
+    { name: 'Uzair Syed', role: 'Co-founder & Head of Security, Transit Sentinel', picture: 'panel-uzair-syed.png' },
+    { name: 'Peaches Madarang-Cesario', role: 'COO, Sterling Cybersecurity and Advisory Group', picture: 'panel-peaches-madarang-cesario.png' }
+  ] }
+];
+// The chapter's sponsors and partners, whose logos end every designed email: the website's Supported by strip
+// (src/data/partners.ts) and the chapter's partner footer. The pictures aren't links, as each outside address can count
+// against an email with spam filters. scripts/generate-email-art.mjs draws each at twice 125 x 60.
+var ATT_SUPPORTERS = [
+  { name: 'Fusion', picture: 'supporter-fusion.png' },
+  { name: 'Sterling Cybersecurity and Advisory Group', picture: 'supporter-sterling.png' },
+  { name: 'FRCT', picture: 'supporter-frct.png' },
+  { name: 'WEtech Alliance', picture: 'supporter-wetech.png' },
+  { name: 'Small Business and Entrepreneurship Centre', picture: 'supporter-small-business-centre.png' },
+  { name: 'Picsume', picture: 'supporter-picsume.png' },
+  { name: 'Grayfel Technologies Inc.', picture: 'supporter-grayfel.png' },
+  { name: 'Offshoot Initiative', picture: 'supporter-offshoot.png' },
+  { name: 'UWSA', picture: 'supporter-uwsa.png' },
+  { name: 'GSS', picture: 'supporter-gss.png' },
+  { name: 'University of Windsor Alumni Association', picture: 'supporter-alumni-association.png' },
+  { name: 'University of Windsor Research and Innovation Office', picture: 'supporter-research-and-innovation.png' },
+  { name: 'UWill Discover', picture: 'supporter-uwill-discover.png' },
+  { name: 'City of Windsor', picture: 'supporter-city-of-windsor.png' }
 ];
 
 function attProps_() { return PropertiesService.getScriptProperties(); }
@@ -140,6 +175,39 @@ function sendFollowUpTest() {
     attCommit_(db);
     console.log('Sent four test follow-ups for ' + event.title + ' to ' + to + '.');
   } finally { lock.releaseLock(); }
+}
+/**
+ * Run from the Apps Script editor to see what every event still to come will send, as it will look on the day: its
+ * reminder, thank-you card and missed-you letter, in date order, each for a reader who said yes to updates and isn't
+ * signed up for the next event. Sent to the first ATTENDANCE_TEST_EMAILS address only. Nothing is queued or saved, so
+ * the secure links in these emails won't work.
+ */
+function sendEveryEventTest() {
+  var to = (attProps_().getProperty('ATTENDANCE_TEST_EMAILS') || '').split(',')[0].trim().toLowerCase();
+  if (!to) throw new Error('Add your email address to the ATTENDANCE_TEST_EMAILS script property first.');
+  // The lock is only for reading: nothing here writes, and holding it while sending would turn attendees away as busy.
+  var lock = LockService.getScriptLock(), db; lock.waitLock(30000);
+  try { db = attLoad_(); } finally { lock.releaseLock(); }
+  var today = Date.now(), events = attEvents_(db, today).filter(function(event) { return ['cancelled', 'completed'].indexOf(event.status) < 0 && Date.parse(event.startsAt) > today; });
+  // Real emails share this quota, so keep some back for them.
+  var count = events.length * 3, left = MailApp.getRemainingDailyQuota();
+  if (left < count + 20) throw new Error('This test sends ' + count + ' emails, but only ' + left + ' are left in today\'s MailApp quota and real attendees\' emails need some of them. Try again tomorrow.');
+  var found = db.attendees.find(function(item) { return item.email === to; });
+  var reader = { id: 'every-event-test', firstName: found ? found.firstName : 'friend', email: to }, sent = 0;
+  var send = function(mail) { sent += 1; MailApp.sendEmail({ to: to, name: 'Hult Prize at UWindsor', replyTo: attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com', subject: '[Test ' + sent + '/' + count + '] ' + mail.subject, body: mail.body, htmlBody: mail.htmlBody }); };
+  events.forEach(function(event) {
+    // The reader only ever exists in this copy of the data. Each email is built for the moment it would really go out,
+    // so it works out the next event and the Ticket Jar as it will on the day.
+    var registration = { id: 'every-event-test-' + event.id, attendeeId: reader.id, eventId: event.id, status: 'confirmed' };
+    db.attendees.push(reader); db.registrations.push(registration);
+    send(attEmail_(db, { type: 'reminder', attendeeId: reader.id, eventId: event.id, eventStartsAt: event.startsAt, registrationIds: [registration.id] }, Date.parse(event.startsAt) - ATT_DAY));
+    db.attendees.pop(); db.registrations.pop();
+    db.checkins.push({ id: 'every-event-test', registrationId: registration.id, attendeeId: reader.id, eventId: event.id });
+    send(attFollowUp_(db, event, reader, attFollowUpAt_('thanks', event), true, 'thanks'));
+    db.checkins.pop();
+    send(attFollowUp_(db, event, reader, attFollowUpAt_('missed', event), true, 'missed'));
+  });
+  console.log('Sent ' + sent + ' test emails for ' + events.length + ' events to ' + to + ': ' + events.map(function(event) { return event.title; }).join(', ') + '.');
 }
 /**
  * Run from the Apps Script editor when follow-ups were missed (for example, before this feature was installed).
@@ -424,22 +492,27 @@ function attEmail_(db, delivery, now) {
   }
   var shown = delivery.type === 'management' ? [] : registrations.map(function(registration) { return { registration: registration, event: db.events.find(function(item) { return item.id === registration.eventId; }) }; }).filter(function(item) { return item.event; });
   var details = shown.map(function(item) { return attEventText_(item.event, item.registration); });
+  var panels = shown.filter(function(item) { return item.registration.status !== 'cancelled' && attPanel_(item.event.id); }).map(function(item) { return attPanel_(item.event.id); });
   var discord = attProps_().getProperty('ATTENDANCE_DISCORD_URL') || 'https://discord.gg/ybeQYQxcqZ';
   var body = ['Hi ' + person.firstName + ',', introduction].concat(details).concat([
     offerText, 'Manage attendance (secure link, expires in 48 hours and can be used once):\n' + manage,
-    'After opening your secure link, this browser can manage your attendance for 7 days. Request another link at ' + site + '/attend/manage whenever needed.',
+    'After opening your secure link, this browser can manage your attendance for 7 days. Request another link at ' + site + '/attend/manage whenever needed.'
+  ]).concat(panels.map(function(panel) { return panel.heading + ':\n' + attPanelText_(panel); })).concat([
     'Bring your team: each person should register separately at ' + site + '/attend. Each attendee counts as one person, even when attending multiple events.',
     'Want to pitch in the competition? Event attendance registration does not register your team to compete or reserve a pitching slot. Complete competition registration separately by November 20, 2026: https://www.hultprize.org/register',
     discord && /^https:\/\//.test(discord) ? 'Join our Discord: ' + discord : '',
+    attSupportersText_(),
     'Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.\nThe global US$1 million seed investment prize.'
   ]).filter(Boolean).join('\n\n');
   // The body above is the plain-text copy, where an address can't be hidden. Mail apps show this instead: named links,
   // one button per email (accepting a seat if one is offered, otherwise the secure link), and the short site address in
-  // the small print, as a longer one can't wrap and would widen the email on a small phone.
+  // the small print, as a longer one can't wrap and would widen the email on a small phone. An event's panel comes after
+  // the button, as it's tall on a phone and shouldn't push accepting a seat out of sight.
   var content = attH1_(attHtml_(heading)) + attP_('Hi ' + attHtml_(person.firstName) + ',') + attP_(attHtml_(introductionHtml || introduction))
     + shown.map(function(item, index) { return attEventHtml_(item.event, item.registration, index ? 12 : 20); }).join('') + offerHtml
     + (offerHtml ? attP_(attA_(manage, 'Manage my attendance'), 'margin:18px 0 6px;') : attButton_(manage, 'Manage my attendance', 22))
     + attP_('This link is just for you. It works once, within 48 hours, so please don’t forward this email. After you open it, this browser can manage your attendance for 7 days. You can request another link at ' + attA_(site + '/attend/manage', site.replace(/^https:\/\//, '')) + ' whenever you need one.', 'font-size:13px;color:#53616f;')
+    + panels.map(function(panel) { return attBox_('#edf4f8', attH2_(attHtml_(panel.heading)) + attPanelHtml_(site, panel), 22); }).join('')
     + attBox_('#fff0f7', attP_(attStrong_('Bring your team.') + ' Each person should ' + attA_(site + '/attend', 'register separately') + '. Each attendee counts as one person, even when attending multiple events.', 'font-size:15px;')
       + attP_(attStrong_('Want to pitch in the competition?') + ' Event attendance registration does not register your team to compete or reserve a pitching slot. ' + attA_('https://www.hultprize.org/register', 'Complete competition registration') + ' separately by ' + attStrong_('<span style="display:inline-block;">November 20, 2026.</span>'), 'font-size:15px;'), 22);
   return { to: person.email, subject: subject, body: body, htmlBody: attPage_(site, heading, introductionHtml || introduction, content, attFooter_(site, discord, 'The global US$1 million seed investment prize.')), name: 'Hult Prize at UWindsor', replyTo: attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com' };
@@ -465,6 +538,36 @@ function attBox_(colour, inner, top) { return '<table role="presentation" width=
 function attButton_(href, label, top) { return '<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:' + (top || 4) + 'px 0 12px;"><tr><td style="background:#da2381;border-radius:15px;mso-padding-alt:13px 24px;"><a href="' + attHtml_(href) + '" style="display:inline-block;padding:13px 24px;font-size:16px;font-weight:600;line-height:1.5;color:#ffffff;text-decoration:none;">' + label + ' &rarr;</a></td></tr></table>'; }
 function attFooter_(site, discord, last) { return (/^https:\/\//.test(discord) ? '<a href="' + attHtml_(discord) + '" style="color:#53616f;">Join our Discord</a> · ' : '') + '<a href="' + site + '" style="color:#53616f;">' + site.replace(/^https:\/\//, '') + '</a><br>Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.<br>' + attHtml_(last); }
 /**
+ * Pieces side by side, centred, as many to a row as fit: each is at most `width` px wide, and `share` of the box on a small
+ * phone. Inline-block needs no style block, so it also works in the Gmail app with a non-Google account. Classic Outlook
+ * ignores inline-block, so only it sees a table of the same pieces, `columns` to a row.
+ */
+function attGrid_(pieces, width, share, columns, align) {
+  var cell = '<td width="' + width + '" align="center" valign="' + align + '">';
+  return '<div style="text-align:center;"><!--[if mso]><table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0"><tr>' + cell + '<![endif]-->'
+    + pieces.map(function(piece, index) { return (index ? '<!--[if mso]></td>' + (index % columns ? '' : '</tr><tr>') + cell + '<![endif]-->' : '') + '<div style="display:inline-block;width:' + share + ';max-width:' + width + 'px;vertical-align:' + align + ';">' + piece + '</div>'; }).join('')
+    + '<!--[if mso]></td></tr></table><![endif]--></div>';
+}
+function attPanel_(eventId) { return ATT_EVENT_PANELS.find(function(panel) { return panel.eventId === eventId; }); }
+function attPanelText_(panel) { return panel.speakers.map(function(speaker) { return speaker.name + ', ' + speaker.role; }).join('\n'); }
+// Four to a row on a computer and two on a phone. A long name may break at its hyphen here, as the column can be narrower
+// than it. The Polaroids' alt is empty because the names are under them.
+function attPanelHtml_(site, panel) {
+  return attGrid_(panel.speakers.map(function(speaker) {
+    return '<img src="' + site + '/images/email/' + speaker.picture + '" width="112" height="163" alt="" style="display:block;width:100%;max-width:112px;height:auto;margin:0 auto;border:0;">'
+      + attP_(attStrong_(attHtml_(speaker.name)), 'margin:2px 3px;font-size:13px;line-height:1.3;')
+      + attP_(attHtml_(speaker.role), 'margin:0 3px 16px;font-size:12px;line-height:1.35;color:#53616f;');
+  }), 116, '50%', 4, 'top');
+}
+function attSupportersText_() { return 'Supported by ' + ATT_SUPPORTERS.map(function(supporter) { return supporter.name; }).join(', ') + '.'; }
+// Four to a row on a computer and three on a phone, in a white card like the email's own, as the logos are made for white.
+function attSupportersHtml_(site) {
+  return '<tr><td style="padding:12px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#ffffff;border-radius:20px;padding:24px 16px 14px;">'
+    + '<h2 style="margin:0 0 12px;font-size:18px;line-height:1.3;color:#002b51;text-align:center;">Supported by</h2>'
+    + attGrid_(ATT_SUPPORTERS.map(function(supporter) { return '<img src="' + site + '/images/email/' + supporter.picture + '" width="125" height="60" alt="' + attHtml_(supporter.name) + '" style="display:block;width:100%;max-width:125px;height:auto;border:0;font-size:11px;line-height:1.3;color:#53616f;">'; }), 125, '33.33%', 4, 'middle')
+    + '</td></tr></table></td></tr>';
+}
+/**
  * The page around a designed email. Tables and inline styles, because Gmail and Outlook drop most stylesheets. The page
  * colour matches the GIF's edge, and the chapter's logo sits above the rest at the top left, as on the website. The
  * logo's pink background is part of the picture, so it stays readable when a phone darkens the email. `picture` is an
@@ -479,6 +582,7 @@ function attPage_(site, title, preview, content, footer, picture, head) {
     + '<tr><td align="left" style="padding:0 0 12px;"><a href="' + site + '"><img src="' + site + '/images/email/logo.png" width="240" height="43" alt="Hult Prize at UWindsor" style="display:block;width:240px;max-width:70%;height:auto;border:0;"></a></td></tr>'
     + (picture || '')
     + '<tr><td style="background:#ffffff;border-radius:20px;padding:30px 24px 30px;">' + content + '</td></tr>'
+    + attSupportersHtml_(site)
     + '<tr><td align="center" style="padding:22px 16px 0;font-size:12px;line-height:1.7;color:#53616f;">' + footer + '</td></tr>'
     + '</table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>';
 }
@@ -561,14 +665,14 @@ function attFollowUp_(db, event, person, now, updates, type) {
     openingHtml: 'We’re sad you couldn’t make it, but we know things come up. We hope everything’s okay.',
     note: 'Did you make it after all, and we missed you at the door? Just reply and let us know, and we’ll fix our list.',
     invite: 'Come to the next one? We’d love to see you there:', going: 'You’re already signed up for this one, so your seat is waiting!',
-    closing: 'Hope to see you soon,', why: 'You’re getting this because you registered for ' + event.title,
+    closing: 'Hope to see you soon,', why: 'You’re getting this because you registered for ' + event.title, panel: 'Here’s who you missed',
     picture: 'missed-you-letter', height: 560, envelope: 'background-position:50% 53.57%;background-size:68% 44%;', alt: 'A letter slides out of an envelope and unfolds: We missed you!',
   } : {
     subject: 'Thank you for coming to ' + event.title + ' 💌', heading: 'Thank you for coming to ' + event.title + '!',
     opening: 'Thank you for coming to ' + event.title + '. It meant a lot to have you there, and we hope you left with an idea or two worth chasing.',
     openingHtml: 'It meant a lot to have you there, and we hope you left with an idea or two worth chasing.',
     note: '', invite: 'We’d love to see you at our next event:', going: 'You’re already signed up, so we’ll see you there!',
-    closing: 'See you soon,', why: 'You’re getting this because you checked in at ' + event.title,
+    closing: 'See you soon,', why: 'You’re getting this because you checked in at ' + event.title, panel: 'Thank you to our panel',
     picture: 'thank-you-card', height: 420, envelope: 'background-position:50% 65.22%;background-size:56.67% 48.89%;', alt: 'A thank-you card slides out of an envelope and opens: So glad you came!',
   };
   var events = attEvents_(db, now).filter(function(item) { return item.status !== 'cancelled'; });
@@ -580,6 +684,11 @@ function attFollowUp_(db, event, person, now, updates, type) {
   var text = ['Hi ' + person.firstName + ',', copy.opening, copy.note];
   var p = attP_, h2 = attH2_, a = attA_, box = attBox_;
   var html = attH1_(attHtml_(copy.heading)) + p('Hi ' + attHtml_(person.firstName) + ',') + p(attHtml_(copy.openingHtml)) + (copy.note ? p(attHtml_(copy.note), 'font-size:14px;color:#53616f;') : '');
+  var panel = attPanel_(event.id);
+  if (panel) {
+    html += box('#edf4f8', h2(attHtml_(copy.panel)) + attPanelHtml_(site, panel));
+    text.push(copy.panel + ':\n' + attPanelText_(panel));
+  }
   if (next) {
     var registration = db.registrations.find(function(item) { return item.attendeeId === person.id && item.eventId === next.id && item.status !== 'cancelled'; });
     var day = when(next.startsAt, 'EEEE, MMMM d'), hours = when(next.startsAt, 'h:mm a') + '-' + when(next.endsAt, 'h:mm a z');
@@ -601,7 +710,9 @@ function attFollowUp_(db, event, person, now, updates, type) {
       nextHtml += '<div style="margin:0 0 14px;font-size:0;"><div style="display:inline-block;width:100%;max-width:' + column + 'px;vertical-align:middle;"><img src="' + site + '/images/email/' + lead.picture + '" width="' + lead.width + '" alt="" style="display:block;width:100%;max-width:' + lead.width + 'px;height:auto;border:0;"></div>'
         + '<div style="display:inline-block;width:100%;max-width:' + words + 'px;vertical-align:middle;" class="lead-words">' + p(leadLine(true), 'margin:0;') + '</div></div>';
     }
-    text.push(copy.invite + ' ' + next.title + '\n' + day + ' · ' + hours + '\n' + next.venue + (next.description ? '\n' + next.description : '') + (lead ? '\n' + leadLine(false) : ''));
+    var nextPanel = attPanel_(next.id);
+    if (nextPanel) nextHtml += p(attStrong_(attHtml_(nextPanel.heading)), 'margin-bottom:10px;') + attPanelHtml_(site, nextPanel);
+    text.push(copy.invite + ' ' + next.title + '\n' + day + ' · ' + hours + '\n' + next.venue + (next.description ? '\n' + next.description : '') + (lead ? '\n' + leadLine(false) : '') + (nextPanel ? '\n' + nextPanel.heading + ':\n' + attPanelText_(nextPanel) : ''));
     if (registration && registration.status === 'confirmed') {
       nextHtml += p(attHtml_(copy.going) + ' ' + a(attCalendar_(next), 'Add to Google Calendar') + ' · ' + a(attOutlook_(next), 'Add to Outlook'));
       text.push(copy.going + '\nAdd to Google Calendar: ' + attCalendar_(next) + '\nAdd to Outlook: ' + attOutlook_(next));
@@ -642,6 +753,7 @@ function attFollowUp_(db, event, person, now, updates, type) {
   text.push(copy.closing + '\nThe Hult Prize at UWindsor team');
   var discord = attProps_().getProperty('ATTENDANCE_DISCORD_URL') || 'https://discord.gg/ybeQYQxcqZ';
   var why = copy.why + (updates ? ' and said yes to hearing about our other events. To stop, just reply and let us know.' : '.');
+  text.push(attSupportersText_());
   text.push((/^https:\/\//.test(discord) ? 'Join our Discord: ' + discord + '\n' : '') + 'Hult Prize at UWindsor · One idea. Four minutes. $1,000,000.\n' + why);
   var preview = type === 'missed' ? (next ? 'Sorry you couldn’t make it. Come to ' + next.title + '?' : 'Sorry you couldn’t make it to ' + event.title + '.') : (next ? 'A little thank-you card, and an invite to ' + next.title + '.' : 'A little thank-you card from the Hult Prize at UWindsor team.');
   // A lead's words get the whole box on a phone, rather than the narrower column they need beside the picture on a
