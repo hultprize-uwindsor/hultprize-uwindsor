@@ -21,6 +21,12 @@ const registrations = [
 const checkins = []
 const deliveries = [{ id: 'delivery1', attendeeId: 'person1', eventId: events[0].id, type: 'confirmation', status: 'failed', attempts: 1, lastError: 'Test-only email failure' }]
 const payloads = []
+const counts = held => ({ held, pending: 0, failed: 0, sent: 0, skipped: 0 })
+const emailBatches = [
+  { eventId: events[0].id, title: events[0].title, type: 'thanks', name: 'Thank-you card', dueAt: '2026-10-29T23:00:00.000Z', state: 'waiting', decidedAt: '', counts: counts(1), expected: null },
+  { eventId: events[1].id, title: events[1].title, type: 'reminder', name: 'Reminder', dueAt: '2027-11-06T15:00:00.000Z', state: 'needsApproval', decidedAt: '', counts: counts(0), expected: 1 },
+]
+const readers = [{ id: 'person1', name: 'Ada Example', email: 'ada@example.test' }, { id: 'person2', name: 'Jo Sponsor', email: 'jo@example.test' }]
 let signedIn = false
 let supportAccess = false
 let failWalkIn = false
@@ -34,7 +40,9 @@ await context.route('**/api/attendance*', async route => {
   if (payload.action === 'login') { signedIn = true; supportAccess = payload.password === 'support-fixture'; return reply({ ok: true, canViewSupport: supportAccess }) }
   if (payload.action === 'logout') { signedIn = false; return reply({ ok: true }) }
   if (!signedIn) return reply({ ok: false, code: 'unauthorized' }, 401)
-  if (payload.action === 'admin') return reply({ ok: true, events, registrations, checkins, deliveries, canViewSupport: supportAccess, attendees: people.map(person => { const copy = { ...person }; if (!supportAccess) { delete copy.dietary; delete copy.accessibility } return copy }) })
+  if (payload.action === 'reviewEmail') { const recipient = readers.find(reader => reader.id === payload.attendeeId) ?? readers[0]; return reply({ ok: true, subject: `Thank you for coming to ${events[0].title}`, body: `Hi ${recipient.name},\n\nThank you for coming.`, htmlBody: `<!doctype html><html><body style="margin:0;"><h1>Thank you for coming</h1><p>Hi ${recipient.name},</p><div style="height:900px;"></div><a href="https://example.test/attend/manage#token=preview">Manage my attendance</a></body></html>`, recipient, recipients: readers, sample: false, at: '2026-10-29T23:00:00.000Z' }) }
+  if (payload.action === 'decideEmail') { const batch = emailBatches.find(item => item.eventId === payload.eventId && item.type === payload.type); Object.assign(batch, payload.decision === 'approve' ? { state: 'sending', decidedAt: '2026-10-29T23:05:00.000Z', counts: { ...counts(0), pending: 1 } } : payload.decision === 'decline' ? { state: 'declined', decidedAt: '2026-10-29T23:05:00.000Z' } : { state: 'waiting', decidedAt: '', counts: counts(1) }); return reply({ ok: true, changed: 1 }) }
+  if (payload.action === 'admin') return reply({ ok: true, events, registrations, checkins, deliveries, reviewing: true, emailBatches, canViewSupport: supportAccess, attendees: people.map(person => { const copy = { ...person }; if (!supportAccess) { delete copy.dietary; delete copy.accessibility } return copy }) })
   if (payload.action === 'checkIn') { checkins.push({ id: 'checkin1', registrationId: payload.registrationId, checkedInAt: '2026-10-29T20:31:00Z' }); return reply({ ok: true }) }
   if (payload.action === 'saveEvent') { Object.assign(events.find(event => event.id === payload.event.id), payload.event); return reply({ ok: true, notificationRequired: true }) }
   if (payload.action === 'walkIn') return failWalkIn ? reply({ ok: false, message: 'Temporary test failure. Retry safely.' }, 503) : reply({ ok: true, saved: true })
@@ -156,6 +164,36 @@ try {
   await page.getByRole('button', { name: 'Refresh', exact: true }).click()
   await page.getByText('Email sending is disabled. Configure before launch.', { exact: true }).waitFor()
 
+  // Review emails: the list, the email as it will arrive, another reader's copy, and approving it.
+  await page.getByRole('button', { name: 'Review emails (2 to approve)', exact: true }).click()
+  const reviewList = page.getByRole('region', { name: 'Emails to review' })
+  assert.match(await reviewList.textContent(), /Thank-you card.*Due, waiting for your approval.*Reminder.*1 person so far.*Waiting for your approval/s)
+  await page.getByRole('button', { name: `Review ${events[0].title}’s thank-you cards`, exact: true }).click()
+  const frame = page.locator('iframe.attendance-admin__review-frame')
+  await page.frameLocator('iframe.attendance-admin__review-frame').getByRole('heading', { name: 'Thank you for coming' }).waitFor()
+  assert.equal(await frame.getAttribute('sandbox'), 'allow-same-origin', 'The preview runs no scripts')
+  await page.waitForFunction(() => document.querySelector('iframe.attendance-admin__review-frame')?.getBoundingClientRect().height > 900)
+  assert.equal(await frame.evaluate(element => getComputedStyle(element).pointerEvents), 'none', 'The preview\'s links, whose secure links are made up, can\'t be followed')
+  assert.match(await page.locator('.attendance-admin__review-meta').textContent(), /ToAda Example \(ada@example\.test\)SubjectThank you for coming to/)
+  await page.getByLabel(/Show the copy for/).selectOption('person2')
+  await page.frameLocator('iframe.attendance-admin__review-frame').getByText('Hi Jo Sponsor,').waitFor()
+  assert.equal(payloads.findLast(payload => payload.action === 'reviewEmail').attendeeId, 'person2', 'Another reader\'s copy is drawn for them')
+  await page.getByRole('button', { name: 'Phone', exact: true }).click()
+  await page.waitForFunction(() => document.querySelector('iframe.attendance-admin__review-frame')?.getBoundingClientRect().width <= 375)
+  await page.getByRole('button', { name: 'Plain text', exact: true }).click()
+  assert.match(await page.locator('.attendance-admin__review-text').textContent(), /Hi Jo Sponsor,\n\nThank you for coming\./)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const reviewOverflow = await page.evaluate(() => ({ page: document.documentElement.scrollWidth, viewport: innerWidth, elements: [...document.querySelectorAll('body *')].filter(element => element.getBoundingClientRect().right > innerWidth + 1 && !element.closest('.attendance-admin__table-wrap')).map(element => element.tagName + '.' + element.className).slice(0, 8) }))
+  assert(reviewOverflow.page <= reviewOverflow.viewport && !reviewOverflow.elements.length, `The review tab fits a phone: ${JSON.stringify(reviewOverflow)}`)
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.getByRole('button', { name: 'Approve and send now', exact: true }).click()
+  await page.getByRole('status').filter({ hasText: `Approved: ${events[0].title}’s thank-you cards are going out now.` }).waitFor()
+  assert.deepEqual((({ eventId, type, decision }) => ({ eventId, type, decision }))(payloads.findLast(payload => payload.action === 'decideEmail')), { eventId: events[0].id, type: 'thanks', decision: 'approve' })
+  await page.getByRole('button', { name: 'Withdraw approval', exact: true }).waitFor()
+  assert.equal(await page.getByRole('button', { name: 'Approve and send now', exact: true }).count(), 0, 'An approved email offers withdrawing instead')
+  await page.getByRole('button', { name: 'Close', exact: true }).click()
+  await page.getByRole('button', { name: 'Review emails (1 to approve)', exact: true }).waitFor()
+
   await page.getByRole('button', { name: 'Sign out', exact: true }).click()
   await signIn('support-fixture')
   await page.getByRole('button', { name: 'Rosters & reports', exact: true }).click()
@@ -177,7 +215,7 @@ try {
   await page.getByText('Anonymised attendee', { exact: true }).first().waitFor()
   await count('Unique people', 2)
   assert.deepEqual(pageErrors, [], 'No uncaught browser errors')
-  console.log('Passed: admin login, private support controls, unique people/registrations/check-ins, roster filters, safe CSV, Windsor DST conversion including invalid/ambiguous hours, sponsor walk-in validation and retry key, email retry, blocked pending email visibility, anonymised reports, material update, mobile overflow. All attendance requests intercepted; no live submissions or emails.')
+  console.log('Passed: admin login, private support controls, unique people/registrations/check-ins, roster filters, safe CSV, Windsor DST conversion including invalid/ambiguous hours, sponsor walk-in validation and retry key, email retry, blocked pending email visibility, reviewing and approving an email, anonymised reports, material update, mobile overflow. All attendance requests intercepted; no live submissions or emails.')
 } finally {
   await browser.close()
 }

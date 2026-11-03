@@ -8,10 +8,10 @@ export interface Partner {
 
 export const PARTNERS: Partner[] = [
   { name: 'WEtech Alliance', role: 'Technology and Innovation Ecosystem Partner', url: 'https://www.wetech-alliance.com/', logo: '/images/partners/wetech-alliance.png' },
-  { name: 'Research and Innovation Office', role: 'University of Windsor, Institutional Research Partner', url: 'https://www.uwindsor.ca/research/', logo: '/images/partners/uwindsor.png' },
+  { name: 'Research and Innovation Office', role: 'University of Windsor, Institutional Research Partner', url: 'https://www.uwindsor.ca/research/', logo: '/images/partners/research-and-innovation.png' },
   { name: 'UWSA', role: "University of Windsor Students’ Alliance", url: 'https://uwsa.ca/', logo: '/images/partners/uwsa.png' },
   { name: 'GSS', role: 'Graduate Student Society, University of Windsor', url: 'https://uwindsorgss.ca/', logo: '/images/partners/gss.png' },
-  { name: 'Alumni Association', role: 'University of Windsor Alumni Association', url: 'https://www.uwindsor.ca/alumni/', logo: '/images/partners/uwindsor.png' },
+  { name: 'Alumni Association', role: 'University of Windsor Alumni Association', url: 'https://www.uwindsor.ca/alumni/', logo: '/images/partners/uwindsor-alumni-association.png' },
   { name: 'Student Centre', role: 'University of Windsor Student Centre', url: 'https://www.uwsa.ca/student-centre', logo: '/images/partners/uwsa.png' },
   { name: 'Picsume', role: 'Corporate Sponsor and Startup Ecosystem Supporter', url: 'https://www.picsume.com/', logo: '/images/partners/picsume.png' },
   { name: 'City of Windsor', role: 'Municipal Government Partner', url: 'https://www.citywindsor.ca/', logo: '/images/partners/city-of-windsor.png' },
@@ -21,13 +21,15 @@ export const PARTNERS: Partner[] = [
 
 // This year's partners and sponsors, as confirmed by the owner. FRCT (Averti Institute's Cyber First Aid programme)
 // sponsors the bootcamp workshops, Grayfel Technologies the Ticket Jar prize and Offshoot Initiative the People's
-// Choice Award. Grayfel's logo is still to come.
+// Choice Award. Grayfel's logo is still to come. Enactus Windsor's is the chapter's reversed logo with its white
+// lettering turned Enactus grey, as the boxes are white.
 export const CURRENT_PARTNERS: Partner[] = [
   { name: 'Fusion', url: 'https://www.uwindsor.ca/fusion/', logo: '/images/partners/fusion.png' },
   { name: 'Sterling Cybersecurity and Advisory Group', url: 'https://www.sterlinginfo.com/', logo: '/images/partners/sterling-cybersecurity-advisory-group.png' },
   { name: 'FRCT', url: 'https://www.averti.institute/frct.html', logo: '/images/partners/frct.png' },
   { name: 'Grayfel Technologies Inc.', url: 'https://grayfeltechnologiesinc.ca/' },
   { name: 'Offshoot Initiative', url: '', logo: '/images/partners/offshoot-initiative.svg' },
+  { name: 'Enactus Windsor', url: 'https://www.enactuswindsor.ca/', logo: '/images/partners/enactus.png' },
 ]
 
 // The site-wide "Supported by" logo strip under every page (App.tsx). Set to false to hide it.

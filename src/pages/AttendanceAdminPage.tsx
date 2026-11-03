@@ -16,9 +16,16 @@ type Attendee = {
 type Registration = { id: string; attendeeId: string; eventId: string; status: RegistrationStatus; createdAt?: string }
 type Checkin = { id: string; registrationId: string; checkedInAt: string }
 type Delivery = { id: string; attendeeId: string; eventId?: string; type?: string; kind?: string; status: string; lastError?: string; error?: string; attempts?: number }
-type Dashboard = { events: EventRecord[]; attendees: Attendee[]; registrations: Registration[]; deliveries: Delivery[]; checkins: Checkin[]; canViewSupport: boolean }
+// The emails to a whole event's list, which wait for an organiser's approval (ATT_REVIEWED in Attendance.gs).
+type EmailType = 'reminder' | 'thanks' | 'missed' | 'update' | 'eventCancelled'
+type BatchState = 'waiting' | 'needsApproval' | 'approved' | 'sending' | 'sent' | 'declined' | 'closed' | 'automatic'
+type EmailBatch = { eventId: string; title: string; type: EmailType; name: string; dueAt: string; state: BatchState; decidedAt: string; counts: Record<string, number>; expected: number | null }
+type Reader = { id: string; name: string; email: string }
+type EmailPreview = { subject: string; body: string; htmlBody: string; recipient: Reader; recipients: Reader[]; sample: boolean; at: string }
+type Review = { eventId: string; type: EmailType; preview: EmailPreview | null; error: string }
+type Dashboard = { events: EventRecord[]; attendees: Attendee[]; registrations: Registration[]; deliveries: Delivery[]; checkins: Checkin[]; canViewSupport: boolean; reviewing?: boolean; emailBatches?: EmailBatch[] }
 type Row = { registration: Registration; attendee: Attendee; event: EventRecord; checkin?: Checkin }
-type Result = { ok?: boolean; message?: string; notificationRequired?: boolean; queued?: number }
+type Result = { ok?: boolean; message?: string; notificationRequired?: boolean; queued?: number; review?: boolean; held?: number }
 type Filters = { eventIds: string[]; category: string; institution: string; faculty: string; team: string; status: string; search: string }
 
 const CATEGORIES: [string, string][] = [
@@ -163,7 +170,7 @@ function EventEditor({ event, busy, onSave, onUpdate }: { event: EventRecord; bu
       <label className="attendance-admin__check"><input type="checkbox" checked={draft.allowLateRegistration} onChange={e => set('allowLateRegistration', e.target.checked)} /><span>Allow registration after the event begins</span></label>
       <div className="attendance-admin__actions attendance-admin__field--wide"><button className="btn btn--primary" disabled={busy} type="submit">Save event</button></div>
     </form>
-    <div className="attendance-admin__event-notice"><p>After saving a material date, time or venue change, notify affected registrants. The email uses the saved details. Saving a cancelled event automatically queues cancellation emails.</p><button type="button" className="btn btn--outline" disabled={busy || event.status === 'cancelled'} onClick={onUpdate}>Email saved event update</button></div>
+    <div className="attendance-admin__event-notice"><p>After saving a material date, time or venue change, notify affected registrants. The email uses the saved details. Saving a cancelled event automatically queues cancellation emails. Both wait under Review emails until you approve them.</p><button type="button" className="btn btn--outline" disabled={busy || event.status === 'cancelled'} onClick={onUpdate}>Email saved event update</button></div>
   </details>
 }
 
@@ -205,13 +212,72 @@ function WalkInForm({ events, canViewSupport, busy, onSave }: { events: EventRec
   </section>
 }
 
+const BATCH_STATES: Record<BatchState, string> = {
+  waiting: 'Due, waiting for your approval', needsApproval: 'Waiting for your approval', approved: 'Approved', sending: 'Sending',
+  sent: 'Sent', declined: 'Not being sent', closed: 'Too late to send', automatic: 'Sends by itself',
+}
+const BATCH_PLURALS: Record<EmailType, string> = { reminder: 'reminders', thanks: 'thank-you cards', missed: 'missed-you letters', update: 'update emails', eventCancelled: 'cancellation notices' }
+const people = (count: number) => `${count} ${count === 1 ? 'person' : 'people'}`
+const isDue = (batch: EmailBatch) => !batch.dueAt || Date.parse(batch.dueAt) <= Date.now()
+function batchWhen(batch: EmailBatch) {
+  if (!batch.dueAt) return ''
+  if (batch.type === 'update' || batch.type === 'eventCancelled') return `Queued ${displayTime(batch.dueAt)}`
+  return `${isDue(batch) ? 'Was due' : 'Due'} ${displayTime(batch.dueAt)}`
+}
+function batchAudience(batch: EmailBatch) {
+  const queued = ['held', 'pending', 'failed', 'sent'].reduce((total, status) => total + (batch.counts[status] ?? 0), 0)
+  if (batch.state === 'sending') return `Sent to ${batch.counts.sent ?? 0} of ${queued}`
+  if (queued) return people(queued)
+  if (batch.type === 'thanks') return 'Everyone who checks in'
+  if (batch.type === 'missed') return 'Everyone registered who doesn’t come'
+  return batch.expected === null ? '' : `${people(batch.expected)} so far`
+}
+
+/** Emails to a whole event's list, each waiting for an organiser's approval, and the one being looked at, as it will arrive. */
+function EmailReview({ batches, reviewing, busy, review, onOpen, onReader, onClose, onDecide }: { batches?: EmailBatch[]; reviewing?: boolean; busy: boolean; review: Review | null; onOpen: (batch: EmailBatch) => void; onReader: (attendeeId: string) => void; onClose: () => void; onDecide: (batch: EmailBatch, decision: 'approve' | 'decline' | 'undo') => void }) {
+  const [view, setView] = useState<'computer' | 'phone' | 'text'>('computer')
+  const batch = review && batches?.find(item => item.eventId === review.eventId && item.type === review.type)
+  const preview = review?.preview
+  const can = (states: BatchState[]) => reviewing !== false && !!batch && states.includes(batch.state)
+  const canApprove = can(['waiting', 'needsApproval', 'declined'])
+  const canWithdraw = can(['approved', 'sending']) && Boolean(batch?.decidedAt)
+  const canDecline = can(['waiting', 'needsApproval', 'approved'])
+  const reader = preview && (preview.recipient.email ? `${preview.recipient.name} (${preview.recipient.email})` : preview.recipient.name)
+  return <>
+    <section className="attendance-admin__panel" aria-labelledby="review-heading">
+      <h2 id="review-heading">Review emails</h2>
+      <p>{reviewing === false ? 'Email review is off, so these emails send by themselves. To approve them first, delete the ATTENDANCE_EMAIL_REVIEW script property in Apps Script.' : 'Emails to a whole event’s list wait here until you approve them: reminders, thank-you cards, missed-you letters, event updates and cancellation notices. You can approve one any time before it’s due. If one comes due without your approval, the organisers’ inbox gets an email about it. Emails answering one person, like a confirmation or sign-in link, still go straight away.'}</p>
+      {!batches ? <p className="attendance-admin__empty">Publish a new version of the attendance script to review emails here.</p> : !batches.length ? <p className="attendance-admin__empty">No emails coming up.</p> : <div className="attendance-admin__table-wrap" role="region" aria-label="Emails to review" tabIndex={0}><table><thead><tr><th scope="col">Email</th><th scope="col">Event</th><th scope="col">When</th><th scope="col">Who</th><th scope="col">Status</th><th scope="col"><span className="visually-hidden">Review</span></th></tr></thead><tbody>{batches.map(item => <tr key={`${item.eventId}:${item.type}`}><th scope="row">{item.name}</th><td>{item.title}</td><td>{batchWhen(item)}</td><td>{batchAudience(item)}</td><td><span className={`attendance-admin__status attendance-admin__status--plain attendance-admin__status--${item.state}`}>{BATCH_STATES[item.state]}</span></td><td><button type="button" className="btn btn--outline attendance-admin__checkin" aria-label={`Review ${item.title}’s ${BATCH_PLURALS[item.type]}`} aria-pressed={review?.eventId === item.eventId && review.type === item.type} onClick={() => onOpen(item)}>Review</button></td></tr>)}</tbody></table></div>}
+    </section>
+    {review && batch && <section className="attendance-admin__panel attendance-admin__review" aria-labelledby="review-preview">
+      <div className="attendance-admin__section-head"><div><h2 id="review-preview">{batch.name}: {batch.title}</h2><p>{[batchWhen(batch), batchAudience(batch), BATCH_STATES[batch.state]].filter(Boolean).join(' · ')}</p></div><button type="button" className="attendance-admin__text-button" onClick={onClose}>Close</button></div>
+      {review.error ? <p role="alert" className="attendance-admin__error">{review.error}</p> : !preview ? <p role="status" className="attendance-admin__loading">Loading the email…</p> : <>
+        <dl className="attendance-admin__review-meta">
+          <div><dt>To</dt><dd>{preview.sample ? `An example copy for ${reader}. Nobody is due to get it yet.` : reader}</dd></div>
+          <div><dt>Subject</dt><dd>{preview.subject}</dd></div>
+        </dl>
+        {preview.recipients.length > 1 && <Field label={`Show the copy for (${people(preview.recipients.length)} in all)`}><select value={preview.recipient.id} onChange={event => onReader(event.target.value)}>{preview.recipients.map(item => <option key={item.id} value={item.id}>{item.name} ({item.email})</option>)}</select></Field>}
+        <div className="attendance-admin__actions attendance-admin__review-views" role="group" aria-label="Show it as">{([['computer', 'Computer'], ['phone', 'Phone'], ['text', 'Plain text']] as const).map(([value, label]) => <button key={value} type="button" className="btn btn--outline" aria-pressed={view === value} onClick={() => setView(value)}>{label}</button>)}</div>
+        {view === 'text' ? <pre className="attendance-admin__review-text">{preview.body}</pre> : <iframe key={`${view}:${preview.recipient.id}`} title={`${batch.name} for ${batch.title}, as ${preview.recipient.name} will see it`} className={`attendance-admin__review-frame${view === 'phone' ? ' attendance-admin__review-frame--phone' : ''}`} sandbox="allow-same-origin" srcDoc={preview.htmlBody} onLoad={event => { const frame = event.currentTarget, height = frame.contentDocument?.documentElement.scrollHeight; if (height) frame.style.height = `${height}px` }} />}
+        <p className="attendance-admin__muted">Links are switched off in this preview. Each person’s copy has their own name and secure link{batch.type === 'thanks' || batch.type === 'missed' ? ', and only those who said yes to updates get the invite to the next event' : ''}.</p>
+        {reviewing !== false && <div className="attendance-admin__actions">
+          {canApprove && <button type="button" className="btn btn--primary" disabled={busy} onClick={() => onDecide(batch, 'approve')}>{isDue(batch) ? 'Approve and send now' : `Approve, to send ${displayTime(batch.dueAt)}`}</button>}
+          {canWithdraw && <button type="button" className="btn btn--outline" disabled={busy} onClick={() => onDecide(batch, 'undo')}>Withdraw approval</button>}
+          {canDecline && <button type="button" className="btn btn--outline" disabled={busy} onClick={() => onDecide(batch, 'decline')}>Don’t send</button>}
+        </div>}
+      </>}
+    </section>}
+  </>
+}
+
 export default function AttendanceAdminPage() {
   const [data, setData] = useState<Dashboard | null>(null)
   const [pending, setPending] = useState('initial')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
-  const [tab, setTab] = useState<'roster' | 'events' | 'walkin' | 'email'>('roster')
+  const [tab, setTab] = useState<'roster' | 'events' | 'walkin' | 'review' | 'email'>('roster')
+  const [review, setReview] = useState<Review | null>(null)
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [showSupport, setShowSupport] = useState(false)
   const [exportSupport, setExportSupport] = useState(false)
@@ -236,10 +302,27 @@ export default function AttendanceAdminPage() {
     setPending(action); setError(''); setNotice('')
     try {
       const result = await api<Result>(action, body)
-      setNotice(`${action === 'sendUpdate' && result.queued !== undefined ? `${result.queued} event update emails queued.` : message}${result.notificationRequired ? ' The schedule or venue changed. Use “Email saved event update” to notify affected registrants.' : ''}`)
+      setNotice(`${action === 'sendUpdate' && result.queued !== undefined ? `${result.queued} event update emails ${result.review ? 'are waiting for your approval below.' : 'queued.'}` : message}${result.notificationRequired ? ' The schedule or venue changed. Use “Email saved event update” to notify affected registrants.' : ''}${result.held ? ` ${result.held} cancellation ${result.held === 1 ? 'notice is' : 'notices are'} waiting for your approval below.` : ''}`)
       try { setData(await api<Dashboard>('admin')) } catch (failure) { handleError(failure); setNotice(`${message} Refresh the dashboard to see the latest records.`) }
       return result
     } catch (failure) { handleError(failure); return null } finally { setPending('') }
+  }
+  // The email is drawn by the attendance script, so the preview is exactly what will be sent.
+  async function openReview(eventId: string, type: EmailType, attendeeId?: string) {
+    const same = (current: Review) => current.eventId === eventId && current.type === type
+    setReview(current => ({ eventId, type, preview: current && same(current) ? current.preview : null, error: '' }))
+    try {
+      const preview = await api<EmailPreview>('reviewEmail', { eventId, type, ...(attendeeId ? { attendeeId } : {}) })
+      setReview(current => current && same(current) ? { ...current, preview } : current)
+    } catch (failure) {
+      if (failure instanceof RequestError && failure.status === 401) { handleError(failure); return }
+      setReview(current => current && same(current) ? { ...current, error: failure instanceof Error ? failure.message : 'The email could not be shown. Please try again.' } : current)
+    }
+  }
+  function decide(batch: EmailBatch, decision: 'approve' | 'decline' | 'undo') {
+    const emails = `${batch.title}’s ${BATCH_PLURALS[batch.type]}`
+    const message = decision === 'approve' ? `Approved: ${emails} ${isDue(batch) ? 'are going out now.' : `will go out ${displayTime(batch.dueAt)}.`}` : decision === 'decline' ? `${emails} won’t be sent.` : `Approval withdrawn: ${emails} will wait for you again.`
+    void mutate('decideEmail', { eventId: batch.eventId, type: batch.type, decision }, message)
   }
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setPending('login'); setError(''); setNotice('')
@@ -268,6 +351,7 @@ export default function AttendanceAdminPage() {
   const counts = { confirmed: filtered.filter(row => row.registration.status === 'confirmed').length, waitlisted: filtered.filter(row => row.registration.status === 'waitlisted').length, offered: filtered.filter(row => row.registration.status === 'offered').length, cancelled: filtered.filter(row => row.registration.status === 'cancelled').length, checkedIn: filtered.filter(row => row.checkin).length }
   const optionValues = (field: 'institution' | 'faculty' | 'team') => [...new Set(rows.map(({ attendee }) => field === 'team' ? attendee.teamName || attendee.organisation : attendee[field]).filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b))
   const failures = data?.deliveries.filter(delivery => delivery.status === 'failed' || delivery.status === 'pending' && (delivery.lastError || delivery.error)) ?? []
+  const toApprove = data?.emailBatches?.filter(batch => batch.state === 'waiting' || batch.state === 'needsApproval').length ?? 0
   const busy = Boolean(pending)
   const setFilter = (key: keyof Filters, value: string | string[]) => setFilters(previous => ({ ...previous, [key]: value }))
 
@@ -278,7 +362,7 @@ export default function AttendanceAdminPage() {
     {error && <div ref={errorRef} tabIndex={-1} role="alert" className="attendance-admin__error">{error}</div>}
     <div role="status" aria-live="polite" className={notice ? 'attendance-admin__notice' : 'visually-hidden'}>{notice}</div>
     {pending === 'initial' || !data ? <section className="attendance-admin__login" aria-labelledby="organiser-login"><h1 id="organiser-login">Organiser sign in</h1>{pending === 'initial' ? <p role="status" className="attendance-admin__loading">Checking organiser access…</p> : <><p>Use your organiser password. Dietary and accessibility details need separate support access.</p><form onSubmit={login}><Field label="Organiser password"><input type="password" required autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} /></Field><button className="btn btn--primary" disabled={busy} type="submit">{pending === 'login' ? 'Signing in…' : 'Sign in'}</button></form><a href="/attend">Go to public event registration</a></>}</section> : <>
-      <nav className="attendance-admin__nav" aria-label="Attendance dashboard sections">{([['roster', 'Rosters & reports'], ['walkin', 'Record a walk-in'], ['events', 'Manage events'], ['email', `Email delivery${failures.length ? ` (${failures.length} ${failures.length === 1 ? 'issue' : 'issues'})` : ''}`]] as const).map(([value, label]) => <button key={value} type="button" aria-current={tab === value ? 'page' : undefined} onClick={() => setTab(value)}>{label}</button>)}</nav>
+      <nav className="attendance-admin__nav" aria-label="Attendance dashboard sections">{([['roster', 'Rosters & reports'], ['walkin', 'Record a walk-in'], ['events', 'Manage events'], ['review', `Review emails${toApprove ? ` (${toApprove} to approve)` : ''}`], ['email', `Email delivery${failures.length ? ` (${failures.length} ${failures.length === 1 ? 'issue' : 'issues'})` : ''}`]] as const).map(([value, label]) => <button key={value} type="button" aria-current={tab === value ? 'page' : undefined} onClick={() => setTab(value)}>{label}</button>)}</nav>
       {tab === 'roster' && <>
         <section className="attendance-admin__panel" aria-labelledby="roster-filters"><div className="attendance-admin__section-head"><h2 id="roster-filters">Find your attendees</h2><button type="button" className="attendance-admin__text-button" onClick={() => setFilters(EMPTY_FILTERS)}>Reset filters</button></div>
           <div className="attendance-admin__filters"><Field label="Search names, emails, teams or organisations" wide><input type="search" value={filters.search} onChange={e => setFilter('search', e.target.value)} placeholder="Start typing to search" /></Field><Field label="Category"><select value={filters.category} onChange={e => setFilter('category', e.target.value)}><option value="">All categories</option>{CATEGORIES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>{(['institution', 'faculty', 'team'] as const).map(key => <Field key={key} label={key === 'team' ? 'Team / organisation' : key === 'faculty' ? 'Faculty / area of study' : 'Institution'}><select value={filters[key]} onChange={e => setFilter(key, e.target.value)}><option value="">All {key === 'team' ? 'teams / organisations' : key === 'faculty' ? 'faculties / areas' : 'institutions'}</option>{optionValues(key).map(value => <option key={value}>{value}</option>)}</select></Field>)}<Field label="Registration / check-in status"><select value={filters.status} onChange={e => setFilter('status', e.target.value)}><option value="">All statuses</option><option value="confirmed">Confirmed</option><option value="waitlisted">Waitlisted</option><option value="offered">Seat offered</option><option value="cancelled">Cancelled</option><option value="checked-in">Actually checked in</option></select></Field></div>
@@ -293,9 +377,10 @@ export default function AttendanceAdminPage() {
           {!filtered.length ? <p className="attendance-admin__empty">No registrations match these filters.</p> : <div className="attendance-admin__table-wrap" role="region" aria-label="Attendee roster" tabIndex={0}><table><thead><tr><th scope="col">Attendee</th><th scope="col">Category / affiliation</th><th scope="col">Event</th><th scope="col">Registration</th><th scope="col">Actual attendance</th>{data.canViewSupport && showSupport && <th scope="col">Attendance support</th>}</tr></thead><tbody>{filtered.map(({ registration, attendee, event, checkin }) => <tr key={registration.id}><th scope="row"><strong>{personName(attendee)}</strong><span className="attendance-admin__table-detail">{attendee.email}</span>{(attendee.teamName || attendee.organisation) && <span className="attendance-admin__table-detail">{attendee.teamName || attendee.organisation}</span>}</th><td>{categoryLabel(attendee.category)}{attendee.institution && <span className="attendance-admin__table-detail">{attendee.institution}</span>}{attendee.faculty && <span className="attendance-admin__table-detail">{attendee.faculty}</span>}</td><td>{event.title}<span className="attendance-admin__table-detail">{displayTime(event.startsAt)}</span></td><td><Status status={registration.status} /></td><td>{checkin ? <><strong className="attendance-admin__checked">Checked in</strong><span className="attendance-admin__table-detail">{displayTime(checkin.checkedInAt)}</span></> : registration.status === 'confirmed' && event.status !== 'cancelled' ? <button type="button" disabled={busy} className="btn btn--outline attendance-admin__checkin" aria-label={`Check in ${personName(attendee)} for ${event.title}`} onClick={() => mutate('checkIn', { registrationId: registration.id }, `${personName(attendee)} checked in for ${event.title}.`)}>Check in</button> : <span className="attendance-admin__muted">Not checked in</span>}</td>{data.canViewSupport && showSupport && <td><span className="attendance-admin__table-detail"><strong>Dietary:</strong> {attendee.dietary || 'Not supplied'}</span><span className="attendance-admin__table-detail"><strong>Accessibility:</strong> {attendee.accessibility || 'Not supplied'}</span></td>}</tr>)}</tbody></table></div>}
         </section>
       </>}
-      {tab === 'events' && <section aria-labelledby="manage-events"><div className="attendance-admin__section-head"><div><h2 id="manage-events">Manage event details</h2><p>Leave capacity blank until a venue limit is confirmed. Registration closes at the start unless late registration is enabled.</p></div></div>{data.events.map(event => <EventEditor key={event.id} event={event} busy={busy} onSave={updated => mutate('saveEvent', { event: updated }, 'Event details saved.')} onUpdate={() => { void mutate('sendUpdate', { eventId: event.id }, `Event update queued for ${event.title}.`) }} />)}</section>}
+      {tab === 'events' && <section aria-labelledby="manage-events"><div className="attendance-admin__section-head"><div><h2 id="manage-events">Manage event details</h2><p>Leave capacity blank until a venue limit is confirmed. Registration closes at the start unless late registration is enabled.</p></div></div>{data.events.map(event => <EventEditor key={event.id} event={event} busy={busy} onSave={updated => mutate('saveEvent', { event: updated }, 'Event details saved.').then(result => { if (result?.held) { setTab('review'); void openReview(event.id, 'eventCancelled') } return result })} onUpdate={() => { void mutate('sendUpdate', { eventId: event.id }, `Event update queued for ${event.title}.`).then(result => { if (result?.review) { setTab('review'); void openReview(event.id, 'update') } }) }} />)}</section>}
+      {tab === 'review' && <EmailReview batches={data.emailBatches} reviewing={data.reviewing} busy={busy} review={review} onOpen={batch => { void openReview(batch.eventId, batch.type) }} onReader={attendeeId => { if (review) void openReview(review.eventId, review.type, attendeeId) }} onClose={() => setReview(null)} onDecide={decide} />}
       {tab === 'walkin' && <WalkInForm events={data.events} canViewSupport={data.canViewSupport} busy={busy} onSave={body => mutate('walkIn', body, 'Walk-in saved. Confirmed event registrations have been checked in; review any waitlisted events in the roster.')} />}
-      {tab === 'email' && <section className="attendance-admin__panel" aria-labelledby="delivery-heading"><h2 id="delivery-heading">Email delivery</h2><p>Failed emails do not remove registrations. Retrying sends the recorded message without creating another registration. Blocked pending messages are listed here too; configuration issues require the site maintainer.</p><div className="attendance-admin__delivery-counts">{['pending', 'sent', 'failed', 'skipped'].map(status => <span key={status}><strong>{data.deliveries.filter(delivery => delivery.status === status).length}</strong> <span>{status[0].toUpperCase() + status.slice(1)}</span></span>)}</div>{!failures.length ? <p className="attendance-admin__empty">No delivery issues.</p> : <div className="attendance-admin__table-wrap" role="region" aria-label="Email delivery issues" tabIndex={0}><table><thead><tr><th scope="col">Recipient</th><th scope="col">Message</th><th scope="col">Delivery issue</th><th scope="col">Action</th></tr></thead><tbody>{failures.map(delivery => { const attendee = data.attendees.find(person => person.id === delivery.attendeeId); const event = data.events.find(item => item.id === delivery.eventId); return <tr key={delivery.id}><th scope="row">{attendee ? personName(attendee) : 'Recipient'}<span className="attendance-admin__table-detail">{attendee?.email}</span></th><td>{delivery.type || delivery.kind || 'Event email'}{event && <span className="attendance-admin__table-detail">{event.title}</span>}</td><td><Status status={delivery.status} /><span className="attendance-admin__table-detail">{delivery.lastError || delivery.error || 'Delivery failed. Retry or check the email service configuration.'}</span>{delivery.attempts !== undefined && <span className="attendance-admin__table-detail">{delivery.attempts} {delivery.attempts === 1 ? 'attempt' : 'attempts'}</span>}</td><td><button type="button" className="btn btn--outline" disabled={busy} onClick={() => mutate('retryEmail', { deliveryId: delivery.id }, 'Email queued for another delivery attempt.')}>Retry email</button></td></tr> })}</tbody></table></div>}</section>}
+      {tab === 'email' && <section className="attendance-admin__panel" aria-labelledby="delivery-heading"><h2 id="delivery-heading">Email delivery</h2><p>Failed emails do not remove registrations. Retrying sends the recorded message without creating another registration. Blocked pending messages are listed here too; configuration issues require the site maintainer.</p><div className="attendance-admin__delivery-counts">{['held', 'pending', 'sent', 'failed', 'skipped'].map(status => <span key={status}><strong>{data.deliveries.filter(delivery => delivery.status === status).length}</strong> <span>{status === 'held' ? 'Waiting for approval' : status[0].toUpperCase() + status.slice(1)}</span></span>)}</div>{!failures.length ? <p className="attendance-admin__empty">No delivery issues.</p> : <div className="attendance-admin__table-wrap" role="region" aria-label="Email delivery issues" tabIndex={0}><table><thead><tr><th scope="col">Recipient</th><th scope="col">Message</th><th scope="col">Delivery issue</th><th scope="col">Action</th></tr></thead><tbody>{failures.map(delivery => { const attendee = data.attendees.find(person => person.id === delivery.attendeeId); const event = data.events.find(item => item.id === delivery.eventId); return <tr key={delivery.id}><th scope="row">{attendee ? personName(attendee) : 'Recipient'}<span className="attendance-admin__table-detail">{attendee?.email}</span></th><td>{delivery.type || delivery.kind || 'Event email'}{event && <span className="attendance-admin__table-detail">{event.title}</span>}</td><td><Status status={delivery.status} /><span className="attendance-admin__table-detail">{delivery.lastError || delivery.error || 'Delivery failed. Retry or check the email service configuration.'}</span>{delivery.attempts !== undefined && <span className="attendance-admin__table-detail">{delivery.attempts} {delivery.attempts === 1 ? 'attempt' : 'attempts'}</span>}</td><td><button type="button" className="btn btn--outline" disabled={busy} onClick={() => mutate('retryEmail', { deliveryId: delivery.id }, 'Email queued for another delivery attempt.')}>Retry email</button></td></tr> })}</tbody></table></div>}</section>}
     </>}
   </div></div>
 }

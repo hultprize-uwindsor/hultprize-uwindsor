@@ -276,14 +276,13 @@ assert.equal(context.attFollowUpAt_('thanks', { endsAt: '2026-11-07T17:20:00Z' }
 assert.equal(context.attFollowUpAt_('missed', info), Date.parse('2026-10-30T14:00:00Z'), 'Missed-you letters: 10 AM EDT the next morning')
 assert.equal(context.attFollowUpAt_('missed', { endsAt: '2026-10-31T23:00:00Z' }), Date.parse('2026-11-01T15:00:00Z'), '10 AM EST on the morning the clocks go back')
 assert.equal(context.attFollowUpAt_('missed', { endsAt: '2026-11-14T03:50:00Z' }), Date.parse('2026-11-14T15:00:00Z'), 'A night that ends at 10:50 PM gets its letter the next morning')
-now = Date.parse('2026-10-29T23:01:00Z'); context.attendanceMaintenance()
-assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, 0, 'Automatic follow-ups stay off until ATTENDANCE_FOLLOW_UP_MODE is auto')
-props.ATTENDANCE_FOLLOW_UP_MODE = 'auto'
 now = Date.parse('2026-10-29T22:59:00Z'); context.attendanceMaintenance()
 assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, 0, 'No cards before 7 PM')
+const mailedBeforeCards = mailed.length
 now = Date.parse('2026-10-29T23:01:00Z'); context.attendanceMaintenance()
 const checkedIn = db().checkins.filter(row => row.eventId === 'info-session-1')
 assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, checkedIn.length, 'One card per check-in, walk-ins included')
+assert(db().deliveries.filter(row => row.type === 'thanks').every(row => row.status === 'held') && !mailed.slice(mailedBeforeCards).some(mail => /^Thank you for coming/.test(mail.subject)), 'Cards wait for an organiser\'s approval, so pasting the script never emails attendees by itself')
 assert(db().deliveries.filter(row => row.type === 'thanks').every(row => checkedIn.some(checkin => checkin.registrationId === row.registrationIds[0])), 'Only checked-in attendees get a card')
 context.attendanceMaintenance()
 assert.equal(db().deliveries.filter(row => row.type === 'thanks').length, checkedIn.length, 'Thank-you uniqueness')
@@ -557,9 +556,88 @@ now = Date.parse('2026-11-08T01:00:00Z'); quiet(() => context.sendFollowUpsForLa
 const caughtUp = db().deliveries.filter(row => row.type === 'thanks' && row.eventId === 'workshop-1')
 assert.equal(caughtUp.length, 1, 'A manual catch-up queues the latest event that has ended')
 assert.equal(caughtUp[0].manual, true)
+assert.notEqual(caughtUp[0].status, 'held', 'Running the catch-up approves what it queues')
 assert.equal(db().deliveries.filter(row => row.type === 'missed' && row.eventId === 'workshop-1').length, 0, 'Missed-you letters for it are not due until 10 AM')
 now = beforeThanks
-delete props.ATTENDANCE_FOLLOW_UP_MODE
+
+// Emails to a whole event's list wait for an organiser's approval, which can be given ahead and lapses on a change.
+{
+  model = db()
+  const at = iso => Date.parse(iso), w1 = () => model.events.find(event => event.id === 'workshop-1')
+  const batch = (eventId, type, when) => context.attEmailBatches_(model, when).find(item => item.eventId === eventId && item.type === type)
+  const reminders = () => model.deliveries.filter(row => row.type === 'reminder' && row.eventId === 'workshop-1')
+  const ahead = at('2026-11-05T12:00:00Z'), due = at('2026-11-06T15:01:00Z')
+  assert(batch('workshop-1', 'reminder', ahead).state === 'needsApproval' && batch('workshop-1', 'reminder', ahead).expected > 0 && !reminders().length, 'Listed before it is due, with who it would go to, and nothing queued')
+  assert.equal(batch('workshop-1', 'reminder', ahead).dueAt, '2026-11-06T15:00:00.000Z', 'A reminder is due a day before its event')
+  context.attDecide_(model, w1(), 'reminder', 'approve', ahead)
+  assert.equal(batch('workshop-1', 'reminder', ahead).state, 'approved')
+  assert(context.attEvents_(model, ahead).every(event => !('emailReview' in event)), 'Organisers\' decisions stay off the public schedule')
+  context.attMaintenance_(model, due)
+  assert(reminders().length > 0 && reminders().every(row => row.status === 'pending'), 'An approval given ahead lets the reminders go when they are due')
+  assert.equal(batch('workshop-1', 'reminder', due).state, 'sending')
+  // A preview is the email itself, for a real reader, and saves nothing: not even the secure link it creates.
+  const tokens = model.tokens.length, saved = JSON.stringify(model.deliveries)
+  const preview = context.attPreview_(model, w1(), 'reminder', undefined, due)
+  assert(preview.subject === 'Reminder: Workshop 1: Problem, Insight & Story' && preview.htmlBody.includes('See you soon!') && !preview.sample, 'The preview is the reminder itself')
+  assert.equal(preview.recipients.length, reminders().length, 'It names everyone it goes to')
+  assert(model.tokens.length === tokens && JSON.stringify(model.deliveries) === saved, 'A preview saves nothing')
+  if (preview.recipients.length > 1) assert.equal(context.attPreview_(model, w1(), 'reminder', preview.recipients[1].id, due).recipient.id, preview.recipients[1].id, 'Any reader\'s copy can be shown')
+  assert(!model.checkins.some(row => row.eventId === 'workshop-2'), 'Fixture: nobody has checked in to Workshop 2')
+  const card = context.attPreview_(model, model.events.find(event => event.id === 'workshop-2'), 'thanks', undefined, ahead)
+  assert(card.sample && /^Thank you for coming to Workshop 2/.test(card.subject) && model.checkins.length === db().checkins.length, 'Before anyone has checked in, a card is shown as an example, without saving a check-in')
+  // Changing what the email says lapses the approval and holds what hasn't gone; a moved reminder is dropped.
+  context.attHandle_(model, { action: 'saveEvent', event: { ...w1(), venue: 'A new room, second floor' }, actor: admin }, due + 60000)
+  assert(reminders().every(row => row.status === 'held') && batch('workshop-1', 'reminder', due + 60000).state === 'waiting', 'A change to the event holds an approved email again')
+  assert.equal(context.attHandle_(model, { action: 'saveEvent', event: { ...w1(), capacity: w1().capacity }, actor: admin }, due + 70000).ok, true)
+  context.attDecide_(model, w1(), 'reminder', 'approve', due + 80000)
+  context.attHandle_(model, { action: 'saveEvent', event: { ...w1(), status: 'full' }, actor: admin }, due + 90000)
+  assert(reminders().every(row => row.status === 'pending'), 'A change the email doesn\'t show leaves the approval standing')
+  // Declining, approving again, withdrawing.
+  context.attDecide_(model, w1(), 'reminder', 'decline', due + 100000)
+  assert(reminders().every(row => row.status === 'skipped' && row.lastError === context.ATT_DECLINED) && batch('workshop-1', 'reminder', due + 100000).state === 'declined')
+  context.attDecide_(model, w1(), 'reminder', 'approve', due + 110000)
+  assert(reminders().every(row => row.status === 'pending'), 'A declined email can still be approved')
+  context.attDecide_(model, w1(), 'reminder', 'undo', due + 120000)
+  assert(reminders().every(row => row.status === 'held'), 'Withdrawing an approval holds what hasn\'t gone')
+  // Nobody approved it in time: one note to the organisers (the tester in test mode), only once.
+  const mailedBefore = mailed.length
+  context.attNudge_(model, due + 130000); context.attNudge_(model, due + 140000)
+  const nudges = mailed.slice(mailedBefore)
+  assert(nudges.length === 1 && nudges[0].to === 'mail@example.invalid' && /waiting for your approval$/.test(nudges[0].subject) && nudges[0].body.includes('Reminder for Workshop 1: Problem, Insight & Story') && nudges[0].body.includes('https://hultprizeuwindsor.ca/organiser/events'), 'A due email nobody approved is flagged to the organisers once')
+  assert.throws(() => context.attHandle_(model, { action: 'decideEmail', eventId: 'workshop-1', type: 'reminder', decision: 'approve', actor: admin }, at('2026-11-07T15:01:00Z')), /has started/, 'A reminder can\'t be approved once its event has begun')
+  assert.equal(batch('workshop-1', 'reminder', at('2026-11-07T15:01:00Z')).state, 'closed')
+  // A card approved after its evening still goes, as someone chose to send it.
+  const info = model.events.find(event => event.id === 'info-session-1'), late = at('2026-10-31T12:00:00Z')
+  context.attDecide_(model, info, 'thanks', 'approve', late)
+  const lateCard = model.deliveries.find(row => row.type === 'thanks' && row.eventId === 'info-session-1')
+  assert(lateCard.status === 'pending' && lateCard.manual === true && context.attEmail_(model, lateCard, late), 'An approved card goes even after its evening')
+  // A newer update replaces one still waiting, so nobody gets both.
+  const w5 = () => model.events.find(event => event.id === 'workshop-5'), updates = () => model.deliveries.filter(row => row.type === 'update' && row.eventId === 'workshop-5')
+  assert(updates().length > 0 && updates().every(row => row.status === 'held'), 'Event updates wait for approval too')
+  context.attHandle_(model, { action: 'saveEvent', event: { ...w5(), venue: 'Another full venue' }, actor: admin }, late)
+  context.attHandle_(model, { action: 'sendUpdate', eventId: 'workshop-5', actor: admin }, late)
+  const newest = 'update:workshop-5:' + w5().revision + ':'
+  assert(updates().filter(row => row.status === 'held').every(row => row.key.startsWith(newest)) && updates().some(row => row.lastError === 'Replaced by a newer update.'), 'Only the newest update waits')
+  // A cancellation notice waits too; personal emails never do.
+  assert(model.deliveries.filter(row => row.type === 'eventCancelled').every(row => row.status === 'held'), 'Cancellation notices wait for approval')
+  assert(model.deliveries.filter(row => ['confirmation', 'management', 'offer', 'offerExpired', 'cancellation'].includes(row.type)).every(row => row.status !== 'held'), 'Emails answering one person never wait')
+  // With review off, everything sends by itself.
+  props.ATTENDANCE_EMAIL_REVIEW = 'off'
+  const automatic = db(); context.attMaintenance_(automatic, due)
+  assert(automatic.deliveries.filter(row => row.type === 'reminder' && row.eventId === 'workshop-1').every(row => row.status === 'pending') && context.attEmailBatches_(automatic, ahead).find(item => item.eventId === 'founders-panel' && item.type === 'reminder').state === 'automatic', 'ATTENDANCE_EMAIL_REVIEW=off sends them by themselves')
+  delete props.ATTENDANCE_EMAIL_REVIEW
+}
+// Through the web app: the preview is for organisers, changes nothing and sends nothing; approving releases the emails.
+{
+  const tokens = db().tokens.length, saved = JSON.stringify(db().deliveries), mailedBefore = mailed.length
+  const shown = call('reviewEmail', { eventId: 'workshop-5', type: 'update' }, admin)
+  assert(shown.ok && shown.subject.startsWith('Event update: ') && shown.recipients.length > 0, 'The preview comes back to the dashboard')
+  assert(db().tokens.length === tokens && JSON.stringify(db().deliveries) === saved && mailed.length === mailedBefore, 'Previewing saves and sends nothing')
+  assert.equal(call('reviewEmail', { eventId: 'workshop-5', type: 'update' }).code, 'unauthorized')
+  assert(call('admin', {}, admin).emailBatches.some(item => item.eventId === 'workshop-5' && item.type === 'update' && item.state === 'waiting'), 'The dashboard lists what is waiting')
+  assert.equal(call('decideEmail', { eventId: 'workshop-5', type: 'update', decision: 'approve' }, admin).ok, true)
+  assert(db().deliveries.filter(row => row.type === 'update' && row.eventId === 'workshop-5').every(row => row.status !== 'held'), 'Approving releases them')
+}
 
 const csv = rosterCsv({ events: seed, attendees: [{ id: 'a', firstName: '=HYPERLINK("malicious")', email: '+malicious@example.invalid', category: 'community', dietary: 'SECRET SUPPORT' }], registrations: [{ id: 'r', attendeeId: 'a', eventId: 'info-session-1', status: 'confirmed' }], checkins: [] })
 assert(csv.includes("'=HYPERLINK")); assert(!csv.includes('SECRET SUPPORT'))
@@ -585,6 +663,12 @@ assert.equal(login.status, 200); assert.equal(login.body.canViewSupport, false)
 assert(login.headers['Set-Cookie'].includes('HttpOnly; SameSite=Strict'))
 assert(login.headers['Set-Cookie'].includes('; Secure'))
 assert.equal((await invoke('login', { password: 'wrong' })).status, 401)
+const organiser = { cookie: login.headers['Set-Cookie'].split(';')[0] }, forwardedBeforeReview = forwarded
+assert.equal((await invoke('reviewEmail', { eventId: 'workshop-5', type: 'update' })).status, 401, 'Only organisers can preview emails')
+assert.equal((await invoke('decideEmail', { eventId: 'workshop-5', type: 'confirmation', decision: 'approve' }, { headers: organiser })).status, 400, 'Only emails to a whole list are approved')
+assert.equal((await invoke('decideEmail', { eventId: 'workshop-5', type: 'update', decision: 'send' }, { headers: organiser })).status, 400)
+assert.equal((await invoke('reviewEmail', { eventId: 'workshop-5', type: 'update', attendeeId: '../x' }, { headers: organiser })).status, 400)
+assert.equal(forwarded, forwardedBeforeReview, 'Rejected review requests never reach the script')
 const supportLogin = await invoke('login', { password: env.ATTENDANCE_SUPPORT_PASSWORD })
 assert.equal(supportLogin.body.canViewSupport, true)
 assert.equal((await invoke('admin', {}, { method: 'GET', headers: { cookie: supportLogin.headers['Set-Cookie'].split(';')[0] } })).body.canViewSupport, true)
@@ -607,4 +691,4 @@ assert(db().attendees.every(row => !row.email && !row.firstName && row.anonymize
 assert.equal(db().consents.length, 0); assert.equal(db().tokens.length, 0); assert.equal(db().deliveries.length, 0)
 assert.equal(sheets.get('journal').rows[1][0], '')
 assert.equal(lockHeld, false)
-console.log('Passed attendance validation, mixed selections, duplicate privacy, serialized capacity, lock rejection, FIFO reserved offers/expiry, single-use hashed tokens, ownership, support roles, journal recovery, email guard/failure/retry, DST/calendar content, reminders, thank-you cards and missed-you letters, walk-ins/check-ins, updates/cancellation, CSV safety, proxy auth/CSRF/configuration, and retention. Spreadsheet and MailApp are fully mocked; no live emails or services used.')
+console.log('Passed attendance validation, mixed selections, duplicate privacy, serialized capacity, lock rejection, FIFO reserved offers/expiry, single-use hashed tokens, ownership, support roles, journal recovery, email guard/failure/retry, DST/calendar content, reminders, thank-you cards and missed-you letters, walk-ins/check-ins, updates/cancellation, email review (approval ahead, lapsing on change, decline, withdraw, previews that save nothing, the organiser alert), CSV safety, proxy auth/CSRF/configuration, and retention. Spreadsheet and MailApp are fully mocked; no live emails or services used.')

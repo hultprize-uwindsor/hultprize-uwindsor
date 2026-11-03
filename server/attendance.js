@@ -1,7 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
 const CATEGORIES = ['undergraduate', 'graduate', 'other-student', 'sponsor', 'founder', 'faculty', 'alumni', 'community']
-const ADMIN_ACTIONS = new Set(['admin', 'saveEvent', 'checkIn', 'walkIn', 'retryEmail', 'sendUpdate', 'export'])
+const ADMIN_ACTIONS = new Set(['admin', 'saveEvent', 'checkIn', 'walkIn', 'retryEmail', 'sendUpdate', 'export', 'reviewEmail', 'decideEmail'])
+// The emails to a whole event's list, which wait for an organiser's approval (ATT_REVIEWED in Attendance.gs).
+const REVIEWED = ['reminder', 'thanks', 'missed', 'update', 'eventCancelled']
 const MEMBER_ACTIONS = new Set(['manage', 'updateDetails', 'addEvents', 'cancel'])
 const GET_ACTIONS = new Set(['events', 'manage', 'admin', 'export'])
 const MAX_BODY = 20000
@@ -67,6 +69,10 @@ function validate(body) {
     case 'saveEvent': return validateEvent(body.event) ? { ...out, event: validateEvent(body.event) } : null
     case 'retryEmail': return ID.test(body.deliveryId ?? '') ? { ...out, deliveryId: body.deliveryId } : null
     case 'sendUpdate': return ID.test(body.eventId ?? '') ? { ...out, eventId: body.eventId } : null
+    case 'reviewEmail':
+      if (!ID.test(body.eventId ?? '') || !REVIEWED.includes(body.type) || (body.attendeeId !== undefined && !ID.test(body.attendeeId))) return null
+      return { ...out, eventId: body.eventId, type: body.type, ...(body.attendeeId ? { attendeeId: body.attendeeId } : {}) }
+    case 'decideEmail': return ID.test(body.eventId ?? '') && REVIEWED.includes(body.type) && ['approve', 'decline', 'undo'].includes(body.decision) ? { ...out, eventId: body.eventId, type: body.type, decision: body.decision } : null
     case 'login': return text(body.password, 256, true) ? { ...out, password: body.password } : null
     case 'logout': return out
     default: return null

@@ -17,8 +17,8 @@ export function PartnerGrid({ linked = false }: { linked?: boolean }) {
   </div>
 }
 
-/** The "Supported by" logo strip above the footer. Several offices share the University's or the UWSA's logo, so each
-    logo appears once, linked to the first partner listed with it. A sponsor whose logo hasn't arrived shows its name. */
+/** The "Supported by" logo strip above the footer. The Student Centre shares the UWSA's logo, so each logo appears once,
+    linked to the first partner listed with it. A sponsor whose logo hasn't arrived shows its name. */
 export function PartnerStrip() {
   const partners = [...PARTNERS.filter(p => !p.individual), ...CURRENT_PARTNERS].filter((partner, i, all) => !partner.logo || all.findIndex(other => other.logo === partner.logo) === i)
   return <section className="partner-strip" id="supporters" aria-label="Our partners">

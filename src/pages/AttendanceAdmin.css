@@ -106,7 +106,7 @@
 .attendance-admin__breakdown p { font-size:.875rem; color:var(--a-muted); }
 
 /* Tables. */
-.attendance-admin__table-wrap { width:100%; margin-block:16px 4px; overflow:auto; border:1px solid var(--a-line); border-radius:10px; overscroll-behavior-x:contain; }
+.attendance-admin__table-wrap { position:relative; width:100%; margin-block:16px 4px; overflow:auto; border:1px solid var(--a-line); border-radius:10px; overscroll-behavior-x:contain; }
 .attendance-admin table { width:100%; border-collapse:collapse; font-size:.875rem; text-align:left; }
 .attendance-admin th,.attendance-admin td { min-width:110px; padding:12px 16px; border-bottom:1px solid var(--a-line); vertical-align:top; }
 .attendance-admin thead th { background:var(--a-soft); font-size:.8125rem; font-weight:600; color:var(--a-muted); white-space:nowrap; }
@@ -124,6 +124,11 @@
 .attendance-admin__status--cancelled::before,.attendance-admin__status--failed::before { background:var(--a-bad); }
 .attendance-admin__status--sent::before { background:var(--a-good); }
 .attendance-admin__status--pending::before { background:var(--a-warn); }
+/* An email's status is a phrase, so it keeps its own capitals and may wrap. */
+.attendance-admin__status--plain { text-transform:none; white-space:normal; }
+.attendance-admin__status--waiting::before { background:var(--a-bad); }
+.attendance-admin__status--needsApproval::before { background:var(--a-warn); }
+.attendance-admin__status--approved::before,.attendance-admin__status--sending::before { background:var(--a-good); }
 .attendance-admin__checked { font-size:.8125rem; font-weight:500; color:var(--a-good); white-space:nowrap; }
 .attendance-admin__checkin { min-height:36px; padding:0 12px; font-size:.8125rem; white-space:nowrap; }
 .attendance-admin__support-controls { padding:8px 16px; border:1px solid var(--a-line); border-radius:10px; background:var(--a-soft); }
@@ -144,11 +149,22 @@
 .attendance-admin__event-notice { padding:20px 0; border-top:1px solid var(--a-line); }
 .attendance-admin__event-notice p { max-width:75ch; font-size:.875rem; color:var(--a-muted); }
 /* Email totals: the same divided strip as the attendance figures. */
-.attendance-admin__delivery-counts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin-block:16px 20px; border:1px solid var(--a-line); border-radius:12px; overflow:hidden; }
+.attendance-admin__delivery-counts { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); margin-block:16px 20px; border:1px solid var(--a-line); border-radius:12px; overflow:hidden; }
 .attendance-admin__delivery-counts > span { display:flex; flex-direction:column-reverse; justify-content:flex-end; gap:4px; padding:14px 18px; }
 .attendance-admin__delivery-counts > span + span { border-left:1px solid var(--a-line); }
 .attendance-admin__delivery-counts strong { font-size:1.375rem; font-weight:600; line-height:1.1; color:var(--a-ink); font-variant-numeric:tabular-nums; }
 .attendance-admin__delivery-counts > span > span { font-size:.8125rem; color:var(--a-muted); }
+/* Review emails: the email exactly as it will arrive, at its full height, so the page scrolls rather than the frame. */
+.attendance-admin__review-meta { display:grid; gap:8px; margin:0 0 16px; }
+.attendance-admin__review-meta > div { display:grid; grid-template-columns:72px minmax(0,1fr); gap:12px; }
+.attendance-admin__review-meta dt { font-size:.8125rem; color:var(--a-muted); }
+.attendance-admin__review-meta dd { margin:0; overflow-wrap:anywhere; }
+.attendance-admin__review-views { margin-block:16px 12px; }
+.attendance-admin__review-views .btn[aria-pressed="true"] { border-color:var(--a-accent); color:var(--a-accent); }
+.attendance-admin__review-frame { display:block; width:100%; height:640px; border:1px solid var(--a-line); border-radius:10px; background:#fff; pointer-events:none; }
+.attendance-admin__review-frame--phone { width:375px; max-width:100%; }
+.attendance-admin__review-text { margin:0; padding:16px; border:1px solid var(--a-line); border-radius:10px; background:var(--a-soft); font:inherit; font-size:.875rem; line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
+.attendance-admin__review > .attendance-admin__muted { margin-block:12px 16px; }
 
 @media(max-width:1100px) {
   .attendance-admin__stats { grid-template-columns:repeat(4,minmax(0,1fr)); }
@@ -164,7 +180,7 @@
   .attendance-admin__bar-actions:has(> a) { width:auto; margin-left:auto; }
   .attendance-admin__form,.attendance-admin__filters,.attendance-admin__breakdowns,.attendance-admin__event-choice { grid-template-columns:minmax(0,1fr); }
   .attendance-admin__stats,.attendance-admin__delivery-counts { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .attendance-admin__delivery-counts > span:nth-child(3) { border-left:0; }
+  .attendance-admin__delivery-counts > span:nth-child(odd) { border-left:0; }
   .attendance-admin__delivery-counts > span:nth-child(n + 3) { border-top:1px solid var(--a-line); }
   .attendance-admin__stats > div:nth-child(n) { border-left:0; border-top:1px solid var(--a-line); }
   .attendance-admin__stats > div:nth-child(even) { border-left:1px solid var(--a-line); }

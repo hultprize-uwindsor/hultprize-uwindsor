@@ -5,8 +5,8 @@
  * Run setupAttendance(), then installAttendanceTriggers(); deploy execute-as-owner,
  * Anyone access. All HTTP operations require the server's shared secret.
  * Follow-ups (thank-you cards, missed-you letters): sendFollowUpTest() previews them, sendEveryEventTest() previews every
- * event still to come, and sendFollowUpsForLatestEvent() catches up a missed send. They are sent automatically only once
- * ATTENDANCE_FOLLOW_UP_MODE is set to auto.
+ * event still to come, and sendFollowUpsForLatestEvent() catches up a missed send. Like every email to a whole event's
+ * list, they wait for an organiser's approval on the dashboard's Review emails tab (ATT_REVIEWED).
  * See docs/event-registration.md. Every mutation is serialised, journaled, then materialised.
  */
 var ATT_TABLES = ['attendees', 'events', 'registrations', 'consents', 'deliveries', 'checkins', 'tokens', 'rateLimits'];
@@ -16,11 +16,18 @@ var ATT_MARKETING = 'Keep me updated about other Hult Prize at UWindsor events a
 var ATT_DAY = 86400000;
 // Follow-ups after each event: thank-you cards at 7 PM Windsor time that day (or an hour after it ends, if later)
 // and missed-you letters at 10 AM the next morning. Each is queued for six hours from then, so a late check-in still
-// counts but a long-past event never sends. Off until the ATTENDANCE_FOLLOW_UP_MODE script property is auto, so
-// pasting this file never emails attendees before a test.
+// counts but a long-past event never sends.
 var ATT_THANKS_HOUR = 19;
 var ATT_MISSED_HOUR = 10;
 var ATT_FOLLOW_UP_WINDOW = 6 * 3600000;
+// Emails to a whole event's list wait for an organiser's approval on the dashboard's Review emails tab, so pasting this
+// file never emails attendees before a test. An email answering one person's own action (a confirmation, sign-in link
+// or seat offer) goes at once, as they're waiting for it. An approval can be given ahead of time. It lapses if the
+// event's details change, as the email would no longer be the one approved. The ATTENDANCE_EMAIL_REVIEW script property
+// set to off sends them all automatically instead.
+var ATT_REVIEWED = ['reminder', 'thanks', 'missed', 'update', 'eventCancelled'];
+var ATT_REVIEW_NAMES = { reminder: 'Reminder', thanks: 'Thank-you card', missed: 'Missed-you letter', update: 'Event update', eventCancelled: 'Cancellation notice' };
+var ATT_DECLINED = 'Not sent: an organiser chose not to send it.';
 // The Ticket Jar runs from its first event to the draw at the finale (src/data/blog.ts, the-ticket-jar).
 var ATT_RAFFLE = { firstEventId: 'workshop-1', drawEventId: 'campus-grand-finale' };
 // The follow-up GIFs' fingerprint, which scripts/generate-email-art.mjs prints. The emails add it to each GIF's
@@ -57,7 +64,7 @@ var ATT_EVENT_PANELS = [
 // (src/data/partners.ts) and the chapter's partner footer. The pictures aren't links, as each outside address can count
 // against an email with spam filters. scripts/generate-email-art.mjs draws each at twice 125 x 60.
 var ATT_SUPPORTERS = [
-  { name: 'Fusion', picture: 'supporter-fusion.png' },
+  { name: 'Fusion', picture: 'supporter-fusion-2.png' },
   { name: 'Sterling Cybersecurity and Advisory Group', picture: 'supporter-sterling.png' },
   { name: 'FRCT', picture: 'supporter-frct.png' },
   { name: 'WEtech Alliance', picture: 'supporter-wetech.png' },
@@ -67,8 +74,9 @@ var ATT_SUPPORTERS = [
   { name: 'Offshoot Initiative', picture: 'supporter-offshoot.png' },
   { name: 'UWSA', picture: 'supporter-uwsa.png' },
   { name: 'GSS', picture: 'supporter-gss.png' },
+  { name: 'Enactus Windsor', picture: 'supporter-enactus.png' },
   { name: 'University of Windsor Alumni Association', picture: 'supporter-alumni-association.png' },
-  { name: 'University of Windsor Research and Innovation Office', picture: 'supporter-research-and-innovation.png' },
+  { name: 'University of Windsor Research and Innovation Office', picture: 'supporter-research-and-innovation-2.png' },
   { name: 'UWill Discover', picture: 'supporter-uwill-discover.png' },
   { name: 'City of Windsor', picture: 'supporter-city-of-windsor.png' }
 ];
@@ -212,17 +220,20 @@ function sendEveryEventTest() {
 /**
  * Run from the Apps Script editor when follow-ups were missed (for example, before this feature was installed).
  * Queues everything already due for the most recent event that has ended: thank-you cards from 7 PM, missed-you
- * letters from 10 AM the next morning. Anyone who already has one is skipped. The first 15 send now; maintenance
- * sends the rest, 15 every five minutes.
+ * letters from 10 AM the next morning. Anyone who already has one is skipped. Running it approves them. The first 15
+ * send now; maintenance sends the rest, 15 every five minutes.
  */
 function sendFollowUpsForLatestEvent() {
   var lock = LockService.getScriptLock(); lock.waitLock(30000);
   try {
     var db = attLoad_(), now = Date.now(), event = attLatestEvent_(db, now);
     if (!event) throw new Error('No event has ended yet.');
+    var stored = db.events.find(function(item) { return item.id === event.id; });
     var report = ['thanks', 'missed'].map(function(type) {
       var at = attFollowUpAt_(type, event), name = type === 'missed' ? 'missed-you letters' : 'thank-you cards';
-      if (now < at) return name + ' are not due until ' + Utilities.formatDate(new Date(at), 'America/Toronto', 'EEEE h:mm a z') + ' (run this again then, or let maintenance send them in auto mode)';
+      if (now < at) return name + ' are not due until ' + Utilities.formatDate(new Date(at), 'America/Toronto', 'EEEE h:mm a z') + ' (run this again then, or approve them under Review emails)';
+      // Running this is an organiser's approval.
+      attDecide_(db, stored, type, 'approve', now);
       return attQueueFollowUps_(db, event, type, now, true) + ' ' + name + ' queued';
     });
     attCommit_(db); attDeliver_(db, now, 15);
@@ -268,10 +279,128 @@ function attState_(db, event, now) {
   if (event.status === 'full' || (event.capacity !== null && attReserved_(db, event.id, now) >= event.capacity)) return 'full';
   return 'open';
 }
-function attEvents_(db, now) { return db.events.map(function(event) { var copy = Object.assign({}, event); copy.status = attState_(db, event, now); return copy; }).sort(function(a, b) { return Date.parse(a.startsAt) - Date.parse(b.startsAt); }); }
+// Organisers' decisions on an event's emails stay off the public schedule.
+function attEvents_(db, now) { return db.events.map(function(event) { var copy = Object.assign({}, event); copy.status = attState_(db, event, now); delete copy.emailReview; delete copy.emailNudged; return copy; }).sort(function(a, b) { return Date.parse(a.startsAt) - Date.parse(b.startsAt); }); }
 function attQueue_(db, type, attendeeId, eventId, key, now, registrationIds) {
   if (db.deliveries.some(function(delivery) { return delivery.key === key; })) return;
-  db.deliveries.push({ id: attId_(), key: key, type: type, attendeeId: attendeeId, eventId: eventId || '', eventStartsAt: type === 'reminder' ? db.events.find(function(event) { return event.id === eventId; }).startsAt : '', registrationIds: registrationIds || [], status: 'pending', attempts: 0, createdAt: attIso_(now), nextAttemptAt: now, lastAttemptAt: '', lastError: '' });
+  var event = db.events.find(function(item) { return item.id === eventId; });
+  var delivery = { id: attId_(), key: key, type: type, attendeeId: attendeeId, eventId: eventId || '', eventStartsAt: type === 'reminder' ? event.startsAt : '', registrationIds: registrationIds || [], status: 'pending', attempts: 0, createdAt: attIso_(now), nextAttemptAt: now, lastAttemptAt: '', lastError: '' };
+  var decision = ATT_REVIEWED.indexOf(type) >= 0 && attReviewing_() ? attDecision_(event, attBatch_(delivery)) : 'approved';
+  if (decision === 'declined') { delivery.status = 'skipped'; delivery.lastError = ATT_DECLINED; } else if (decision !== 'approved') delivery.status = 'held';
+  db.deliveries.push(delivery);
+}
+/** Whether emails to a whole event's list wait for an organiser's approval (ATT_REVIEWED). */
+function attReviewing_() { return attProps_().getProperty('ATTENDANCE_EMAIL_REVIEW') !== 'off'; }
+/** Which approval a queued email needs: a reminder's goes with its event's start time, and an update's with its revision. */
+function attBatch_(delivery) { return delivery.type === 'reminder' ? 'reminder:' + delivery.eventStartsAt : delivery.type === 'update' ? 'update:' + delivery.key.split(':')[2] : delivery.type; }
+function attCurrentBatch_(event, type) { return type === 'reminder' ? 'reminder:' + event.startsAt : type === 'update' ? 'update:' + (event.updateSentRevision || 0) : type; }
+/** The organiser's decision on one of an event's emails, approved or declined, while the event still reads as it did then. */
+function attDecision_(event, batch) { var record = event && (event.emailReview || {})[batch]; return record && record.emailRevision === (event.emailRevision || 0) ? record.decision : ''; }
+/**
+ * Records an organiser's decision on one of an event's emails (approve, decline, or undo either) and applies it to
+ * those already queued. An approved card or letter goes even after its evening or morning, as someone chose to send it.
+ */
+function attDecide_(db, event, type, decision, now) {
+  var batch = attCurrentBatch_(event, type), changed = 0;
+  event.emailReview = event.emailReview || {};
+  if (decision === 'undo') delete event.emailReview[batch];
+  else event.emailReview[batch] = { decision: decision === 'approve' ? 'approved' : 'declined', emailRevision: event.emailRevision || 0, decidedAt: attIso_(now) };
+  db.deliveries.forEach(function(delivery) {
+    var waiting = delivery.status === 'held' || (delivery.status === 'pending' && !delivery.attempts) || (delivery.status === 'skipped' && delivery.lastError === ATT_DECLINED);
+    if (delivery.eventId !== event.id || delivery.type !== type || attBatch_(delivery) !== batch || !waiting) return;
+    changed += 1;
+    if (decision === 'approve') { delivery.status = 'pending'; delivery.lastError = ''; delivery.nextAttemptAt = now; if (type === 'thanks' || type === 'missed') delivery.manual = true; }
+    else if (decision === 'decline') { delivery.status = 'skipped'; delivery.lastError = ATT_DECLINED; }
+    else { delivery.status = 'held'; delivery.lastError = ''; }
+  });
+  return changed;
+}
+/** After an event's details change: what an earlier approval released but hasn't gone waits again, and a stale reminder is dropped. */
+function attRehold_(db, event) {
+  db.deliveries.forEach(function(delivery) {
+    if (delivery.eventId !== event.id || ATT_REVIEWED.indexOf(delivery.type) < 0 || delivery.attempts || ['held', 'pending'].indexOf(delivery.status) < 0) return;
+    if (delivery.type === 'reminder' && delivery.eventStartsAt !== event.startsAt) { delivery.status = 'skipped'; delivery.lastError = 'No longer applicable to the current registration.'; }
+    else if (attReviewing_()) delivery.status = 'held';
+  });
+}
+/** The dashboard's Review emails list: each event's reminder, card and letter, and any update or cancellation notice. */
+function attEmailBatches_(db, now) {
+  var reviewing = attReviewing_(), list = [];
+  db.events.forEach(function(event) {
+    ATT_REVIEWED.forEach(function(type) {
+      var batch = attCurrentBatch_(event, type), counts = { held: 0, pending: 0, failed: 0, sent: 0, skipped: 0 };
+      var rows = db.deliveries.filter(function(delivery) { return delivery.eventId === event.id && delivery.type === type && attBatch_(delivery) === batch; });
+      rows.forEach(function(row) { counts[row.status] = (counts[row.status] || 0) + 1; });
+      var start = Date.parse(event.startsAt), follow = type === 'thanks' || type === 'missed';
+      var due = type === 'reminder' ? start - ATT_DAY : follow ? attFollowUpAt_(type, event) : rows.length ? Math.min.apply(null, rows.map(function(row) { return Date.parse(row.createdAt); })) : NaN;
+      // Too late: a reminder once its event has begun, or a card or letter whose six hours passed with nobody to send it to.
+      var late = type === 'reminder' ? start <= now : follow && now > due + ATT_FOLLOW_UP_WINDOW && !rows.length;
+      var open = counts.held + counts.pending + counts.failed;
+      if (!rows.length && (late || event.status === 'cancelled' || (!follow && type !== 'reminder'))) return;
+      if (rows.length && !open && now > due + 7 * ATT_DAY) return;
+      var decision = attDecision_(event, batch), record = (event.emailReview || {})[batch];
+      var state = counts.held ? (late ? 'closed' : 'waiting') : counts.pending || counts.failed ? 'sending' : counts.sent ? 'sent' : decision === 'declined' ? 'declined' : late ? 'closed' : !reviewing ? 'automatic' : decision === 'approved' ? 'approved' : 'needsApproval';
+      var confirmed = db.registrations.filter(function(registration) { return registration.eventId === event.id && registration.status === 'confirmed'; }).length;
+      list.push({ eventId: event.id, title: event.title, type: type, name: ATT_REVIEW_NAMES[type], dueAt: isFinite(due) ? attIso_(due) : '', state: state, decidedAt: decision ? record.decidedAt : '', counts: counts, expected: !rows.length && type === 'reminder' ? confirmed : null });
+    });
+  });
+  return list.sort(function(a, b) { return Date.parse(a.dueAt) - Date.parse(b.dueAt); });
+}
+/**
+ * The email an organiser is asked to approve, as it will look when it goes out, for one of the people it goes to. It's
+ * drawn from a copy of the data, so nothing is saved: not the secure link every email creates, nor the pretend check-in
+ * a card needs before anyone has arrived. That's why the preview's links don't work.
+ */
+function attPreview_(db, event, type, attendeeId, now) {
+  var copy = {}; ATT_TABLES.forEach(function(table) { copy[table] = JSON.parse(JSON.stringify(db[table])); });
+  var start = Date.parse(event.startsAt), at = type === 'reminder' ? Math.max(now, start - ATT_DAY) : type === 'thanks' || type === 'missed' ? Math.max(now, attFollowUpAt_(type, event)) : now;
+  if (type === 'reminder' && at >= start) attError_('conflict', 'This event has started, so its reminder can no longer be sent.');
+  var batch = attCurrentBatch_(event, type), queued = copy.deliveries.filter(function(delivery) { return delivery.eventId === event.id && delivery.type === type && attBatch_(delivery) === batch && delivery.status !== 'skipped'; });
+  var registrations = copy.registrations.filter(function(registration) { return registration.eventId === event.id; });
+  var wanted = function(registration) {
+    if (type === 'eventCancelled') return registration.status === 'cancelled';
+    if (type === 'update') return registration.status !== 'cancelled';
+    if (type === 'thanks') return attCheckedIn_(copy, registration.id);
+    return registration.status === 'confirmed' && (type === 'reminder' || !attCheckedIn_(copy, registration.id));
+  };
+  // Who it goes to: those already queued, or else those it would go to if it were due now.
+  var targets = queued.length ? queued.map(function(delivery) { return { attendeeId: delivery.attendeeId, registrationId: delivery.registrationIds[0] }; }) : registrations.filter(wanted).map(function(registration) { return { attendeeId: registration.attendeeId, registrationId: registration.id }; });
+  var name = function(person) { return [person.firstName, person.lastName].filter(Boolean).join(' ') || person.email; }, people = [];
+  targets.forEach(function(target) {
+    var person = copy.attendees.find(function(item) { return item.id === target.attendeeId; });
+    if (person && !person.anonymizedAt && !people.some(function(item) { return item.id === person.id; })) people.push({ id: person.id, name: name(person), email: person.email, registrationId: target.registrationId });
+  });
+  var chosen = people.find(function(item) { return item.id === attendeeId; }) || people[0], sample = !chosen;
+  if (!chosen) {
+    // Nobody yet, like a card before anyone has checked in: it's shown for someone registered, as if they'd come.
+    var registered = registrations.find(function(registration) { return registration.status === 'confirmed'; });
+    var person = registered && copy.attendees.find(function(item) { return item.id === registered.attendeeId && !item.anonymizedAt; });
+    if (!person) { person = { id: 'preview-reader', firstName: 'friend', email: 'preview@example.invalid' }; registered = { id: 'preview-registration', attendeeId: person.id, eventId: event.id, status: 'confirmed' }; copy.attendees.push(person); copy.registrations.push(registered); }
+    if (type === 'eventCancelled') registered.status = 'cancelled';
+    chosen = { id: person.id, name: person.id === 'preview-reader' ? 'A sample reader' : name(person), email: person.id === 'preview-reader' ? '' : person.email, registrationId: registered.id };
+  }
+  var reader = copy.attendees.find(function(item) { return item.id === chosen.id; }), stored = copy.events.find(function(item) { return item.id === event.id; });
+  if (type === 'thanks' && !attCheckedIn_(copy, chosen.registrationId)) copy.checkins.push({ id: 'preview-checkin', registrationId: chosen.registrationId, attendeeId: chosen.id, eventId: event.id, checkedInAt: attIso_(start) });
+  var mail = type === 'thanks' || type === 'missed' ? attFollowUp_(copy, stored, reader, at, attWantsUpdates_(copy, reader.id), type) : attEmail_(copy, { type: type, attendeeId: chosen.id, eventId: event.id, eventStartsAt: stored.startsAt, registrationIds: [chosen.registrationId] }, at);
+  if (!mail) attError_('conflict', 'This email would no longer be sent to ' + chosen.name + '.');
+  return { subject: mail.subject, body: mail.body, htmlBody: mail.htmlBody, recipient: { id: chosen.id, name: chosen.name, email: chosen.email }, recipients: people.map(function(item) { return { id: item.id, name: item.name, email: item.email }; }), sample: sample, at: attIso_(at) };
+}
+/**
+ * Tells the organisers, once, when emails come due without an approval, so a forgotten one can't quietly mean nobody
+ * gets a reminder. Test mode tells the first ATTENDANCE_TEST_EMAILS address instead, as it never emails anyone else.
+ */
+function attNudge_(db, now) {
+  var mode = attProps_().getProperty('ATTENDANCE_EMAIL_MODE') || 'disabled';
+  if (!attReviewing_() || ['live', 'test'].indexOf(mode) < 0) return;
+  var mark = function(batch) { var event = db.events.find(function(item) { return item.id === batch.eventId; }); return { event: event, key: attCurrentBatch_(event, batch.type) + '@' + (event.emailRevision || 0) }; };
+  var waiting = attEmailBatches_(db, now).filter(function(batch) { var at = mark(batch); return batch.state === 'waiting' && !(at.event.emailNudged || {})[at.key]; });
+  var to = mode === 'test' ? (attProps_().getProperty('ATTENDANCE_TEST_EMAILS') || '').split(',')[0].trim() : attProps_().getProperty('ATTENDANCE_REPLY_TO') || 'hultprizeatuwindsor@gmail.com';
+  if (!waiting.length || !to) return;
+  var one = waiting.length === 1, lines = waiting.map(function(batch) { return '- ' + batch.name + ' for ' + batch.title + ': ' + batch.counts.held + (batch.counts.held === 1 ? ' person' : ' people'); });
+  try {
+    MailApp.sendEmail({ to: to, name: 'Hult Prize at UWindsor', subject: (one ? 'An email is' : waiting.length + ' emails are') + ' waiting for your approval', body: 'Nothing has been sent to attendees yet. ' + (one ? 'It waits' : 'They wait') + ' until you approve ' + (one ? 'it' : 'them') + ' under Review emails on the organiser dashboard:\n' + attSiteUrl_() + '/organiser/events\n\n' + lines.join('\n') + '\n\nA reminder can only go before its event starts.' });
+  } catch (error) { return; }
+  waiting.forEach(function(batch) { var at = mark(batch); at.event.emailNudged = at.event.emailNudged || {}; at.event.emailNudged[at.key] = attIso_(now); });
 }
 function attReconcileOffers_(db, now) {
   db.registrations.filter(function(registration) { return registration.status === 'offered' && Date.parse(registration.offerExpiresAt) <= now; }).forEach(function(registration) {
@@ -342,7 +471,7 @@ function attQueueManagement_(db, attendeeId, now) {
 function attGeneric_() { return { ok: true, verificationRequired: true, message: 'If this address has registrations, a secure management link will arrive by email. Use it to review or add events.' }; }
 function attHandle_(db, request, now) {
   var action = request.action, actor = request.actor || {}, admin = actor.role === 'admin' || actor.role === 'support';
-  var adminActions = ['admin', 'saveEvent', 'checkIn', 'walkIn', 'retryEmail', 'sendUpdate'];
+  var adminActions = ['admin', 'saveEvent', 'checkIn', 'walkIn', 'retryEmail', 'sendUpdate', 'reviewEmail', 'decideEmail'];
   var memberActions = ['manage', 'updateDetails', 'addEvents', 'cancel'];
   if (adminActions.indexOf(action) >= 0 && !admin) attError_('unauthorized');
   if (memberActions.indexOf(action) >= 0 && !actor.attendeeId) attError_('unauthorized');
@@ -396,20 +525,25 @@ function attHandle_(db, request, now) {
     return attMember_(db, member.id, now);
   }
   if (action === 'admin') {
-    return { ok: true, events: db.events.map(function(event) { return Object.assign({}, event, { effectiveStatus: attState_(db, event, now) }); }), attendees: db.attendees.map(function(person) { var copy = Object.assign({}, person); if (actor.role !== 'support') { delete copy.dietary; delete copy.accessibility; } delete copy.requestId; return copy; }), registrations: db.registrations, deliveries: db.deliveries.map(function(delivery) { var copy = Object.assign({}, delivery); delete copy.key; return copy; }), checkins: db.checkins, canViewSupport: actor.role === 'support' };
+    return { ok: true, events: db.events.map(function(event) { return Object.assign({}, event, { effectiveStatus: attState_(db, event, now) }); }), attendees: db.attendees.map(function(person) { var copy = Object.assign({}, person); if (actor.role !== 'support') { delete copy.dietary; delete copy.accessibility; } delete copy.requestId; return copy; }), registrations: db.registrations, deliveries: db.deliveries.map(function(delivery) { var copy = Object.assign({}, delivery); delete copy.key; return copy; }), checkins: db.checkins, canViewSupport: actor.role === 'support', reviewing: attReviewing_(), emailBatches: attEmailBatches_(db, now) };
   }
   if (action === 'saveEvent') {
     var event = attValidateEvent_(request.event), old = db.events.find(function(item) { return item.id === event.id; });
     if (!old) attError_('not_found', 'Only the confirmed public event catalogue can be edited.');
     if (event.capacity !== null && event.capacity < attReserved_(db, event.id, now)) attError_('capacity_conflict', 'Capacity cannot be lower than confirmed attendees and unexpired seat offers.');
     var changed = ['startsAt', 'endsAt', 'venue', 'status'].some(function(key) { return old[key] !== event[key]; });
+    // Anything the emails show. An approval given before it changed was for an email that no longer exists.
+    var rewritten = ['title', 'startsAt', 'endsAt', 'venue', 'description', 'preparation'].some(function(key) { return (old[key] || '') !== (event[key] || ''); });
     event.updatedAt = attIso_(now); event.revision = (old.revision || 0) + 1; event.updateSentRevision = old.updateSentRevision || 0;
+    if (rewritten) event.emailRevision = (old.emailRevision || 0) + 1;
     Object.assign(old, event);
+    if (rewritten) attRehold_(db, old);
     if (event.status === 'cancelled') {
       db.registrations.filter(function(item) { return item.eventId === event.id && item.status !== 'cancelled'; }).forEach(function(item) { item.status = 'cancelled'; item.cancelledAt = attIso_(now); item.updatedAt = attIso_(now); item.cancelledByEvent = true; attQueue_(db, 'eventCancelled', item.attendeeId, event.id, 'event-cancelled:' + item.id + ':' + event.revision, now, [item.id]); });
     }
     attReconcileOffers_(db, now);
-    return { ok: true, notificationRequired: changed && event.status !== 'cancelled', event: event };
+    var held = db.deliveries.filter(function(delivery) { return delivery.eventId === event.id && delivery.type === 'eventCancelled' && delivery.status === 'held'; }).length;
+    return { ok: true, notificationRequired: changed && event.status !== 'cancelled', event: event, held: event.status === 'cancelled' ? held : 0 };
   }
   if (action === 'checkIn') { attCheckIn_(db, request.registrationId, now); return { ok: true }; }
   if (action === 'retryEmail') {
@@ -420,12 +554,23 @@ function attHandle_(db, request, now) {
   }
   if (action === 'sendUpdate') {
     var updated = db.events.find(function(item) { return item.id === request.eventId; }); if (!updated) attError_('not_found');
-    var ids = [];
+    var ids = [], current = 'update:' + (updated.revision || 0);
+    // A newer update replaces one still waiting for approval, so nobody gets both.
+    db.deliveries.forEach(function(delivery) { if (delivery.type === 'update' && delivery.eventId === updated.id && delivery.status === 'held' && attBatch_(delivery) !== current) { delivery.status = 'skipped'; delivery.lastError = 'Replaced by a newer update.'; } });
     db.registrations.filter(function(item) { return item.eventId === updated.id && item.status !== 'cancelled'; }).forEach(function(item) {
       if (ids.indexOf(item.attendeeId) >= 0) return; ids.push(item.attendeeId);
       attQueue_(db, 'update', item.attendeeId, updated.id, 'update:' + updated.id + ':' + (updated.revision || 0) + ':' + item.attendeeId, now, [item.id]);
     });
-    updated.updateSentRevision = updated.revision || 0; return { ok: true, queued: ids.length };
+    updated.updateSentRevision = updated.revision || 0; return { ok: true, queued: ids.length, review: attReviewing_() };
+  }
+  if (action === 'reviewEmail' || action === 'decideEmail') {
+    var reviewed = db.events.find(function(item) { return item.id === request.eventId; });
+    if (!reviewed || ATT_REVIEWED.indexOf(request.type) < 0) attError_('not_found');
+    if (action === 'reviewEmail') return Object.assign({ ok: true }, attPreview_(db, reviewed, request.type, request.attendeeId, now));
+    if (['approve', 'decline', 'undo'].indexOf(request.decision) < 0) attError_('invalid_request');
+    if (!attReviewing_()) attError_('conflict', 'Email review is off, so these emails send by themselves.');
+    if (request.decision === 'approve' && request.type === 'reminder' && Date.parse(reviewed.startsAt) <= now) attError_('conflict', 'This event has started, so its reminder can no longer be sent.');
+    return { ok: true, changed: attDecide_(db, reviewed, request.type, request.decision, now) };
   }
   attError_('invalid_request');
 }
@@ -801,7 +946,7 @@ function attMaintenance_(db, now) {
     });
   });
   // In start order, so the repeat no-show rule sees an earlier event's letter before a later one's.
-  if (attProps_().getProperty('ATTENDANCE_FOLLOW_UP_MODE') === 'auto') db.events.slice().sort(function(a, b) { return Date.parse(a.startsAt) - Date.parse(b.startsAt) || (a.id < b.id ? -1 : 1); }).forEach(function(event) {
+  db.events.slice().sort(function(a, b) { return Date.parse(a.startsAt) - Date.parse(b.startsAt) || (a.id < b.id ? -1 : 1); }).forEach(function(event) {
     ['thanks', 'missed'].forEach(function(type) {
       var at = attFollowUpAt_(type, event);
       if (event.status !== 'cancelled' && now >= at && now <= at + ATT_FOLLOW_UP_WINDOW) attQueueFollowUps_(db, event, type, now, false);
@@ -822,7 +967,7 @@ function attMaintenance_(db, now) {
 }
 function attendanceMaintenance() {
   var lock = LockService.getScriptLock(); if (!lock.tryLock(10000)) return;
-  try { var db = attLoad_(), now = Date.now(); attMaintenance_(db, now); attCommit_(db); attDeliver_(db, now, 15); } catch (error) { console.error('Attendance maintenance could not complete; review deployment and retry.'); } finally { lock.releaseLock(); }
+  try { var db = attLoad_(), now = Date.now(); attMaintenance_(db, now); attCommit_(db); attNudge_(db, now); attCommit_(db); attDeliver_(db, now, 15); } catch (error) { console.error('Attendance maintenance could not complete; review deployment and retry.'); } finally { lock.releaseLock(); }
 }
 function doPost(e) {
   var params = e && e.parameter || {}, secret = attProps_().getProperty('ATTENDANCE_SHARED_SECRET');
@@ -831,13 +976,13 @@ function doPost(e) {
   try { if (!params.payload || params.payload.length > 22000) throw new Error('body'); request = JSON.parse(params.payload); if (!request || typeof request !== 'object' || !/^[a-f0-9]{64}$/.test(request.clientKey || '')) throw new Error('client'); } catch (error) { return attJson_({ ok: false, code: 'invalid_request' }); }
   var lock = LockService.getScriptLock(); if (!lock.tryLock(10000)) return attJson_({ ok: false, code: 'busy' });
   try {
-    var db = attLoad_(), now = Date.now(), bucket = request.action === 'rateCheck' ? 'login' : ['events', 'admin', 'manage'].indexOf(request.action) >= 0 ? 'read' : request.actor && ['admin', 'support'].indexOf(request.actor.role) >= 0 ? 'adminWrite' : 'write';
+    var db = attLoad_(), now = Date.now(), bucket = request.action === 'rateCheck' ? 'login' : ['events', 'admin', 'manage', 'reviewEmail'].indexOf(request.action) >= 0 ? 'read' : request.actor && ['admin', 'support'].indexOf(request.actor.role) >= 0 ? 'adminWrite' : 'write';
     try { attRate_(db, 'ip:' + bucket + ':' + request.clientKey, bucket === 'read' || bucket === 'adminWrite' ? 600 : bucket === 'login' ? 10 : 30, 600000, now); } catch (rateError) { attCommit_(db); throw rateError; }
     attCommit_(db);
     attReconcileOffers_(db, now); attCommit_(db);
     var response = attHandle_(db, request, now); attCommit_(db);
     // Durable save precedes mail. Mail failure never rolls back attendance.
-    if (['events', 'admin', 'manage', 'rateCheck'].indexOf(request.action) < 0) { try { attDeliver_(db, now, 3); } catch (mailError) { /* Pending journal recovers at the next request. */ } }
+    if (['events', 'admin', 'manage', 'rateCheck', 'reviewEmail'].indexOf(request.action) < 0) { try { attDeliver_(db, now, 3); } catch (mailError) { /* Pending journal recovers at the next request. */ } }
     return attJson_(response);
   } catch (error) {
     return attJson_({ ok: false, code: error.attCode || 'unconfirmed', message: error.attCode ? error.message : 'The operation could not be confirmed. Please retry safely.' });

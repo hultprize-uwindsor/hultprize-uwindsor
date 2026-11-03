@@ -41,11 +41,11 @@ const PANEL = [
 ].map(([name, caption], i) => ({ picture: `panel-${name}.png`, scale: 0.8, tilt: SPEAKER_TILTS[i % 3], people: [{ photo: caption === PEACHES.caption ? PEACHES.photo : `scripts/email-art/panel/${name}.jpg`, caption }] }))
 // Each supporter's logo (ATT_SUPPORTERS in Attendance.gs), in the emails' own size. Most are the website's, from
 // public/images/partners. The ones it doesn't have are in scripts/email-art/logos: Grayfel's is its brand wordmark with
-// a damaged curve repaired, and the Alumni Association's and UWill Discover's are the chapter's partner brochure's.
-// Research and Innovation's logo is the University's own, so it's named underneath. Grayfel's bold letters look bigger
-// than their area, so it's drawn smaller.
+// a damaged curve repaired, and UWill Discover's is the chapter's partner brochure's. Grayfel's bold letters look bigger
+// than their area, so it's drawn smaller. A logo that changes gets a new file name, as mail apps keep a picture for up to
+// a week; its old file stays, showing the new logo, for emails already sent.
 const SUPPORTERS = [
-  { picture: 'supporter-fusion.png', logo: 'public/images/partners/fusion.png' },
+  { picture: 'supporter-fusion-2.png', logo: 'public/images/partners/fusion.png' },
   { picture: 'supporter-sterling.png', logo: 'public/images/partners/sterling-cybersecurity-advisory-group.png' },
   { picture: 'supporter-frct.png', logo: 'public/images/partners/frct.png' },
   { picture: 'supporter-wetech.png', logo: 'public/images/partners/wetech-alliance.png' },
@@ -55,8 +55,9 @@ const SUPPORTERS = [
   { picture: 'supporter-offshoot.png', logo: 'public/images/partners/offshoot-initiative.svg' },
   { picture: 'supporter-uwsa.png', logo: 'public/images/partners/uwsa.png' },
   { picture: 'supporter-gss.png', logo: 'public/images/partners/gss.png' },
-  { picture: 'supporter-alumni-association.png', logo: 'scripts/email-art/logos/uwindsor-alumni-association.png' },
-  { picture: 'supporter-research-and-innovation.png', logo: 'public/images/partners/uwindsor.png', label: 'Research &amp; Innovation' },
+  { picture: 'supporter-enactus.png', logo: 'public/images/partners/enactus.png' },
+  { picture: 'supporter-alumni-association.png', logo: 'public/images/partners/uwindsor-alumni-association.png' },
+  { picture: 'supporter-research-and-innovation-2.png', logo: 'public/images/partners/research-and-innovation.png' },
   { picture: 'supporter-uwill-discover.png', logo: 'scripts/email-art/logos/uwill-discover.jpg' },
   { picture: 'supporter-city-of-windsor.png', logo: 'public/images/partners/city-of-windsor.png' },
 ]
@@ -190,15 +191,12 @@ try {
         cut.getContext('2d').drawImage(canvas, -left, -top)
         return { url: cut.toDataURL(), ratio: cut.width / cut.height }
       }, await dataUrl(supporter.logo))
-      const roomy = supporter.label ? TILE.maxHeight - 13 : TILE.maxHeight
-      const fit = Math.min(1, TILE.maxWidth / Math.sqrt(TILE.area * trimmed.ratio), roomy / Math.sqrt(TILE.area / trimmed.ratio))
+      const fit = Math.min(1, TILE.maxWidth / Math.sqrt(TILE.area * trimmed.ratio), TILE.maxHeight / Math.sqrt(TILE.area / trimmed.ratio))
       const width = Math.sqrt(TILE.area * trimmed.ratio) * fit * (supporter.scale ?? 1)
       await page.setContent(`<!doctype html><style>
-        @font-face { font-family: Inter; src: url(data:font/woff2;base64,${await font('inter-variable.woff2')}) format('woff2'); font-weight: 100 900; }
         html, body { margin: 0; height: 100%; background: white; } body { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        img { display: block; } div { margin-top: 2px; font: 600 9.5px/11px Inter, sans-serif; color: #33475b; white-space: nowrap; }
-        </style><img src="${trimmed.url}" alt="" style="width:${width}px;">${supporter.label ? `<div>${supporter.label}</div>` : ''}`)
-      await page.evaluate(() => document.fonts.ready)
+        img { display: block; }
+        </style><img src="${trimmed.url}" alt="" style="width:${width}px;">`)
       // Every email carries all of these, so each is kept small: a palette of 64 colours looks no different at this size.
       const drawn = join(frames, supporter.picture)
       await page.screenshot({ path: drawn })
